@@ -1,4 +1,6 @@
 {
+    "name": "keboola/app-snowflake-dwh-manager",
+    "description": "",
     "require": {
         "PHP": "^7.1",
         "keboola/php-component": "^4.1"
@@ -14,12 +16,12 @@
     },
     "autoload": {
         "psr-4": {
-            "MyComponent\\": "src/"
+            "Keboola\\SnowflakeDwhManager\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "MyComponent\\Tests\\": "tests/phpunit/"
+            "Keboola\\SnowflakeDwhManager\\Tests\\": "tests/phpunit/"
         }
     },
     "scripts": {
