@@ -3,7 +3,8 @@
     "description": "",
     "require": {
         "PHP": "^7.1",
-        "keboola/php-component": "^4.1"
+        "keboola/php-component": "^4.1",
+        "keboola/php-csv-db-import": "^4.1"
     },
     "require-dev": {
         "jakub-onderka/php-parallel-lint": "^1.0",
@@ -28,8 +29,7 @@
         "tests-phpunit": "phpunit",
         "tests-datadir": "datadir-tests",
         "tests": [
-            "@tests-phpunit",
-            "@tests-datadir"
+            "@tests-phpunit"
         ],
 
         "phpstan": "phpstan analyse ./src ./tests --level=max --no-progress -c phpstan.neon",

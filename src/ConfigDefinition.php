@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Keboola\SnowflakeDwhManager;
 
 use Keboola\Component\Config\BaseConfigDefinition;
+use Keboola\SnowflakeDwhManager\Configuration\SchemaDefinition;
+use Keboola\SnowflakeDwhManager\Configuration\UserDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 
 class ConfigDefinition extends BaseConfigDefinition
@@ -32,27 +34,8 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->scalarNode('warehouse')
                     ->isRequired()
                 ->end()
-                ->arrayNode('business_schema')
-                    ->children()
-                        ->scalarNode('schema_name')
-                            ->isRequired()
-                        ->end()
-                    ->end()
-                ->end()
-                ->arrayNode('user')
-                    ->children()
-                        ->scalarNode('email')
-                            ->isRequired()
-                        ->end()
-                        ->arrayNode('business_schemes')
-                            ->scalarPrototype()
-                        ->end()
-                        ->end()
-                        ->booleanNode('disabled')
-                            ->defaultFalse()
-                        ->end()
-                    ->end()
-                ->end()
+                ->append((new SchemaDefinition())->getRootDefinition())
+                ->append((new UserDefinition())->getRootDefinition())
             ->end()
             ->validate()
                 ->ifTrue(function ($v) {
@@ -68,7 +51,6 @@ class ConfigDefinition extends BaseConfigDefinition
             ->end()
         ;
         // @formatter:on
-        // host, user, password, database
         return $parametersNode;
     }
 }
