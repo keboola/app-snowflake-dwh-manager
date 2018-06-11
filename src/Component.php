@@ -14,13 +14,17 @@ class Component extends BaseComponent
         /** @var Config $config */
         $config = $this->getConfig();
         $connection = new Connection($config->getSnowflakeConnectionOptions());
-        $manager = new DwhManager($connection);
+        $database = $config->getValue(['parameters', 'master_database']);
+        $connection->query(
+            'USE DATABASE ' . $connection->quoteIdentifier($database)
+        );
+        $manager = new DwhManager($connection, $this->getLogger());
         if ($config->isSchemaRow()) {
             $schema = $config->getSchema();
             if ($manager->schemaSetupCorrectly($schema)) {
                 $manager->updateSchema($schema);
             } else {
-                $manager->createSchema($schema);
+                $manager->createSchemaAndRwUser($schema);
             }
         } elseif ($config->isUserRow()) {
             $user = $config->getUser();

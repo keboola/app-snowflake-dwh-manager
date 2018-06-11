@@ -44,7 +44,7 @@ class Config extends BaseConfig
 
     public function getSchema(): Schema
     {
-        return new Schema($this->getValue(['parameters', 'schema']), new SchemaDefinition());
+        return new Schema($this->getValue(['parameters', 'business_schema']), new SchemaDefinition());
     }
 
     public function getUser(): User
