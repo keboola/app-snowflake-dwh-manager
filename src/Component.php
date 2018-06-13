@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Keboola\SnowflakeDwhManager;
 
 use Keboola\Component\BaseComponent;
-use Keboola\Db\Import\Snowflake\Connection;
+use Keboola\SnowflakeDwhManager\Manager\Checker;
+use Keboola\SnowflakeDwhManager\Manager\Generator;
 
 class Component extends BaseComponent
 {
@@ -18,10 +19,10 @@ class Component extends BaseComponent
         $connection->query(
             'USE DATABASE ' . $connection->quoteIdentifier($database)
         );
-        $manager = new DwhManager($connection, $this->getLogger());
+        $manager = new DwhManager(new Checker($connection), new Generator($connection), $this->getLogger());
         if ($config->isSchemaRow()) {
             $schema = $config->getSchema();
-            if ($manager->schemaSetupCorrectly($schema)) {
+            if ($manager->checkSchema($schema)) {
                 $manager->updateSchema($schema);
             } else {
                 $manager->createSchemaAndRwUser($schema);
