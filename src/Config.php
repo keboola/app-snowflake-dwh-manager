@@ -51,4 +51,13 @@ class Config extends BaseConfig
     {
         return new User($this->getValue(['parameters', 'user']), new UserDefinition());
     }
+
+    public function getWarehouse(): string
+    {
+        return $this->getValue(['parameters', 'warehouse']);
+    }
+    public function getDatabase(): string
+    {
+        return $this->getValue(['parameters', 'master_database']);
+    }
 }
