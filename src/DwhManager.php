@@ -75,6 +75,7 @@ class DwhManager
         $rwUser = $this->getRwUserFromSchema($schema);
         $rwRole = $this->getRwRoleFromSchema($schema);
         $roRole = $this->getRoRoleFromSchema($schema);
+        $currentRole = $this->checker->getCurrentRole();
 
         $this->ensureSchemaExists($schemaName);
 
@@ -93,7 +94,11 @@ class DwhManager
             'default_warehouse' => $this->warehouse,
             'default_namespace' => $this->database,
         ]);
+
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
+
+        $this->ensureRoleGrantedToRole($rwRole, $currentRole);
+        $this->ensureRoleGrantedToRole($roRole, $currentRole);
 
         $this->ensureGrantedSelectOnAllTablesInSchemaToRole($schemaName, $roRole);
     }
@@ -102,6 +107,7 @@ class DwhManager
     {
         $userSchemaName = $this->getOwnSchemaNameFromUser($user);
         $userRole = $this->getRoleNameFromUser($user);
+        $currentRole = $this->checker->getCurrentRole();
 
         $this->ensureSchemaExists($userSchemaName);
 
@@ -118,6 +124,8 @@ class DwhManager
         ]);
 
         $this->ensureRoleGrantedToUser($userRole, $userName);
+
+        $this->ensureRoleGrantedToRole($userRole, $currentRole);
 
         foreach ($user->getSchemes() as $linkedSchemaName) {
             if (!$this->checker->existsSchema($linkedSchemaName)) {
