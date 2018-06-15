@@ -36,7 +36,6 @@ class DwhManager
     ];
     private const PRIVILEGES_WAREHOUSE_MINIMAL = [
         'USAGE',
-        'OPERATE',
     ];
     private const SUFFIX_ROLE_RO = '_role_ro';
 
