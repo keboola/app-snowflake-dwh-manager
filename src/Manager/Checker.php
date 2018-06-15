@@ -20,31 +20,51 @@ class Checker
         $this->connection = $connection;
     }
 
+    public function existsRole(string $rwRole): bool
+    {
+        $roles = $this->connection->fetchRoles($rwRole);
+        return count($roles) === 1;
+    }
+
     public function existsSchema(string $schemaName): bool
     {
         $schemas = $this->connection->fetchSchemasLike($schemaName);
         return count($schemas) === 1;
     }
 
-    public function existsRole(string $rwRole): bool
+    public function existsUser(string $rwUserName): bool
     {
-        $roles = $this->connection->fetchRolesLike($rwRole);
-        return count($roles) === 1;
+        try {
+            $this->connection->describeUser($rwUserName);
+        } catch (Throwable $e) {
+            $position = strpos(
+                $e->getMessage(),
+                'User \'"' . $rwUserName . '"\' does not exist.'
+            );
+            if ($position !== false) {
+                return false;
+            }
+
+            // other exception, but probably user still does not exist
+            return false;
+        }
+        return true;
     }
 
-    public function hasRolePrivilegesOnSchema(string $role, array $grants, string $schema): bool
+    public function getCurrentRole(): string
     {
-        return $this->hasRolePrivilegesOnObjectType($role, $grants, $schema, Connection::OBJECT_TYPE_SCHEMA);
+        $roles = $this->connection->fetchRoles();
+        $result = array_values(array_filter($roles, function (array $role) {
+            if ($role['is_current'] === 'Y') {
+                return true;
+            }
+        }));
+        return $result[0]['name'];
     }
 
     public function hasRolePrivilegesOnDatabase(string $role, array $grants, string $schema): bool
     {
         return $this->hasRolePrivilegesOnObjectType($role, $grants, $schema, Connection::OBJECT_TYPE_SCHEMA);
-    }
-
-    public function hasRolePrivilegesOnWarehouse(string $role, array $grants, string $warehouse): bool
-    {
-        return $this->hasRolePrivilegesOnObjectType($role, $grants, $warehouse, Connection::OBJECT_TYPE_WAREHOUSE);
     }
 
     private function hasRolePrivilegesOnObjectType(
@@ -72,33 +92,14 @@ class Checker
         return $privileges == $grants;
     }
 
-    public function existsUser(string $rwUserName): bool
+    public function hasRolePrivilegesOnSchema(string $role, array $grants, string $schema): bool
     {
-        try {
-            $this->connection->describeUser($rwUserName);
-        } catch (Throwable $e) {
-            $position = strpos(
-                $e->getMessage(),
-                'User \'"' . $rwUserName . '"\' does not exist.'
-            );
-            if ($position !== false) {
-                return false;
-            }
-
-            // other exception, but probably user still does not exist
-            return false;
-        }
-        return true;
+        return $this->hasRolePrivilegesOnObjectType($role, $grants, $schema, Connection::OBJECT_TYPE_SCHEMA);
     }
 
-    public function isRoleGrantedToUser(string $role, string $userName): bool
+    public function hasRolePrivilegesOnWarehouse(string $role, array $grants, string $warehouse): bool
     {
-        return $this->isRoleGrantedToObject($role, $userName, Connection::OBJECT_TYPE_USER);
-    }
-
-    public function isRoleGrantedToRole(string $roleThatIsGranted, string $roleGrantedTo): bool
-    {
-        return $this->isRoleGrantedToObject($roleThatIsGranted, $roleGrantedTo, Connection::OBJECT_TYPE_ROLE);
+        return $this->hasRolePrivilegesOnObjectType($role, $grants, $warehouse, Connection::OBJECT_TYPE_WAREHOUSE);
     }
 
     private function isRoleGrantedToObject(string $role, string $granteeName, string $objectType): bool
@@ -114,5 +115,15 @@ class Checker
             }
         );
         return count($roleGrants) >= 1;
+    }
+
+    public function isRoleGrantedToRole(string $roleThatIsGranted, string $roleGrantedTo): bool
+    {
+        return $this->isRoleGrantedToObject($roleThatIsGranted, $roleGrantedTo, Connection::OBJECT_TYPE_ROLE);
+    }
+
+    public function isRoleGrantedToUser(string $role, string $userName): bool
+    {
+        return $this->isRoleGrantedToObject($role, $userName, Connection::OBJECT_TYPE_USER);
     }
 }
