@@ -76,16 +76,18 @@ class Connection extends SnowflakeConnection
         ));
     }
 
-    /**
-     * @return mixed[]
-     */
-    public function fetchRolesLike(string $role): array
+    public function fetchRoles(?string $roleLike = null): array
     {
+        $sql = 'SHOW ROLES';
+        $args = [];
+        if ($roleLike !== null) {
+            $sql .= ' LIKE %s';
+            $args[] = $this->quote($roleLike);
+        }
+
         return $this->fetchAll(vsprintf(
-            'SHOW ROLES LIKE %s',
-            [
-                $this->quote($role),
-            ]
+            $sql,
+            $args
         ));
     }
 
