@@ -19,6 +19,7 @@ class Component extends BaseComponent
             'USE DATABASE ' . $connection->quoteIdentifier($database)
         );
         $manager = new DwhManager(
+            $prefix,
             new Checker($connection),
             $connection,
             $this->getLogger(),

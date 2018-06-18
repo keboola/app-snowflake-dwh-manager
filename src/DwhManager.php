@@ -40,14 +40,17 @@ class DwhManager
     ];
     private const SUFFIX_ROLE_RO = '_role_ro';
 
-    /** @var LoggerInterface */
-    private $logger;
+    /** @var string */
+    private $uniquePrefix;
 
     /** @var Checker */
     private $checker;
 
     /** @var Connection */
     private $connection;
+
+    /** @var LoggerInterface */
+    private $logger;
 
     /** @var string */
     private $warehouse;
@@ -56,15 +59,17 @@ class DwhManager
     private $database;
 
     public function __construct(
+        string $uniquePrefix,
         Checker $checker,
         Connection $connection,
         LoggerInterface $logger,
         string $warehouse,
         string $database
     ) {
-        $this->logger = $logger;
+        $this->uniquePrefix = $uniquePrefix;
         $this->checker = $checker;
         $this->connection = $connection;
+        $this->logger = $logger;
         $this->warehouse = $warehouse;
         $this->database = $database;
     }
@@ -144,7 +149,7 @@ class DwhManager
                 ));
             }
 
-            $schemaLinkedToRole = $this->getReadOnlyRoleNameFromSchemaName($linkedSchemaName);
+            $schemaLinkedToRole = $this->getRoRoleFromSchemaName($linkedSchemaName);
             $this->ensureRoleGrantedToRole($schemaLinkedToRole, $userRole);
         }
     }
@@ -314,11 +319,20 @@ class DwhManager
                 $password,
                 $options
             );
-            $this->logger->info(sprintf(
-                'Created user "%s" with password "%s"',
-                $userName,
-                $password
-            ));
+            if (isset($options['login_name'])) {
+                $this->logger->info(sprintf(
+                    'Created user "%s" (%s) with password "%s"',
+                    $options['login_name'],
+                    $userName,
+                    $password
+                ));
+            } else {
+                $this->logger->info(sprintf(
+                    'Created user "%s" with password "%s"',
+                    $userName,
+                    $password
+                ));
+            }
         } else {
             $this->logger->info(sprintf(
                 'User "%s" already exists',
@@ -341,14 +355,14 @@ class DwhManager
         return $this->sanitizeAsIdentifier($user->getEmail()) . '_schema_rw';
     }
 
-    private function getReadOnlyRoleNameFromSchemaName(string $schemaName): string
+    private function getRoRoleFromSchemaName(string $schemaName): string
     {
-        return $schemaName . self::SUFFIX_ROLE_RO;
+        return $this->uniquePrefix . '_' . $schemaName . self::SUFFIX_ROLE_RO;
     }
 
     private function getRoRoleFromSchema(Schema $schema): string
     {
-        return $schema->getName() . self::SUFFIX_ROLE_RO;
+        return $this->getRoRoleFromSchemaName($schema->getName());
     }
 
     private function getRoleNameFromUser(User $user): string
@@ -358,12 +372,12 @@ class DwhManager
 
     private function getRwRoleFromSchema(Schema $schema): string
     {
-        return $schema->getName() . '_role_rw';
+        return $this->uniquePrefix . '_' . $schema->getName() . '_role_rw';
     }
 
     private function getRwUserFromSchema(Schema $schema): string
     {
-        return $schema->getName() . '_user_rw';
+        return $this->uniquePrefix . '_' . $schema->getName() . '_user_rw';
     }
 
     private function getSchemaNameFromSchema(Schema $schema): string
@@ -378,6 +392,6 @@ class DwhManager
 
     private function sanitizeAsIdentifier(string $string): string
     {
-        return (string) preg_replace('~[^a-z0-9]+~', '_', $string);
+        return (string) preg_replace('~[^a-z0-9]+~', '_', strtolower($string));
     }
 }
