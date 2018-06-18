@@ -6,6 +6,7 @@ namespace Keboola\SnowflakeDwhManager;
 
 use function json_encode;
 use Keboola\Db\Import\Snowflake\Connection as SnowflakeConnection;
+use Keboola\SnowflakeDwhManager\Connection\Expr;
 use function odbc_error;
 use function odbc_errormsg;
 use Psr\Log\LoggerInterface;
@@ -188,7 +189,8 @@ class Connection extends SnowflakeConnection
     {
         $otherOptionsString = '';
         foreach ($otherOptions as $option => $optionValue) {
-            $otherOptionsString .= strtoupper($option) . '=' . $this->quote($optionValue) . \PHP_EOL;
+            $quotedValue = $optionValue instanceof Expr ? $optionValue->getValue() : $this->quote($optionValue);
+            $otherOptionsString .= strtoupper($option) . '=' . $quotedValue . \PHP_EOL;
         }
 
         $this->query(vsprintf(

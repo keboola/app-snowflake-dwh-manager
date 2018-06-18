@@ -7,6 +7,7 @@ namespace Keboola\SnowflakeDwhManager;
 use Keboola\Component\UserException;
 use Keboola\SnowflakeDwhManager\Configuration\Schema;
 use Keboola\SnowflakeDwhManager\Configuration\User;
+use Keboola\SnowflakeDwhManager\Connection\Expr;
 use Keboola\SnowflakeDwhManager\Manager\Checker;
 use Psr\Log\LoggerInterface;
 use RandomLib\Factory;
@@ -91,7 +92,11 @@ class DwhManager
         $this->ensureUserExists($rwUser, [
             'default_role' => $rwRole,
             'default_warehouse' => $this->warehouse,
-            'default_namespace' => $this->database,
+            'default_namespace' => new Expr(
+                $this->connection->quoteIdentifier($this->database) .
+                '.' .
+                $this->connection->quoteIdentifier($schemaName)
+            ),
         ]);
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
@@ -119,7 +124,11 @@ class DwhManager
             'login_name' => $user->getEmail(),
             'default_role' => $userRole,
             'default_warehouse' => $this->warehouse,
-            'default_namespace' => $this->database,
+            'default_namespace' => new Expr(
+                $this->connection->quoteIdentifier($this->database) .
+                '.' .
+                $this->connection->quoteIdentifier($userSchemaName)
+            ),
         ]);
 
         $this->ensureRoleGrantedToUser($userRole, $userName);
