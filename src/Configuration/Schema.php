@@ -11,7 +11,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 class Schema extends BaseConfig
 {
     public function __construct(
-        $config,
+        array $config,
         ?ConfigurationInterface $configDefinition = null
     ) {
         if (!$configDefinition instanceof SchemaDefinition) {

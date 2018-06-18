@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Keboola\SnowflakeDwhManager\Configuration;
 
@@ -9,7 +11,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 class User extends BaseConfig
 {
     public function __construct(
-        $config,
+        array $config,
         ?ConfigurationInterface $configDefinition = null
     ) {
         if (!$configDefinition instanceof UserDefinition) {
@@ -26,16 +28,16 @@ class User extends BaseConfig
         return $this->getValue(['email']);
     }
 
-    public function isDisabled(): bool
-    {
-        return (bool)$this->getValue(['disabled']);
-    }
-
     /**
      * @return string[]
      */
     public function getSchemes(): array
     {
         return $this->getValue(['business_schemes']);
+    }
+
+    public function isDisabled(): bool
+    {
+        return (bool) $this->getValue(['disabled']);
     }
 }
