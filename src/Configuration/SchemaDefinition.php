@@ -20,6 +20,7 @@ class SchemaDefinition implements ConfigurationInterface
 
     private function buildRootDefinition(TreeBuilder $treeBuilder): ArrayNodeDefinition
     {
+        /** @var ArrayNodeDefinition $root */
         $root = $treeBuilder->root('business_schema');
 
         // @formatter:off

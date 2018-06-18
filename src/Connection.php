@@ -14,6 +14,12 @@ use function strtoupper;
 
 class Connection extends SnowflakeConnection
 {
+
+    /**
+     * @var resource odbc handle
+     */
+    private $connection;
+
     public const OBJECT_TYPE_USER = 'USER';
 
     /** @var LoggerInterface */
