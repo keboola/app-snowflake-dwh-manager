@@ -20,9 +20,9 @@ class Checker
         $this->connection = $connection;
     }
 
-    public function existsRole(string $rwRole): bool
+    public function existsRole(string $role): bool
     {
-        $roles = $this->connection->fetchRoles($rwRole);
+        $roles = $this->connection->fetchRoles($role);
         return count($roles) === 1;
     }
 
@@ -32,14 +32,14 @@ class Checker
         return count($schemas) === 1;
     }
 
-    public function existsUser(string $rwUserName): bool
+    public function existsUser(string $userName): bool
     {
         try {
-            $this->connection->describeUser($rwUserName);
+            $this->connection->describeUser($userName);
         } catch (Throwable $e) {
             $position = strpos(
                 $e->getMessage(),
-                'User \'"' . $rwUserName . '"\' does not exist.'
+                'User \'"' . $userName . '"\' does not exist.'
             );
             if ($position !== false) {
                 return false;
@@ -60,11 +60,6 @@ class Checker
             }
         }));
         return $result[0]['name'];
-    }
-
-    public function hasRolePrivilegesOnDatabase(string $role, array $grants, string $schema): bool
-    {
-        return $this->hasRolePrivilegesOnObjectType($role, $grants, $schema, Connection::OBJECT_TYPE_SCHEMA);
     }
 
     private function hasRolePrivilegesOnObjectType(
@@ -90,6 +85,11 @@ class Checker
             $grantedGrantsOnSchema
         );
         return $privileges == $grants;
+    }
+
+    public function hasRolePrivilegesOnDatabase(string $role, array $grants, string $database): bool
+    {
+        return $this->hasRolePrivilegesOnObjectType($role, $grants, $database, Connection::OBJECT_TYPE_DATABASE);
     }
 
     public function hasRolePrivilegesOnSchema(string $role, array $grants, string $schema): bool

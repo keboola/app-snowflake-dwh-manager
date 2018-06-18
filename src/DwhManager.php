@@ -341,9 +341,9 @@ class DwhManager
         return $this->sanitizeAsIdentifier($user->getEmail()) . '_schema_rw';
     }
 
-    private function getReadOnlyRoleNameFromSchemaName(string $linkedSchemaName): string
+    private function getReadOnlyRoleNameFromSchemaName(string $schemaName): string
     {
-        return $linkedSchemaName . self::SUFFIX_ROLE_RO;
+        return $schemaName . self::SUFFIX_ROLE_RO;
     }
 
     private function getRoRoleFromSchema(Schema $schema): string
