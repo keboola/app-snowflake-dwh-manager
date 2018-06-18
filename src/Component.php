@@ -13,7 +13,7 @@ class Component extends BaseComponent
     {
         /** @var Config $config */
         $config = $this->getConfig();
-        $connection = new Connection($config->getSnowflakeConnectionOptions());
+        $connection = new Connection($this->getLogger(), $config->getSnowflakeConnectionOptions());
         $database = $config->getValue(['parameters', 'master_database']);
         $connection->query(
             'USE DATABASE ' . $connection->quoteIdentifier($database)
