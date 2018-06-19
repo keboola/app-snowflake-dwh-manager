@@ -8,6 +8,14 @@ services:
 before_script:
   - export APP_IMAGE=keboola-component
   - docker -v
+  - >-
+    docker
+    run
+    -e AWS_ACCESS_KEY_ID
+    -e AWS_SECRET_ACCESS_KEY
+    -v `pwd`:/code
+    quay.io/keboola/aws-cli
+    s3 cp s3://keboola-configs/drivers/snowflake/snowflake-odbc-2.14.0.x86_64.deb /code/docker/snowflake-odbc.deb
   - docker build -t $APP_IMAGE .
   - docker run $APP_IMAGE composer ci
 

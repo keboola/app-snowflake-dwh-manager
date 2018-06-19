@@ -20,40 +20,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& chmod +x /tmp/composer-install.sh \
 	&& /tmp/composer-install.sh
 
-# Install PHP odbc extension
-RUN set -x \
-    && docker-php-source extract \
-    && cd /usr/src/php/ext/odbc \
-    && phpize \
-    && sed -ri 's@^ *test +"\$PHP_.*" *= *"no" *&& *PHP_.*=yes *$@#&@g' configure \
-    && ./configure --with-unixODBC=shared,/usr \
-    && docker-php-ext-install odbc \
-    && docker-php-source delete
+RUN set -ex; \
+    docker-php-source extract; \
+    { \
+        echo '# https://github.com/docker-library/php/issues/103#issuecomment-353674490'; \
+        echo 'AC_DEFUN([PHP_ALWAYS_SHARED],[])dnl'; \
+        echo; \
+        cat /usr/src/php/ext/odbc/config.m4; \
+    } > temp.m4; \
+    mv temp.m4 /usr/src/php/ext/odbc/config.m4; \
+    docker-php-ext-configure odbc --with-unixODBC=shared,/usr; \
+    docker-php-ext-install odbc; \
+    docker-php-source delete
 
-# Snowflake ODBC
-# https://github.com/docker-library/php/issues/103
-RUN set -x \
-    && docker-php-source extract \
-    && cd /usr/src/php/ext/odbc \
-    && phpize \
-    && sed -ri 's@^ *test +"\$PHP_.*" *= *"no" *&& *PHP_.*=yes *$@#&@g' configure \
-    && ./configure --with-unixODBC=shared,/usr \
-    && docker-php-ext-install odbc \
-    && docker-php-source delete
-
-ADD ./snowflake-odbc-x86_64.deb /tmp/snowflake-odbc.deb
+ADD ./docker/snowflake-odbc.deb /tmp/snowflake-odbc.deb
 RUN dpkg -i /tmp/snowflake-odbc.deb
-ADD ./driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
-
-# snowflake - charset settings
-ENV LANG en_US.UTF-8
-ENV LC_ALL=C.UTF-8
-
-# install snowsql
-ADD snowsql-linux_x86_64.bash /usr/bin
-RUN SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash
-RUN rm /usr/bin/snowsql-linux_x86_64.bash
-RUN snowsql -v 1.1.49
+ADD ./docker/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
 
 
 ## Composer - deps always cached unless changed
