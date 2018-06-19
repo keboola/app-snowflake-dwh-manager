@@ -1,3 +1,9 @@
+FROM quay.io/keboola/aws-cli
+ARG AWS_SECRET_ACCESS_KEY
+ARG AWS_ACCESS_KEY_ID
+RUN /usr/bin/aws s3 cp s3://keboola-configs/drivers/snowflake/snowflake-odbc-2.14.0.x86_64.deb /code/docker/snowflake-odbc.deb
+
+
 FROM php:7-cli
 
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
@@ -33,7 +39,7 @@ RUN set -ex; \
     docker-php-ext-install odbc; \
     docker-php-source delete
 
-ADD ./docker/snowflake-odbc.deb /tmp/snowflake-odbc.deb
+COPY --from=0 /code/docker/snowflake-odbc.deb /tmp/snowflake-odbc.deb
 RUN dpkg -i /tmp/snowflake-odbc.deb
 ADD ./docker/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
 
