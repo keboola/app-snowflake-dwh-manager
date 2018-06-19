@@ -352,46 +352,70 @@ class DwhManager
 
     private function getOwnSchemaNameFromUser(User $user): string
     {
-        return $this->sanitizeAsIdentifier($user->getEmail()) . '_schema_rw';
+        $schemaName = $this->sanitizeAsIdentifier($user->getEmail()) . '_schema_rw';
+        $this->checkLength($schemaName, $user->getEmail(), 'Maximum email length is %s characters');
+        return $schemaName;
     }
 
     private function getRoRoleFromSchemaName(string $schemaName): string
     {
-        return $this->uniquePrefix . '_' . $schemaName . self::SUFFIX_ROLE_RO;
+        $role = $this->uniquePrefix . '_' . $schemaName . self::SUFFIX_ROLE_RO;
+        $this->checkLength($role, $schemaName, 'Maximum schema name length is %s characters');
+        return $role;
     }
 
     private function getRoRoleFromSchema(Schema $schema): string
     {
-        return $this->getRoRoleFromSchemaName($schema->getName());
+        $role = $this->getRoRoleFromSchemaName($schema->getName());
+        $this->checkLength($role, $schema->getName(), 'Maximum schema name length is %s characters');
+        return $role;
     }
 
     private function getRoleNameFromUser(User $user): string
     {
-        return $this->sanitizeAsIdentifier($user->getEmail()) . '_role';
+        $role = $this->sanitizeAsIdentifier($user->getEmail()) . '_role';
+        $this->checkLength($role, $user->getEmail(), 'Maximum email length is %s characters');
+        return $role;
     }
 
     private function getRwRoleFromSchema(Schema $schema): string
     {
-        return $this->uniquePrefix . '_' . $schema->getName() . '_role_rw';
+        $role = $this->uniquePrefix . '_' . $schema->getName() . '_role_rw';
+        $this->checkLength($role, $schema->getName(), 'Maximum schema name length is %s characters');
+        return $role;
     }
 
     private function getRwUserFromSchema(Schema $schema): string
     {
-        return $this->uniquePrefix . '_' . $schema->getName() . '_user_rw';
+        $user = $this->uniquePrefix . '_' . $schema->getName() . '_user_rw';
+        $this->checkLength($user, $schema->getName(), 'Maximum schema name is %s characters');
+        return $user;
     }
 
     private function getSchemaNameFromSchema(Schema $schema): string
     {
-        return $schema->getName();
+        $schemaName = $schema->getName();
+        $this->checkLength($schemaName, $schema->getName(), 'Maximum schema name length is %s characters');
+        return $schemaName;
     }
 
     private function getUsernameFromEmail(User $user): string
     {
-        return $this->sanitizeAsIdentifier($user->getEmail());
+        $username = $this->sanitizeAsIdentifier($user->getEmail());
+        $this->checkLength($username, $user->getEmail(), 'Maximum email length is %s characters');
+        return $username;
     }
 
     private function sanitizeAsIdentifier(string $string): string
     {
         return (string) preg_replace('~[^a-z0-9]+~', '_', strtolower($string));
+    }
+
+    private function checkLength(string $var, string $source, string $message): void
+    {
+        if (strlen($var) > 255) {
+            $sourceMaxLength = 255 - (strlen($var) - strlen($source));
+            throw new UserException(sprintf($message, $sourceMaxLength));
+        }
     }
 }
