@@ -18,7 +18,7 @@ class Component extends BaseComponent
         $connection->query(
             'USE DATABASE ' . $connection->quoteIdentifier($database)
         );
-        $prefix = getenv('KBC_PROJECTID');
+        $prefix = 'dwhm_' . $database;
         $manager = new DwhManager(
             $prefix,
             new Checker($connection),
