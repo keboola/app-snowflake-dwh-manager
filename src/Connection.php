@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\SnowflakeDwhManager;
 
+use Exception;
 use Keboola\Db\Import\Snowflake\Connection as SnowflakeConnection;
 use Keboola\SnowflakeDwhManager\Connection\Expr;
 use Psr\Log\LoggerInterface;
@@ -26,6 +27,23 @@ class Connection extends SnowflakeConnection
     ) {
         parent::__construct($options);
         $this->logger = $logger;
+    }
+
+    public function alterUser(string $userName, array $options): void
+    {
+        if (!count($options)) {
+            throw new Exception('Nothing to alter without options');
+        }
+
+        $this->query(vsprintf(
+            'ALTER USER IF EXISTS 
+            %s
+            SET 
+            ' . $this->createQuotedOptionsStringFromArray($options),
+            [
+                $this->quoteIdentifier($userName),
+            ]
+        ));
     }
 
     /**

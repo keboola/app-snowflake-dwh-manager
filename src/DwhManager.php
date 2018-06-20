@@ -134,6 +134,7 @@ class DwhManager
                 '.' .
                 $this->connection->quoteIdentifier($userSchemaName)
             ),
+            'disabled' => new Expr($user->isDisabled() ? 'TRUE' : 'FALSE'),
         ]);
 
         $this->ensureRoleGrantedToUser($userRole, $userName);
@@ -299,6 +300,11 @@ class DwhManager
                 ));
             }
         } else {
+            unset($options['login_name']);
+            $this->connection->alterUser(
+                $userName,
+                $options
+            );
             $this->logger->info(sprintf(
                 'User "%s" already exists',
                 $userName
