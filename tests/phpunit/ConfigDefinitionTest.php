@@ -41,7 +41,7 @@ class ConfigDefinitionTest extends TestCase
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
-                            'business_schemes' => [
+                            'business_schemas' => [
                                 'dwh1',
                                 'dwh2',
                             ],
@@ -58,7 +58,7 @@ class ConfigDefinitionTest extends TestCase
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
-                            'business_schemes' => [
+                            'business_schemas' => [
                                 'dwh1',
                                 'dwh2',
                             ],
@@ -131,7 +131,7 @@ class ConfigDefinitionTest extends TestCase
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
-                            'business_schemes' => [
+                            'business_schemas' => [
                                 'dwh1',
                                 'dwh2',
                             ],

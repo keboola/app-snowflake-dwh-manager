@@ -30,7 +30,7 @@ class UserDefinition implements ConfigurationInterface
                 ->scalarNode('email')
                     ->isRequired()
                 ->end()
-                ->arrayNode('business_schemes')
+                ->arrayNode('business_schemas')
                     ->scalarPrototype()
                 ->end()
                 ->end()

@@ -140,7 +140,7 @@ class DwhManager
 
         $this->ensureRoleGrantedToRole($userRole, $currentRole);
 
-        foreach ($user->getSchemes() as $linkedSchemaName) {
+        foreach ($user->getSchemas() as $linkedSchemaName) {
             if (!$this->checker->existsSchema($linkedSchemaName)) {
                 throw new UserException(sprintf(
                     'The schema "%s" to link to user "%s" does not exist',

@@ -31,9 +31,9 @@ class User extends BaseConfig
     /**
      * @return string[]
      */
-    public function getSchemes(): array
+    public function getSchemas(): array
     {
-        return $this->getValue(['business_schemes']);
+        return $this->getValue(['business_schemas']);
     }
 
     public function isDisabled(): bool
