@@ -15,7 +15,7 @@ use function sprintf;
 
 class DwhManager
 {
-    private const GENERATED_PASSWORD_LENGHT = 12;
+    private const GENERATED_PASSWORD_LENGTH = 32;
     private const PRIVILEGES_DATABASE_MINIMAL = [
         'USAGE',
     ];
@@ -317,7 +317,7 @@ class DwhManager
         $randomLibFactory = new Factory();
         $password = $randomLibFactory
             ->getMediumStrengthGenerator()
-            ->generateString(self::GENERATED_PASSWORD_LENGHT);
+            ->generateString(self::GENERATED_PASSWORD_LENGTH);
         return $password;
     }
 
