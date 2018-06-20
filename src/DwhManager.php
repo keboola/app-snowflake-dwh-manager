@@ -220,78 +220,43 @@ class DwhManager
 
     private function ensureRoleHasDatabasePrivileges(string $role, array $databasePrivileges): void
     {
-        if (!$this->checker->hasRolePrivilegesOnDatabase(
+        $this->connection->grantOnDatabaseToRole(
+            $this->database,
             $role,
-            $databasePrivileges,
+            $databasePrivileges
+        );
+        $this->logger->info(sprintf(
+            'Granted [%s] to role "%s" on database "%s"',
+            implode(',', $databasePrivileges),
+            $role,
             $this->database
-        )) {
-            $this->connection->grantOnDatabaseToRole(
-                $this->database,
-                $role,
-                $databasePrivileges
-            );
-            $this->logger->info(sprintf(
-                'Granted [%s] to role "%s" on database "%s"',
-                implode(',', $databasePrivileges),
-                $role,
-                $this->database
-            ));
-        } else {
-            $this->logger->info(sprintf(
-                'Role "%s" has all the required grants on "%s" database',
-                $role,
-                $this->database
-            ));
-        }
+        ));
     }
 
     private function ensureRoleHasSchemaPrivileges(string $role, array $schemaPrivileges, string $schemaName): void
     {
-        if (!$this->checker->hasRolePrivilegesOnSchema(
+        $this->connection->grantOnSchemaToRole($schemaName, $role, $schemaPrivileges);
+        $this->logger->info(sprintf(
+            'Granted [%s] to role "%s" on schema "%s"',
+            implode(',', $schemaPrivileges),
             $role,
-            $schemaPrivileges,
             $schemaName
-        )) {
-            $this->connection->grantOnSchemaToRole($schemaName, $role, $schemaPrivileges);
-            $this->logger->info(sprintf(
-                'Granted [%s] to role "%s" on schema "%s"',
-                implode(',', $schemaPrivileges),
-                $role,
-                $schemaName
-            ));
-        } else {
-            $this->logger->info(sprintf(
-                'Role "%s" has all the required grants',
-                $role
-            ));
-        }
+        ));
     }
 
     private function ensureRoleHasWarehousePrivileges(string $role, array $warehousePrivileges): void
     {
-        if (!$this->checker->hasRolePrivilegesOnWarehouse(
+        $this->connection->grantOnWarehouseToRole(
+            $this->warehouse,
             $role,
-            $warehousePrivileges,
+            $warehousePrivileges
+        );
+        $this->logger->info(sprintf(
+            'Granted [%s] to role "%s" on warehouse "%s"',
+            implode(',', $warehousePrivileges),
+            $role,
             $this->warehouse
-        )) {
-            $this->connection->grantOnWarehouseToRole(
-                $this->warehouse,
-                $role,
-                $warehousePrivileges
-            );
-            $this->logger->info(sprintf(
-                'Granted [%s] to role "%s" on warehouse "%s"',
-                implode(',', $warehousePrivileges),
-                $role,
-                $this->warehouse
-            ));
-        } else {
-            $this->logger->info(sprintf(
-                'Role "%s" has all the required grants on "%s" warehouse',
-                $role,
-                $this->warehouse
-            ));
-        }
+        ));
     }
 
     private function ensureSchemaExists(string $schemaName): void

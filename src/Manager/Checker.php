@@ -7,7 +7,6 @@ namespace Keboola\SnowflakeDwhManager\Manager;
 use Keboola\SnowflakeDwhManager\Connection;
 use Throwable;
 use function array_filter;
-use function strtoupper;
 
 class Checker
 {
@@ -54,46 +53,6 @@ class Checker
     public function getCurrentRole(): string
     {
         return $this->connection->getCurrentRole();
-    }
-
-    private function hasRolePrivilegesOnObjectType(
-        string $role,
-        array $grants,
-        string $objectName,
-        string $objectType
-    ): bool {
-        $objectName = strtoupper($objectName);
-        $grantedGrants = $this->connection->showGrantsToRole($role);
-        $grantedGrantsOnSchema = array_filter(
-            $grantedGrants,
-            function (array $grant) use ($objectName, $objectType) {
-                $grantedOnSchema = $grant['granted_on'] === $objectType;
-                $isSelectedSchema = strpos($grant['name'], $objectName) !== false;
-                return $grantedOnSchema && $isSelectedSchema;
-            }
-        );
-        $privileges = array_map(
-            function (array $grant) {
-                return $grant['privilege'];
-            },
-            $grantedGrantsOnSchema
-        );
-        return $privileges == $grants;
-    }
-
-    public function hasRolePrivilegesOnDatabase(string $role, array $grants, string $database): bool
-    {
-        return $this->hasRolePrivilegesOnObjectType($role, $grants, $database, Connection::OBJECT_TYPE_DATABASE);
-    }
-
-    public function hasRolePrivilegesOnSchema(string $role, array $grants, string $schema): bool
-    {
-        return $this->hasRolePrivilegesOnObjectType($role, $grants, $schema, Connection::OBJECT_TYPE_SCHEMA);
-    }
-
-    public function hasRolePrivilegesOnWarehouse(string $role, array $grants, string $warehouse): bool
-    {
-        return $this->hasRolePrivilegesOnObjectType($role, $grants, $warehouse, Connection::OBJECT_TYPE_WAREHOUSE);
     }
 
     private function isRoleGrantedToObject(string $role, string $granteeName, string $objectType): bool
