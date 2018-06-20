@@ -7,25 +7,15 @@ namespace Keboola\SnowflakeDwhManager;
 use Keboola\Db\Import\Snowflake\Connection as SnowflakeConnection;
 use Keboola\SnowflakeDwhManager\Connection\Expr;
 use Psr\Log\LoggerInterface;
-use function odbc_errormsg;
 use function strtoupper;
 
 class Connection extends SnowflakeConnection
 {
     public const OBJECT_TYPE_DATABASE = 'DATABASE';
-
     public const OBJECT_TYPE_ROLE = 'ROLE';
-
     public const OBJECT_TYPE_SCHEMA = 'SCHEMA';
-
     public const OBJECT_TYPE_USER = 'USER';
-
     public const OBJECT_TYPE_WAREHOUSE = 'WAREHOUSE';
-
-    /**
-     * @var resource odbc handle
-     */
-    private $connection;
 
     /** @var LoggerInterface */
     private $logger;
@@ -215,34 +205,13 @@ class Connection extends SnowflakeConnection
     public function query(string $sql, array $bind = []): void
     {
         $this->logger->info("\t" . $sql);
-        $stmt = odbc_prepare($this->connection, $sql);
-        if (!odbc_execute($stmt, $this->repairBinding($bind))) {
-            $this->logger->error(odbc_errormsg());
-        }
-        odbc_free_result($stmt);
+        parent::query($sql, $bind);
     }
 
     public function quote(string $value): string
     {
         $q = "'";
         return ($q . str_replace("$q", "$q$q", $value) . $q);
-    }
-
-    /**
-     * Avoid odbc file open http://php.net/manual/en/function.odbc-execute.php
-     *
-     * @param array $bind
-     * @return array
-     */
-    private function repairBinding(array $bind): array
-    {
-        return array_map(function ($value) {
-            if (preg_match("/^'.*'$/", $value)) {
-                return " {$value} ";
-            } else {
-                return $value;
-            }
-        }, $bind);
     }
 
     /**
