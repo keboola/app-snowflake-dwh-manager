@@ -270,4 +270,10 @@ class Connection extends SnowflakeConnection
             ]
         ));
     }
+
+    public function getCurrentRole(): string
+    {
+        $res = $this->fetchAll('SELECT CURRENT_ROLE() AS "name"');
+        return $res[0]['name'];
+    }
 }

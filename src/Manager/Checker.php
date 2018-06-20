@@ -53,13 +53,7 @@ class Checker
 
     public function getCurrentRole(): string
     {
-        $roles = $this->connection->fetchRoles();
-        $result = array_values(array_filter($roles, function (array $role) {
-            if ($role['is_current'] === 'Y') {
-                return true;
-            }
-        }));
-        return $result[0]['name'];
+        return $this->connection->getCurrentRole();
     }
 
     private function hasRolePrivilegesOnObjectType(
