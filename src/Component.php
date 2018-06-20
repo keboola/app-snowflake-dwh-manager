@@ -15,9 +15,6 @@ class Component extends BaseComponent
         $config = $this->getConfig();
         $connection = new Connection($this->getLogger(), $config->getSnowflakeConnectionOptions());
         $database = $config->getValue(['parameters', 'master_database']);
-        $connection->query(
-            'USE DATABASE ' . $connection->quoteIdentifier($database)
-        );
         $prefix = 'dwhm_' . $database;
         $manager = new DwhManager(
             $prefix,
