@@ -242,6 +242,26 @@ class Connection extends SnowflakeConnection
         return ($q . str_replace("$q", "$q$q", $value) . $q);
     }
 
+    private function revokeRoleFromObjectType(
+        string $grantedRole,
+        string $roleGrantedTo,
+        string $objectTypeGrantedTo
+    ): void {
+        $this->query(vsprintf(
+            'REVOKE ROLE %s
+            FROM ' . $objectTypeGrantedTo . ' %s',
+            [
+                $this->quoteIdentifier($grantedRole),
+                $this->quoteIdentifier($roleGrantedTo),
+            ]
+        ));
+    }
+
+    public function revokeRoleGrantFromRole(string $grantedRole, string $roleGrantedTo): void
+    {
+        $this->revokeRoleFromObjectType($grantedRole, $roleGrantedTo, Connection::OBJECT_TYPE_ROLE);
+    }
+
     /**
      * @return mixed[][]
      */

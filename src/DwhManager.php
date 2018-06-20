@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\SnowflakeDwhManager;
 
+use function array_diff;
 use Keboola\Component\UserException;
 use Keboola\SnowflakeDwhManager\Configuration\Schema;
 use Keboola\SnowflakeDwhManager\Configuration\User;
@@ -141,6 +142,7 @@ class DwhManager
 
         $this->ensureRoleGrantedToRole($userRole, $currentRole);
 
+        $desiredRoles = [];
         foreach ($user->getSchemas() as $linkedSchemaName) {
             if (!$this->checker->existsSchema($linkedSchemaName)) {
                 throw new UserException(sprintf(
@@ -149,10 +151,9 @@ class DwhManager
                     $userName
                 ));
             }
-
-            $schemaLinkedToRole = $this->getRoRoleFromSchemaName($linkedSchemaName);
-            $this->ensureRoleGrantedToRole($schemaLinkedToRole, $userRole);
+            $desiredRoles[] = $this->getRoRoleFromSchemaName($linkedSchemaName);
         }
+        $this->ensureRoleOnlyHasRolesGranted($userRole, $desiredRoles);
     }
 
     private function ensureGrantedSelectOnAllTablesInSchemaToRole(
@@ -258,6 +259,29 @@ class DwhManager
             $role,
             $this->warehouse
         ));
+    }
+
+    private function ensureRoleOnlyHasRolesGranted(string $roleName, array $desiredRoles): void
+    {
+        $grantedRoles = $this->checker->getGrantedRolesOfRole($roleName);
+        $toBeRevoked = array_diff($grantedRoles, $desiredRoles);
+        $toBeGranted = array_diff($desiredRoles, $grantedRoles);
+        foreach ($toBeRevoked as $revokedRole) {
+            $this->connection->revokeRoleGrantFromRole($revokedRole, $roleName);
+            $this->logger->info(sprintf(
+                'Role "%s" has been revoked from role "%s"',
+                $revokedRole,
+                $roleName
+            ));
+        }
+        foreach ($toBeGranted as $grantedRole) {
+            $this->connection->grantRoleToRole($grantedRole, $roleName);
+            $this->logger->info(sprintf(
+                'Role "%s" has been granted to role "%s"',
+                $grantedRole,
+                $roleName
+            ));
+        }
     }
 
     private function ensureSchemaExists(string $schemaName): void

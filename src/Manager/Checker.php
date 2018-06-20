@@ -10,12 +10,17 @@ use function array_filter;
 
 class Checker
 {
+    /** @var CheckerHelper */
+    private $checkerHelper;
+
     /** @var Connection */
     private $connection;
 
     public function __construct(
+        CheckerHelper $checkerHelper,
         Connection $connection
     ) {
+        $this->checkerHelper = $checkerHelper;
         $this->connection = $connection;
     }
 
@@ -53,6 +58,18 @@ class Checker
     public function getCurrentRole(): string
     {
         return $this->connection->getCurrentRole();
+    }
+
+    public function getGrantedRolesOfRole(string $roleName): array
+    {
+        $grants = $this->connection->showGrantsToRole($roleName);
+        $grantsOfRoles = $this->checkerHelper->filterGrantsByObjectTypeGrantedOn(Connection::OBJECT_TYPE_ROLE, $grants);
+        $values = $this->checkerHelper->mapGrantsArrayToGrantedResourceNames($grantsOfRoles);
+        // ořezat z toho DB a vracet jen stringy bez uvozovek
+
+        return array_map(function ($item) {
+            return $this->checkerHelper->stripGlobalIdenitiferToUnquotedName($item);
+        }, $values);
     }
 
     private function isRoleGrantedToObject(string $role, string $granteeName, string $objectType): bool

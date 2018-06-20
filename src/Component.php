@@ -6,6 +6,7 @@ namespace Keboola\SnowflakeDwhManager;
 
 use Keboola\Component\BaseComponent;
 use Keboola\SnowflakeDwhManager\Manager\Checker;
+use Keboola\SnowflakeDwhManager\Manager\CheckerHelper;
 
 class Component extends BaseComponent
 {
@@ -18,7 +19,7 @@ class Component extends BaseComponent
         $prefix = 'dwhm_' . $database;
         $manager = new DwhManager(
             $prefix,
-            new Checker($connection),
+            new Checker(new CheckerHelper(), $connection),
             $connection,
             $this->getLogger(),
             $config->getWarehouse(),
