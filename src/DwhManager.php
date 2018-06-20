@@ -182,20 +182,20 @@ class DwhManager
         }
     }
 
-    private function ensureRoleGrantedToRole(string $role, string $userName): void
+    private function ensureRoleGrantedToRole(string $roleThatIsGranted, string $roleToGrantTo): void
     {
-        if (!$this->checker->isRoleGrantedToRole($role, $userName)) {
-            $this->connection->grantRoleToRole($role, $userName);
+        if (!$this->checker->isRoleGrantedToRole($roleThatIsGranted, $roleToGrantTo)) {
+            $this->connection->grantRoleToRole($roleThatIsGranted, $roleToGrantTo);
             $this->logger->info(sprintf(
-                'Role "%s" granted to role "%s"',
-                $role,
-                $userName
+                'Role "%s" has been granted to role "%s"',
+                $roleThatIsGranted,
+                $roleToGrantTo
             ));
         } else {
             $this->logger->info(sprintf(
-                'Role "%s" has already been granted role "%s"',
-                $userName,
-                $role
+                'Role "%s" has already been granted to role "%s"',
+                $roleThatIsGranted,
+                $roleToGrantTo
             ));
         }
     }
@@ -205,15 +205,15 @@ class DwhManager
         if (!$this->checker->isRoleGrantedToUser($role, $userName)) {
             $this->connection->grantRoleToUser($role, $userName);
             $this->logger->info(sprintf(
-                'User "%s" has been granted the role "%s"',
-                $userName,
-                $role
+                'Role "%s" has been granted to user "%s"',
+                $role,
+                $userName
             ));
         } else {
             $this->logger->info(sprintf(
-                'User "%s" is already granted the role "%s"',
-                $userName,
-                $role
+                'Role "%s" has already been granted to user "%s"',
+                $role,
+                $userName
             ));
         }
     }
