@@ -28,6 +28,20 @@ class Connection extends SnowflakeConnection
         $this->logger = $logger;
     }
 
+    /**
+     * @param array $otherOptions
+     * @return string
+     */
+    private function createQuotedOptionsStringFromArray(array $otherOptions): string
+    {
+        $otherOptionsString = '';
+        foreach ($otherOptions as $option => $optionValue) {
+            $quotedValue = $optionValue instanceof Expr ? $optionValue->getValue() : $this->quote($optionValue);
+            $otherOptionsString .= strtoupper($option) . '=' . $quotedValue . \PHP_EOL;
+        }
+        return $otherOptionsString;
+    }
+
     public function createRole(string $roleName): void
     {
         $this->query(vsprintf(
@@ -50,11 +64,7 @@ class Connection extends SnowflakeConnection
 
     public function createUser(string $userName, string $password, array $otherOptions): void
     {
-        $otherOptionsString = '';
-        foreach ($otherOptions as $option => $optionValue) {
-            $quotedValue = $optionValue instanceof Expr ? $optionValue->getValue() : $this->quote($optionValue);
-            $otherOptionsString .= strtoupper($option) . '=' . $quotedValue . \PHP_EOL;
-        }
+        $otherOptionsString = $this->createQuotedOptionsStringFromArray($otherOptions);
 
         $this->query(vsprintf(
             'CREATE USER IF NOT EXISTS 
