@@ -337,9 +337,7 @@ class DwhManager
 
     private function getRoRoleFromSchema(Schema $schema): string
     {
-        $role = $this->getRoRoleFromSchemaName($schema->getName());
-        $this->checkLength($role, $schema->getName(), 'Maximum schema name length is %s characters');
-        return $role;
+        return $this->getRoRoleFromSchemaName($schema->getName());
     }
 
     private function getRoleNameFromUser(User $user): string
