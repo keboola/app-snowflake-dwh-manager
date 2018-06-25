@@ -1,33 +1,38 @@
 {
+    "name": "keboola/app-snowflake-dwh-manager",
+    "description": "",
     "require": {
         "PHP": "^7.1",
-        "keboola/php-component": "^4.1"
+        "ircmaxell/random-lib": "^1.2",
+        "keboola/php-component": "^4.1",
+        "keboola/php-csv-db-import": "^4.1"
     },
     "require-dev": {
         "jakub-onderka/php-parallel-lint": "^1.0",
         "keboola/coding-standard": "^4.0",
+        "keboola/datadir-tests": "^1.0",
         "keboola/php-temp": "^1.0",
         "phpstan/phpstan-shim": "^0.9.2",
         "phpunit/phpunit": "^7.0",
+        "squizlabs/php_codesniffer": "^3.3",
         "symfony/process": "^4.0",
-        "keboola/datadir-tests": "^1.0"
+        "symfony/var-dumper": "^4.1"
     },
     "autoload": {
         "psr-4": {
-            "MyComponent\\": "src/"
+            "Keboola\\SnowflakeDwhManager\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "MyComponent\\Tests\\": "tests/phpunit/"
+            "Keboola\\SnowflakeDwhManager\\Tests\\": "tests/phpunit/"
         }
     },
     "scripts": {
         "tests-phpunit": "phpunit",
         "tests-datadir": "datadir-tests",
         "tests": [
-            "@tests-phpunit",
-            "@tests-datadir"
+            "@tests-phpunit"
         ],
 
         "phpstan": "phpstan analyse ./src ./tests --level=max --no-progress -c phpstan.neon",
