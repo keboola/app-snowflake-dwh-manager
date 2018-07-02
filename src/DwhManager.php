@@ -128,7 +128,6 @@ class DwhManager
 
         $userName = $this->getUsernameFromEmail($user);
         $this->ensureUserExists($userName, [
-            'login_name' => $user->getEmail(),
             'default_role' => $userRole,
             'default_warehouse' => $this->warehouse,
             'default_namespace' => new Expr(
@@ -137,6 +136,7 @@ class DwhManager
                 $this->connection->quoteIdentifier($userSchemaName)
             ),
             'disabled' => new Expr($user->isDisabled() ? 'TRUE' : 'FALSE'),
+            'email' => $user->getEmail(),
         ]);
 
         $this->ensureRoleGrantedToUser($userRole, $userName);
@@ -311,22 +311,12 @@ class DwhManager
                 $password,
                 $options
             );
-            if (isset($options['login_name'])) {
-                $this->logger->info(sprintf(
-                    'Created user "%s" (%s) with password "%s"',
-                    $options['login_name'],
-                    $userName,
-                    $password
-                ));
-            } else {
-                $this->logger->info(sprintf(
-                    'Created user "%s" with password "%s"',
-                    $userName,
-                    $password
-                ));
-            }
+            $this->logger->info(sprintf(
+                'Created user "%s" with password "%s"',
+                $userName,
+                $password
+            ));
         } else {
-            unset($options['login_name']);
             $this->connection->alterUser(
                 $userName,
                 $options
@@ -368,7 +358,7 @@ class DwhManager
 
     private function getRoleNameFromUser(User $user): string
     {
-        $role = $this->sanitizeAsIdentifier($user->getEmail());
+        $role = $this->uniquePrefix . '_' . $this->sanitizeAsIdentifier($user->getEmail());
         $this->checkLength($role, $user->getEmail(), 'Maximum email length is %s characters');
         return $role;
     }
@@ -396,7 +386,7 @@ class DwhManager
 
     private function getUsernameFromEmail(User $user): string
     {
-        $username = $this->sanitizeAsIdentifier($user->getEmail());
+        $username = $this->uniquePrefix . '_' . $this->sanitizeAsIdentifier($user->getEmail());
         $this->checkLength($username, $user->getEmail(), 'Maximum email length is %s characters');
         return $username;
     }
