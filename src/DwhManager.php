@@ -136,6 +136,7 @@ class DwhManager
                 $this->connection->quoteIdentifier($userSchemaName)
             ),
             'disabled' => new Expr($user->isDisabled() ? 'TRUE' : 'FALSE'),
+            'email' => $user->getEmail(),
         ]);
 
         $this->ensureRoleGrantedToUser($userRole, $userName);
