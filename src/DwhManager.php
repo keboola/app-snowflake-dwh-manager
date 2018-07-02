@@ -310,22 +310,12 @@ class DwhManager
                 $password,
                 $options
             );
-            if (isset($options['login_name'])) {
-                $this->logger->info(sprintf(
-                    'Created user "%s" (%s) with password "%s"',
-                    $options['login_name'],
-                    $userName,
-                    $password
-                ));
-            } else {
-                $this->logger->info(sprintf(
-                    'Created user "%s" with password "%s"',
-                    $userName,
-                    $password
-                ));
-            }
+            $this->logger->info(sprintf(
+                'Created user "%s" with password "%s"',
+                $userName,
+                $password
+            ));
         } else {
-            unset($options['login_name']);
             $this->connection->alterUser(
                 $userName,
                 $options
