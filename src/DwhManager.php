@@ -357,7 +357,7 @@ class DwhManager
 
     private function getRoleNameFromUser(User $user): string
     {
-        $role = $this->sanitizeAsIdentifier($user->getEmail());
+        $role = $this->uniquePrefix . '_' . $this->sanitizeAsIdentifier($user->getEmail());
         $this->checkLength($role, $user->getEmail(), 'Maximum email length is %s characters');
         return $role;
     }
