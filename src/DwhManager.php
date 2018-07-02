@@ -128,7 +128,6 @@ class DwhManager
 
         $userName = $this->getUsernameFromEmail($user);
         $this->ensureUserExists($userName, [
-            'login_name' => $user->getEmail(),
             'default_role' => $userRole,
             'default_warehouse' => $this->warehouse,
             'default_namespace' => new Expr(
@@ -311,22 +310,12 @@ class DwhManager
                 $password,
                 $options
             );
-            if (isset($options['login_name'])) {
-                $this->logger->info(sprintf(
-                    'Created user "%s" (%s) with password "%s"',
-                    $options['login_name'],
-                    $userName,
-                    $password
-                ));
-            } else {
-                $this->logger->info(sprintf(
-                    'Created user "%s" with password "%s"',
-                    $userName,
-                    $password
-                ));
-            }
+            $this->logger->info(sprintf(
+                'Created user "%s" with password "%s"',
+                $userName,
+                $password
+            ));
         } else {
-            unset($options['login_name']);
             $this->connection->alterUser(
                 $userName,
                 $options
@@ -396,7 +385,7 @@ class DwhManager
 
     private function getUsernameFromEmail(User $user): string
     {
-        $username = $this->sanitizeAsIdentifier($user->getEmail());
+        $username = $this->uniquePrefix . '_' . $this->sanitizeAsIdentifier($user->getEmail());
         $this->checkLength($username, $user->getEmail(), 'Maximum email length is %s characters');
         return $username;
     }
