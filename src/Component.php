@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\SnowflakeDwhManager;
 
 use Keboola\Component\BaseComponent;
+use Keboola\Component\UserException;
 use Keboola\SnowflakeDwhManager\Manager\Checker;
 use Keboola\SnowflakeDwhManager\Manager\CheckerHelper;
 use Psr\Log\NullLogger;
@@ -15,7 +16,11 @@ class Component extends BaseComponent
     {
         /** @var Config $config */
         $config = $this->getConfig();
-        $connection = new Connection(new NullLogger(), $config->getSnowflakeConnectionOptions());
+        try {
+            $connection = new Connection(new NullLogger(), $config->getSnowflakeConnectionOptions());
+        } catch (\Keboola\Db\Import\Exception $e) {
+            throw new UserException('Cannot connect to Snowflake, check your credentials.', 0, $e);
+        }
         $prefix = 'dwhm_' . $config->getDatabase();
         $manager = new DwhManager(
             $prefix,
