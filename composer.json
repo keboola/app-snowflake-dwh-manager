@@ -2,7 +2,7 @@
     "name": "keboola/app-snowflake-dwh-manager",
     "description": "",
     "require": {
-        "PHP": "^7.1",
+        "php": "^7.1",
         "ircmaxell/random-lib": "^1.2",
         "keboola/php-component": "^4.1",
         "keboola/php-csv-db-import": "^4.1"
