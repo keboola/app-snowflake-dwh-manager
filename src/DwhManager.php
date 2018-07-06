@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Keboola\SnowflakeDwhManager;
 
-use function array_diff;
 use Keboola\Component\UserException;
 use Keboola\SnowflakeDwhManager\Configuration\Schema;
 use Keboola\SnowflakeDwhManager\Configuration\User;
 use Keboola\SnowflakeDwhManager\Connection\Expr;
 use Keboola\SnowflakeDwhManager\Manager\Checker;
+use Keboola\SnowflakeDwhManager\Manager\NamingConventions;
 use Psr\Log\LoggerInterface;
 use RandomLib\Factory;
+use function array_diff;
 use function sprintf;
 
 class DwhManager
@@ -39,11 +40,6 @@ class DwhManager
     private const PRIVILEGES_WAREHOUSE_MINIMAL = [
         'USAGE',
     ];
-    private const SUFFIX_ROLE_RO = '_ro';
-    private const SUFFIX_ROLE_RW = '_rw';
-
-    /** @var string */
-    private $uniquePrefix;
 
     /** @var Checker */
     private $checker;
@@ -54,6 +50,9 @@ class DwhManager
     /** @var LoggerInterface */
     private $logger;
 
+    /** @var NamingConventions */
+    private $namingConventions;
+
     /** @var string */
     private $warehouse;
 
@@ -61,27 +60,27 @@ class DwhManager
     private $database;
 
     public function __construct(
-        string $uniquePrefix,
         Checker $checker,
         Connection $connection,
         LoggerInterface $logger,
+        NamingConventions $namingConventions,
         string $warehouse,
         string $database
     ) {
-        $this->uniquePrefix = $uniquePrefix;
         $this->checker = $checker;
         $this->connection = $connection;
         $this->logger = $logger;
+        $this->namingConventions = $namingConventions;
         $this->warehouse = $warehouse;
         $this->database = $database;
     }
 
     public function checkSchema(Schema $schema): void
     {
-        $schemaName = $this->getSchemaNameFromSchema($schema);
-        $rwUser = $this->getRwUserFromSchema($schema);
-        $rwRole = $this->getRwRoleFromSchema($schema);
-        $roRole = $this->getRoRoleFromSchema($schema);
+        $schemaName = $this->namingConventions->getSchemaNameFromSchema($schema);
+        $rwUser = $this->namingConventions->getRwUserFromSchema($schema);
+        $rwRole = $this->namingConventions->getRwRoleFromSchema($schema);
+        $roRole = $this->namingConventions->getRoRoleFromSchema($schema);
         $currentRole = $this->checker->getCurrentRole();
 
         $this->ensureSchemaExists($schemaName);
@@ -116,8 +115,8 @@ class DwhManager
 
     public function checkUser(User $user): void
     {
-        $userSchemaName = $this->getOwnSchemaNameFromUser($user);
-        $userRole = $this->getRoleNameFromUser($user);
+        $userSchemaName = $this->namingConventions->getOwnSchemaNameFromUser($user);
+        $userRole = $this->namingConventions->getRoleNameFromUser($user);
         $currentRole = $this->checker->getCurrentRole();
 
         $this->ensureSchemaExists($userSchemaName);
@@ -126,7 +125,7 @@ class DwhManager
 
         $this->ensureRoleHasSchemaPrivileges($userRole, self::PRIVILEGES_SCHEMA_FULL_ACCESS, $userSchemaName);
 
-        $userName = $this->getUsernameFromEmail($user);
+        $userName = $this->namingConventions->getUsernameFromEmail($user);
         $this->ensureUserExists($userName, [
             'default_role' => $userRole,
             'default_warehouse' => $this->warehouse,
@@ -152,7 +151,7 @@ class DwhManager
                     $userName
                 ));
             }
-            $desiredRoles[] = $this->getRoRoleFromSchemaName($linkedSchemaName);
+            $desiredRoles[] = $this->namingConventions->getRoRoleFromSchemaName($linkedSchemaName);
         }
         $this->ensureRoleOnlyHasRolesGranted($userRole, $desiredRoles);
     }
@@ -335,72 +334,5 @@ class DwhManager
             ->getMediumStrengthGenerator()
             ->generateString(self::GENERATED_PASSWORD_LENGTH);
         return $password;
-    }
-
-    private function getOwnSchemaNameFromUser(User $user): string
-    {
-        $schemaName = $this->sanitizeAsIdentifier($user->getEmail());
-        $this->checkLength($schemaName, $user->getEmail(), 'Maximum email length is %s characters');
-        return $schemaName;
-    }
-
-    private function getRoRoleFromSchemaName(string $schemaName): string
-    {
-        $role = $this->uniquePrefix . '_' . $schemaName . self::SUFFIX_ROLE_RO;
-        $this->checkLength($role, $schemaName, 'Maximum schema name length is %s characters');
-        return $role;
-    }
-
-    private function getRoRoleFromSchema(Schema $schema): string
-    {
-        return $this->getRoRoleFromSchemaName($schema->getName());
-    }
-
-    private function getRoleNameFromUser(User $user): string
-    {
-        $role = $this->uniquePrefix . '_' . $this->sanitizeAsIdentifier($user->getEmail());
-        $this->checkLength($role, $user->getEmail(), 'Maximum email length is %s characters');
-        return $role;
-    }
-
-    private function getRwRoleFromSchema(Schema $schema): string
-    {
-        $role = $this->uniquePrefix . '_' . $schema->getName() . self::SUFFIX_ROLE_RW;
-        $this->checkLength($role, $schema->getName(), 'Maximum schema name length is %s characters');
-        return $role;
-    }
-
-    private function getRwUserFromSchema(Schema $schema): string
-    {
-        $user = $this->uniquePrefix . '_' . $schema->getName();
-        $this->checkLength($user, $schema->getName(), 'Maximum schema name is %s characters');
-        return $user;
-    }
-
-    private function getSchemaNameFromSchema(Schema $schema): string
-    {
-        $schemaName = $schema->getName();
-        $this->checkLength($schemaName, $schema->getName(), 'Maximum schema name length is %s characters');
-        return $schemaName;
-    }
-
-    private function getUsernameFromEmail(User $user): string
-    {
-        $username = $this->uniquePrefix . '_' . $this->sanitizeAsIdentifier($user->getEmail());
-        $this->checkLength($username, $user->getEmail(), 'Maximum email length is %s characters');
-        return $username;
-    }
-
-    private function sanitizeAsIdentifier(string $string): string
-    {
-        return (string) preg_replace('~[^a-z0-9]+~', '_', strtolower($string));
-    }
-
-    private function checkLength(string $var, string $source, string $message): void
-    {
-        if (strlen($var) > 255) {
-            $sourceMaxLength = 255 - (strlen($var) - strlen($source));
-            throw new UserException(sprintf($message, $sourceMaxLength));
-        }
     }
 }

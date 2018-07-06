@@ -8,6 +8,7 @@ use Keboola\Component\BaseComponent;
 use Keboola\Component\UserException;
 use Keboola\SnowflakeDwhManager\Manager\Checker;
 use Keboola\SnowflakeDwhManager\Manager\CheckerHelper;
+use Keboola\SnowflakeDwhManager\Manager\NamingConventions;
 use Psr\Log\NullLogger;
 
 class Component extends BaseComponent
@@ -23,10 +24,10 @@ class Component extends BaseComponent
         }
         $prefix = 'dwhm_' . $config->getDatabase();
         $manager = new DwhManager(
-            $prefix,
             new Checker(new CheckerHelper(), $connection),
             $connection,
             $this->getLogger(),
+            new NamingConventions($prefix),
             $config->getWarehouse(),
             $config->getDatabase()
         );
