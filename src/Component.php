@@ -22,12 +22,11 @@ class Component extends BaseComponent
         } catch (\Keboola\Db\Import\Exception $e) {
             throw new UserException('Cannot connect to Snowflake, check your credentials.', 0, $e);
         }
-        $prefix = 'dwhm_' . $config->getDatabase();
         $manager = new DwhManager(
             new Checker(new CheckerHelper(), $connection),
             $connection,
             $this->getLogger(),
-            new NamingConventions($prefix),
+            new NamingConventions($config->getDatabase()),
             $config->getWarehouse(),
             $config->getDatabase()
         );
