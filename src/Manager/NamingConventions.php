@@ -10,8 +10,8 @@ use Keboola\SnowflakeDwhManager\Configuration\User;
 
 class NamingConventions
 {
-    private const SUFFIX_ROLE_RO = '_ro';
-    private const SUFFIX_ROLE_RW = '_rw';
+    private const SUFFIX_ROLE_RO = '_RO';
+    private const SUFFIX_ROLE_RW = '_RW';
 
     /** @var string */
     private $uniquePrefix;
@@ -25,14 +25,14 @@ class NamingConventions
     {
         $schemaName = $this->sanitizeAsIdentifier($user->getEmail());
         $this->checkLength($schemaName, $user->getEmail(), 'Maximum email length is %s characters');
-        return $schemaName;
+        return strtoupper($schemaName);
     }
 
     public function getRoRoleFromSchemaName(string $schemaName): string
     {
         $role = $this->uniquePrefix . '_' . $schemaName . self::SUFFIX_ROLE_RO;
         $this->checkLength($role, $schemaName, 'Maximum schema name length is %s characters');
-        return $role;
+        return strtoupper($role);
     }
 
     public function getRoRoleFromSchema(Schema $schema): string
@@ -44,35 +44,35 @@ class NamingConventions
     {
         $role = $this->uniquePrefix . '_' . $this->sanitizeAsIdentifier($user->getEmail());
         $this->checkLength($role, $user->getEmail(), 'Maximum email length is %s characters');
-        return $role;
+        return strtoupper($role);
     }
 
     public function getRwRoleFromSchema(Schema $schema): string
     {
         $role = $this->uniquePrefix . '_' . $schema->getName() . self::SUFFIX_ROLE_RW;
         $this->checkLength($role, $schema->getName(), 'Maximum schema name length is %s characters');
-        return $role;
+        return strtoupper($role);
     }
 
     public function getRwUserFromSchema(Schema $schema): string
     {
         $user = $this->uniquePrefix . '_' . $schema->getName();
         $this->checkLength($user, $schema->getName(), 'Maximum schema name is %s characters');
-        return $user;
+        return strtoupper($user);
     }
 
     public function getSchemaNameFromSchema(Schema $schema): string
     {
         $schemaName = $schema->getName();
         $this->checkLength($schemaName, $schema->getName(), 'Maximum schema name length is %s characters');
-        return $schemaName;
+        return strtoupper($schemaName);
     }
 
     public function getUsernameFromEmail(User $user): string
     {
         $username = $this->uniquePrefix . '_' . $this->sanitizeAsIdentifier($user->getEmail());
         $this->checkLength($username, $user->getEmail(), 'Maximum email length is %s characters');
-        return $username;
+        return strtoupper($username);
     }
 
     public function sanitizeAsIdentifier(string $string): string

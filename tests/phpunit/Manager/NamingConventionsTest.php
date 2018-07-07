@@ -45,7 +45,7 @@ class NamingConventionsTest extends TestCase
         $namingConventions = new NamingConventions('DWHM_TEST');
 
         $this->assertSame(
-            'user_example_com',
+            'USER_EXAMPLE_COM',
             $namingConventions->getOwnSchemaNameFromUser($this->getUser())
         );
     }
@@ -55,7 +55,7 @@ class NamingConventionsTest extends TestCase
         $namingConventions = new NamingConventions('DWHM_TEST');
 
         $this->assertSame(
-            'DWHM_TEST_my_schema_name_ro',
+            'DWHM_TEST_MY_SCHEMA_NAME_RO',
             $namingConventions->getRoRoleFromSchema($this->getSchema())
         );
     }
@@ -65,7 +65,7 @@ class NamingConventionsTest extends TestCase
         $namingConventions = new NamingConventions('DWHM_TEST');
 
         $this->assertSame(
-            'DWHM_TEST_my_schema_name_ro',
+            'DWHM_TEST_MY_SCHEMA_NAME_RO',
             $namingConventions->getRoRoleFromSchemaName($this->getSchema()->getName())
         );
     }
@@ -75,7 +75,7 @@ class NamingConventionsTest extends TestCase
         $namingConventions = new NamingConventions('DWHM_TEST');
 
         $this->assertSame(
-            'DWHM_TEST_user_example_com',
+            'DWHM_TEST_USER_EXAMPLE_COM',
             $namingConventions->getRoleNameFromUser($this->getUser())
         );
     }
@@ -85,7 +85,7 @@ class NamingConventionsTest extends TestCase
         $namingConventions = new NamingConventions('DWHM_TEST');
 
         $this->assertSame(
-            'DWHM_TEST_my_schema_name_rw',
+            'DWHM_TEST_MY_SCHEMA_NAME_RW',
             $namingConventions->getRwRoleFromSchema($this->getSchema())
         );
     }
@@ -95,7 +95,7 @@ class NamingConventionsTest extends TestCase
         $namingConventions = new NamingConventions('DWHM_TEST');
 
         $this->assertSame(
-            'DWHM_TEST_my_schema_name',
+            'DWHM_TEST_MY_SCHEMA_NAME',
             $namingConventions->getRwUserFromSchema($this->getSchema())
         );
     }
@@ -105,7 +105,7 @@ class NamingConventionsTest extends TestCase
         $namingConventions = new NamingConventions('DWHM_TEST');
 
         $this->assertSame(
-            'my_schema_name',
+            'MY_SCHEMA_NAME',
             $namingConventions->getSchemaNameFromSchema($this->getSchema())
         );
     }
@@ -115,7 +115,7 @@ class NamingConventionsTest extends TestCase
         $namingConventions = new NamingConventions('DWHM_TEST');
 
         $this->assertSame(
-            'DWHM_TEST_user_example_com',
+            'DWHM_TEST_USER_EXAMPLE_COM',
             $namingConventions->getUsernameFromEmail($this->getUser())
         );
     }
