@@ -32,7 +32,7 @@ class SchemaDefinition implements ConfigurationInterface
                 ->scalarNode('schema_name')
                     ->validate()
                         ->ifTrue(function ($value) {
-                            return preg_match('~' . SchemaDefinition::REGEX_SCHEMA_NAME . '~', $value) !== 1;
+                            return !self::isSchemaNameValid($value);
                         })
                         ->thenInvalid('Schema name can only contain alphanumeric characters and underscore')
                     ->end()
@@ -49,5 +49,13 @@ class SchemaDefinition implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         return $this->buildRootDefinition($treeBuilder);
+    }
+
+    /**
+     * @param mixed $value
+     */
+    public static function isSchemaNameValid($value): bool
+    {
+        return preg_match('~' . self::REGEX_SCHEMA_NAME . '~', $value) === 1;
     }
 }
