@@ -120,6 +120,16 @@ class NamingConventionsTest extends TestCase
         );
     }
 
+    public function testGetRwRoleFromSchemaName(): void
+    {
+        $namingConventions = new NamingConventions('DWHM_TEST');
+
+        $this->assertSame(
+            'DWHM_TEST_MY_SCHEMA_NAME1_RW',
+            $namingConventions->getRwRoleFromSchemaName('my_schema_name1')
+        );
+    }
+
     /**
      * @dataProvider provideInputForSanitize
      */

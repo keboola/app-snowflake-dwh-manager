@@ -36,6 +36,13 @@ class NamingConventions
         return strtoupper($role);
     }
 
+    public function getRwRoleFromSchemaName(string $schemaName): string
+    {
+        $role = $this->uniquePrefix . '_' . $schemaName . self::SUFFIX_ROLE_RW;
+        $this->checkLength($role, $schemaName, 'Maximum schema name length is %s characters');
+        return strtoupper($role);
+    }
+
     public function getRoRoleFromSchema(Schema $schema): string
     {
         return $this->getRoRoleFromSchemaName($schema->getName());
