@@ -4,3 +4,4 @@
 /snowflake-odbc-x86_64.deb
 /snowsql-linux_x86_64.bash
 /data/*
+/.env
