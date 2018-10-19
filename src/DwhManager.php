@@ -21,17 +21,10 @@ class DwhManager
     private const PRIVILEGES_DATABASE_MINIMAL = [
         'USAGE',
     ];
-    private const PRIVILEGES_SCHEMA_FULL_ACCESS = [
-        'CREATE EXTERNAL TABLE',
-        'CREATE FILE FORMAT',
-        'CREATE FUNCTION',
-        'CREATE PIPE',
-        'CREATE SEQUENCE',
+    private const PRIVILEGES_SCHEMA_WRITER_ACCESS = [
         'CREATE STAGE',
         'CREATE TABLE',
         'CREATE VIEW',
-        'MODIFY',
-        'MONITOR',
         'USAGE',
     ];
     private const PRIVILEGES_SCHEMA_READ_ONLY = [
@@ -88,7 +81,7 @@ class DwhManager
         $this->ensureRoleExists($rwRole);
         $this->ensureRoleHasWarehousePrivileges($rwRole, self::PRIVILEGES_WAREHOUSE_MINIMAL);
         $this->ensureRoleHasDatabasePrivileges($rwRole, self::PRIVILEGES_DATABASE_MINIMAL);
-        $this->ensureRoleHasSchemaPrivileges($rwRole, self::PRIVILEGES_SCHEMA_FULL_ACCESS, $schemaName);
+        $this->ensureRoleHasSchemaPrivileges($rwRole, self::PRIVILEGES_SCHEMA_WRITER_ACCESS, $schemaName);
 
         $this->ensureRoleExists($roRole);
         $this->ensureRoleHasWarehousePrivileges($roRole, self::PRIVILEGES_WAREHOUSE_MINIMAL);
@@ -123,7 +116,7 @@ class DwhManager
 
         $this->ensureRoleExists($userRole);
 
-        $this->ensureRoleHasSchemaPrivileges($userRole, self::PRIVILEGES_SCHEMA_FULL_ACCESS, $userSchemaName);
+        $this->ensureRoleHasSchemaPrivileges($userRole, self::PRIVILEGES_SCHEMA_WRITER_ACCESS, $userSchemaName);
 
         $userName = $this->namingConventions->getUsernameFromEmail($user);
         $this->ensureUserExists($userName, [

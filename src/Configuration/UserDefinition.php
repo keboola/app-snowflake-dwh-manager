@@ -34,7 +34,7 @@ class UserDefinition implements ConfigurationInterface
                     ->scalarPrototype()
                     ->validate()
                         ->ifTrue(function ($value) {
-                            return preg_match('~' . SchemaDefinition::REGEX_SCHEMA_NAME . '~', $value) !== 1;
+                            return !SchemaDefinition::isSchemaNameValid($value);
                         })
                         ->thenInvalid('Schema name can only contain alphanumeric characters and underscore')
                     ->end()
