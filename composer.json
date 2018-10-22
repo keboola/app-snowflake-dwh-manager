@@ -26,14 +26,16 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Keboola\\SnowflakeDwhManager\\Tests\\": "tests/phpunit/"
+            "Keboola\\SnowflakeDwhManager\\Tests\\": "tests/phpunit/",
+            "Keboola\\SnowflakeDwhManager\\DatadirTests\\": "tests/functional/"
         }
     },
     "scripts": {
         "tests-phpunit": "phpunit",
-        "tests-datadir": "datadir-tests",
+        "tests-functional": "phpunit ./tests/functional",
         "tests": [
-            "@tests-phpunit"
+            "@tests-phpunit",
+            "@tests-functional"
         ],
 
         "phpstan": "phpstan analyse ./src ./tests --level=max --no-progress -c phpstan.neon",
