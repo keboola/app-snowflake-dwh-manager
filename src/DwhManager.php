@@ -141,7 +141,7 @@ class DwhManager
 
         // grant user's role roles with access to respective schemas
         $desiredRoles = [];
-        foreach ($user->getSchemas() as $linkedSchemaName) {
+        foreach ($user->getReadOnlySchemas() as $linkedSchemaName) {
             if (!$this->checker->existsSchema($linkedSchemaName)) {
                 throw new UserException(sprintf(
                     'The schema "%s" to link to user "%s" does not exist',
