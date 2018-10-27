@@ -226,7 +226,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $masterConnection = $this->getConnectionForConfig($user1config);
 
         // create table in read schema
-        $readSchema = strtoupper($user1config->getUser()->getSchemas()[0]);
+        $readSchema = strtoupper($user1config->getUser()->getReadOnlySchemas()[0]);
         $masterConnection->query('USE SCHEMA ' . $masterConnection->quoteIdentifier($readSchema));
         $masterConnection->query('DROP TABLE IF EXISTS read_schema_table');
         $masterConnection->query('CREATE TABLE read_schema_table (id INT)');

@@ -31,7 +31,7 @@ class User extends BaseConfig
     /**
      * @return string[]
      */
-    public function getSchemas(): array
+    public function getReadOnlySchemas(): array
     {
         return $this->getValue(['business_schemas']);
     }
