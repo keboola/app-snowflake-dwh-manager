@@ -122,6 +122,10 @@ docker-compose build
 docker-compose run --rm dev composer install --no-scripts
 ```
 
+### Tests
+
+Functional tests need `.env` file with Snowflake server credentials. You can create this file from `.env.dist`. By default scenario tests present the component output in console. On Travis, this behavior is suppressed using environment variable `CI=true` to prevent leaking test user credentials into the build log. 
+
 Run the test suite using this command:
 
 ```
