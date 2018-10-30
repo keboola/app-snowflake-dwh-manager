@@ -62,35 +62,51 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 ],
             ],
             'create-user-user1' => [
-                [
-                    'parameters' => [
-                        'master_host' => getenv('HOST'),
-                        'master_user' => getenv('USER'),
-                        '#master_password' => getenv('PASSWORD'),
-                        'master_database' => getenv('DATABASE'),
-                        'warehouse' => getenv('WAREHOUSE'),
-                        'user' => [
-                            'email' => 'user1@keboola.com',
-                            'business_schemas' => ['my_dwh_schema'],
-                            'disabled' => false,
-                        ],
-                    ],
-                ],
+                self::getUser1Config(),
             ],
             'create-user-user2' => [
-                [
-                    'parameters' => [
-                        'master_host' => getenv('HOST'),
-                        'master_user' => getenv('USER'),
-                        '#master_password' => getenv('PASSWORD'),
-                        'master_database' => getenv('DATABASE'),
-                        'warehouse' => getenv('WAREHOUSE'),
-                        'user' => [
-                            'email' => 'user2@keboola.com',
-                            'business_schemas' => ['my_dwh_schema', 'my_dwh_schema2'],
-                            'disabled' => false,
-                        ],
-                    ],
+                self::getUser2Config(),
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private static function getUser1Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('HOST'),
+                'master_user' => getenv('USER'),
+                '#master_password' => getenv('PASSWORD'),
+                'master_database' => getenv('DATABASE'),
+                'warehouse' => getenv('WAREHOUSE'),
+                'user' => [
+                    'email' => 'user1@keboola.com',
+                    'business_schemas' => ['my_dwh_schema'],
+                    'disabled' => false,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private static function getUser2Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('HOST'),
+                'master_user' => getenv('USER'),
+                '#master_password' => getenv('PASSWORD'),
+                'master_database' => getenv('DATABASE'),
+                'warehouse' => getenv('WAREHOUSE'),
+                'user' => [
+                    'email' => 'user2@keboola.com',
+                    'business_schemas' => ['my_dwh_schema', 'my_dwh_schema2'],
+                    'disabled' => false,
                 ],
             ],
         ];
