@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c21fa9612073f10bf3f703e1bceee82",
+    "content-hash": "23f5f1af046ef402ae1005492feacc66",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -1172,21 +1172,22 @@
         },
         {
             "name": "keboola/datadir-tests",
-            "version": "1.1.0",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/datadir-tests.git",
-                "reference": "cc688ba414b6f0fdbe614b454637c06d24eba279"
+                "reference": "70c2f942d07629f0d0984f3109869e62a4ba7f21"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/datadir-tests/zipball/cc688ba414b6f0fdbe614b454637c06d24eba279",
-                "reference": "cc688ba414b6f0fdbe614b454637c06d24eba279",
+                "url": "https://api.github.com/repos/keboola/datadir-tests/zipball/70c2f942d07629f0d0984f3109869e62a4ba7f21",
+                "reference": "70c2f942d07629f0d0984f3109869e62a4ba7f21",
                 "shasum": ""
             },
             "require": {
                 "keboola/php-temp": "^1.0",
                 "php": "^7.1",
+                "phpunit/phpunit": "^7.0",
                 "symfony/filesystem": "^4.0",
                 "symfony/finder": "^4.0",
                 "symfony/process": "^4.0"
@@ -1196,16 +1197,18 @@
                 "keboola/coding-standard": "^2.0",
                 "phpstan/phpstan-shim": "^0.9.2"
             },
-            "bin": [
-                "src/datadir-tests"
-            ],
             "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Keboola\\DatadirTests\\": "src/"
+                }
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "Tool for functional testing of Keboola Connection components",
-            "time": "2018-05-03T16:21:10+00:00"
+            "time": "2018-09-17T15:15:11+00:00"
         },
         {
             "name": "keboola/php-temp",
@@ -2693,6 +2696,63 @@
                 "standards"
             ],
             "time": "2018-06-06T23:58:19+00:00"
+        },
+        {
+            "name": "symfony/dotenv",
+            "version": "v4.1.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/dotenv.git",
+                "reference": "22ca63c46e252b8a8f37b8f9e6da66bff5b3d3e7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/dotenv/zipball/22ca63c46e252b8a8f37b8f9e6da66bff5b3d3e7",
+                "reference": "22ca63c46e252b8a8f37b8f9e6da66bff5b3d3e7",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1.3"
+            },
+            "require-dev": {
+                "symfony/process": "~3.4|~4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Dotenv\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Registers environment variables from a .env file",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "dotenv",
+                "env",
+                "environment"
+            ],
+            "time": "2018-07-26T11:24:31+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
