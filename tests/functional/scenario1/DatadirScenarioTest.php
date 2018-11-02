@@ -217,7 +217,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
      * @depends testDatadir
      */
     // phpcs:disable SlevomatCodingStandard.TypeHints.TypeHintDeclaration.UselessDocComment
-    public function testUsersHaveCorrectAccessAfterProvisioning(): void
+    public function testUser1HaveCorrectAccessAfterProvisioning(): void
     {
         // phpcs:enable
         $user1ConfigArray = self::getUser1Config();
