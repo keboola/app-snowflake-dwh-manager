@@ -34,7 +34,7 @@ class SchemaDefinition implements ConfigurationInterface
                         ->ifTrue(function ($value) {
                             return !self::isSchemaNameValid($value);
                         })
-                        ->thenInvalid('Schema name can only contain alphanumeric characters and underscore')
+                        ->thenInvalid('Schema name can only contain alphanumeric characters and underscores')
                     ->end()
                     ->isRequired()
                 ->end()

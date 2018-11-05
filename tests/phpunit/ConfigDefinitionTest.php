@@ -158,7 +158,7 @@ class ConfigDefinitionTest extends TestCase
             'invalid schema name' => [
                 InvalidConfigurationException::class,
                 'Invalid configuration for path "root.parameters.business_schema.schema_name": '
-                . 'Schema name can only contain alphanumeric characters and underscore',
+                . 'Schema name can only contain alphanumeric characters and underscores',
                 [
                     'parameters' => [
                         'master_host' => 'host',
@@ -174,7 +174,7 @@ class ConfigDefinitionTest extends TestCase
             ],
             'invalid schema name in user' => [
                 InvalidConfigurationException::class,
-                'Schema name can only contain alphanumeric characters and underscore',
+                'Schema name can only contain alphanumeric characters and underscores',
                 [
                     'parameters' => [
                         'master_host' => 'host',
