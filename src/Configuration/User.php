@@ -36,6 +36,40 @@ class User extends BaseConfig
         return $this->getValue(['business_schemas']);
     }
 
+    /**
+     * @return string[]
+     */
+    public function getReadWriteSchemas(): array
+    {
+        return $this->getSchemaNamesByPermission(UserDefinition::PERMISSION_READWRITE);
+    }
+
+    /**
+     * @return string[]
+     */
+    private function getSchemaNamesByPermission(string $permission): array
+    {
+        return $this->mapSchemaConfigToSchemaNames(
+            array_filter(
+                $this->getValue(['schemas']),
+                function (array $schema) use ($permission) {
+                    return $schema['permission'] === $permission;
+                }
+            )
+        );
+    }
+
+    /**
+     * @param string[][] $schemas
+     * @return string[]
+     */
+    private function mapSchemaConfigToSchemaNames(array $schemas): array
+    {
+        return array_map(function (array $schema): string {
+            return $schema['name'];
+        }, $schemas);
+    }
+
     public function isDisabled(): bool
     {
         return (bool) $this->getValue(['disabled']);
