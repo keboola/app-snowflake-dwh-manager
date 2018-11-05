@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Keboola\SnowflakeDwhManager;
 
+use ErrorException;
 use Exception;
 use Keboola\Db\Import\Snowflake\Connection as SnowflakeConnection;
 use Keboola\SnowflakeDwhManager\Connection\Expr;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use function strtoupper;
 
 class Connection extends SnowflakeConnection
@@ -15,6 +17,9 @@ class Connection extends SnowflakeConnection
     public const OBJECT_TYPE_DATABASE = 'DATABASE';
     public const OBJECT_TYPE_ROLE = 'ROLE';
     public const OBJECT_TYPE_SCHEMA = 'SCHEMA';
+    public const OBJECT_TYPE_TABLE = 'TABLE';
+    public const OBJECT_TYPE_VIEW = 'VIEW';
+    public const OBJECT_TYPE_STAGE = 'STAGE';
     public const OBJECT_TYPE_USER = 'USER';
     public const OBJECT_TYPE_WAREHOUSE = 'WAREHOUSE';
 
@@ -201,17 +206,6 @@ class Connection extends SnowflakeConnection
         $this->grantRoleToObject($role, $userName, self::OBJECT_TYPE_USER);
     }
 
-    public function grantSelectOnAllTablesInSchemaToRole(string $schemaName, string $role): void
-    {
-        $this->query(vsprintf(
-            'GRANT SELECT ON ALL TABLES IN SCHEMA %s TO ROLE %s',
-            [
-                $this->quoteIdentifier($schemaName),
-                $this->quoteIdentifier($role),
-            ]
-        ));
-    }
-
     private function grantToObjectTypeOnObjectType(
         string $grantOnObjectType,
         string $grantOnName,
@@ -230,10 +224,48 @@ class Connection extends SnowflakeConnection
         ));
     }
 
+    private function grantToObjectTypeOnFutureObjectTypesInSchema(
+        string $grantOnObjectType,
+        string $schemaName,
+        string $granteeObjectType,
+        string $grantToName,
+        array $grant
+    ): void {
+        $this->query(vsprintf(
+            'GRANT ' . implode(',', $grant) . ' 
+            ON FUTURE ' . $grantOnObjectType . 'S 
+            IN SCHEMA %s
+            TO ' . $granteeObjectType . ' %s',
+            [
+                $this->quoteIdentifier($schemaName),
+                $this->quoteIdentifier($grantToName),
+            ]
+        ));
+    }
+
+    public function grantFutureObjectTypesInSchemaToRole(
+        string $grantOnObjectType,
+        string $schemaName,
+        string $roleName,
+        array $grant
+    ): void {
+        $this->grantToObjectTypeOnFutureObjectTypesInSchema(
+            $grantOnObjectType,
+            $schemaName,
+            self::OBJECT_TYPE_ROLE,
+            $roleName,
+            $grant
+        );
+    }
+
     public function query(string $sql, array $bind = []): void
     {
-        $this->logger->info("\t" . $sql);
-        parent::query($sql, $bind);
+        try {
+            $this->logger->info("\t" . $sql);
+            parent::query($sql, $bind);
+        } catch (ErrorException $e) {
+            throw new RuntimeException(sprintf('Error "%s" while executing query "%s"', $e->getMessage(), $sql));
+        }
     }
 
     public function quote(string $value): string

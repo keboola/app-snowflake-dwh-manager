@@ -11,6 +11,7 @@ use Keboola\SnowflakeDwhManager\Config;
 use Keboola\SnowflakeDwhManager\ConfigDefinition;
 use Keboola\SnowflakeDwhManager\Configuration\Schema;
 use Keboola\SnowflakeDwhManager\Configuration\User;
+use Keboola\SnowflakeDwhManager\Configuration\UserDefinition;
 use Keboola\SnowflakeDwhManager\Connection;
 use Keboola\SnowflakeDwhManager\Manager\NamingConventions;
 use Monolog\Formatter\LineFormatter;
@@ -176,7 +177,10 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'warehouse' => getenv('WAREHOUSE'),
                 'user' => [
                     'email' => 'user2@keboola.com',
-                    'business_schemas' => ['my_dwh_schema', 'my_dwh_schema2'],
+                    'business_schemas' => ['my_dwh_schema'],
+                    'schemas' => [
+                        ['name' => 'my_dwh_schema2', 'permission' => UserDefinition::PERMISSION_READWRITE],
+                    ],
                     'disabled' => false,
                 ],
             ],
@@ -283,10 +287,102 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $user2Config = $this->getConfigFromConfigArray($user2configArray);
         $user2Schema = $this->namingConventions->getOwnSchemaNameFromUser($user2Config->getUser());
 
-
         // cannot use other user's schema
         try {
             $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($user2Schema));
+            $this->fail('User must not be allowed to use other user\'s schema');
+        } catch (Throwable $e) {
+            $this->assertContains(
+                "Object does not exist, or operation cannot be performed.",
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * @depends testDatadir
+     */
+    // phpcs:disable SlevomatCodingStandard.TypeHints.TypeHintDeclaration.UselessDocComment
+    public function testUser2HaveCorrectAccessAfterProvisioning(): void
+    {
+        // phpcs:enable
+        $user2ConfigArray = self::getUser2Config();
+        $user2config = $this->getConfigFromConfigArray($user2ConfigArray);
+
+        $masterConnection = $this->getConnectionForConfig($user2config);
+
+        // create table in read schema
+        $readSchema = strtoupper($user2config->getUser()->getReadOnlySchemas()[0]);
+        $masterConnection->query('USE SCHEMA ' . $masterConnection->quoteIdentifier($readSchema));
+        $masterConnection->query('DROP TABLE IF EXISTS read_schema_table');
+        $masterConnection->query('CREATE TABLE read_schema_table (id INT)');
+        $masterConnection->query('INSERT INTO read_schema_table VALUES (9), (8), (7)');
+
+        // create table in read write schema
+        $readWriteSchemas = $user2config->getUser()->getReadWriteSchemas();
+        $writeSchema = strtoupper($readWriteSchemas[0]);
+        $masterConnection->query('USE SCHEMA ' . $masterConnection->quoteIdentifier($writeSchema));
+        $masterConnection->query('DROP TABLE IF EXISTS readwrite_schema_table');
+        $masterConnection->query('CREATE TABLE readwrite_schema_table (id INT)');
+        $masterConnection->query('INSERT INTO readwrite_schema_table VALUES (9), (8), (7), (6)');
+
+        // disconnect
+        unset($masterConnection);
+
+        $user2connection = $this->getConnectionForUserFromUserConfig($user2ConfigArray);
+        $userRwSchema = $this->namingConventions->getOwnSchemaNameFromUser($user2config->getUser());
+        $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($userRwSchema));
+        $user2connection->query('DROP TABLE IF EXISTS user2table');
+
+        // can create table in their schema
+        $user2connection->query('CREATE TABLE user2table (id INT)');
+
+        // can insert row into created table
+        $user2connection->query('INSERT INTO user2table VALUES (1), (10)');
+
+        // can fetch from created table
+        $rows = $user2connection->fetchAll('SELECT * FROM user2table');
+        $this->assertCount(2, $rows);
+
+        // can read from read only schema
+        $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($readSchema));
+        $rows = $user2connection->fetchAll('SELECT * FROM read_schema_table');
+        $this->assertCount(3, $rows);
+
+        // cannot write to read only schema
+        try {
+            $user2connection->query('CREATE TABLE table_in_read_schema (id INT)');
+            $this->fail('User must not be allowed to create a table in shared read only schema');
+        } catch (Throwable $e) {
+            $this->assertContains(
+                'Insufficient privileges to operate on schema \'MY_DWH_SCHEMA\'',
+                $e->getMessage()
+            );
+        }
+
+        // can read from write schema
+        $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($writeSchema));
+        $rows = $user2connection->fetchAll('SELECT * FROM readwrite_schema_table');
+        $this->assertCount(4, $rows);
+
+        // can write to write schema
+        $user2connection->query('CREATE TABLE user2_table_in_write_schema (id INT)');
+        $user2connection->query('INSERT INTO user2_table_in_write_schema VALUES (1), (10)');
+
+        // can write into existing table
+        $rows = $user2connection->fetchAll('SELECT * FROM readwrite_schema_table');
+        $this->assertCount(4, $rows);
+        $user2connection->query('INSERT INTO readwrite_schema_table VALUES (5)');
+        $rows = $user2connection->fetchAll('SELECT * FROM readwrite_schema_table');
+        $this->assertCount(5, $rows);
+
+        $user1configArray = self::getUser1Config();
+        $user1Config = $this->getConfigFromConfigArray($user1configArray);
+        $user1Schema = $this->namingConventions->getOwnSchemaNameFromUser($user1Config->getUser());
+
+        // cannot use other user's schema
+        try {
+            $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($user1Schema));
             $this->fail('User must not be allowed to use other user\'s schema');
         } catch (Throwable $e) {
             $this->assertContains(
