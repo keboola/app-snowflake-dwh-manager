@@ -33,7 +33,12 @@ class User extends BaseConfig
      */
     public function getReadOnlySchemas(): array
     {
-        return $this->getValue(['business_schemas']);
+        $legacyReadOnlySchemaNames = $this->getValue(['business_schemas']);
+        $newReadOnlySchemaNames = $this->getSchemaNamesByPermission(UserDefinition::PERMISSION_READ);
+        return array_unique(array_merge(
+            array_values($legacyReadOnlySchemaNames),
+            array_values($newReadOnlySchemaNames)
+        ));
     }
 
     /**

@@ -35,6 +35,7 @@ class UserDefinition implements ConfigurationInterface
                     ->isRequired()
                 ->end()
                 ->arrayNode('business_schemas')
+                    ->setDeprecated('"business_schemas" is deprecated, use "schemas" instead')
                     ->scalarPrototype()
                     ->validate()
                         ->ifTrue(function ($value) {
