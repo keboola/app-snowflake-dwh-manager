@@ -13,6 +13,7 @@ use Keboola\SnowflakeDwhManager\Configuration\Schema;
 use Keboola\SnowflakeDwhManager\Configuration\User;
 use Keboola\SnowflakeDwhManager\Connection;
 use Keboola\SnowflakeDwhManager\Manager\NamingConventions;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -321,7 +322,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
     private static function setUpLogging(): void
     {
-        $logger = new Logger('', [new StreamHandler('php://output')]);
+        $handler = new StreamHandler('php://output');
+        $handler->setFormatter(new LineFormatter(null, null, true, true));
+        $logger = new Logger('', [$handler]);
         if (getenv('CI')) {
             // to prevent login leaking on Travis
             $logger = new NullLogger();
