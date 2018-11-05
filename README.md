@@ -8,8 +8,9 @@ Used to create business schema, that will be written to by Snowflake writer and 
 
 * you create a schema `accounting` and fill in the data from you accounting software via Keboola Connection's Snowflake Writer
 * you create a schema `sales` and fill in the data from you CRM software via Keboola Connection's Snowflake Writer
-* you create a user for you analytic `maria@example.com`, that has read-only access to both
-* Maria gets access to both accounting and sales as well as her own `maria_example_com` schema (with write access), so that she can combine the data from accounting and sales to deliver an analysis. The data is safe, because she only has read only access to the original data, but in the same time she can do any desctructive changes she wants inside her own schema
+* you create a schema `development` and fill in the data from you CRM software via Keboola Connection's Snowflake Writer
+* you create a user for you analytic `maria@example.com`, that has read-only access to both and in addition has write access to `development`
+* Maria gets read access to `accounting` and `sales` and read-write access to `development` as well as her own `maria_example_com` schema (with write access), so that she can combine the data from accounting and sales to deliver an analysis. The data is safe, because she only has read only access to the original data, but in the same time she can read and write to the development schema to collaborate with the development team. She's free to use her own schema when she wants to do some rough prototyping.
 
 # Usage
 
@@ -45,6 +46,9 @@ There are two types of configs - schema config and user config. App detects auto
         "user": {
            "email": "maria@example.com",
            "business_schemas" : ["accounting", "sales"],
+           "schemas" : [
+                {"name": "development","permission": "read"}
+           ],
            "disabled": false
        }
     }
@@ -53,6 +57,7 @@ There are two types of configs - schema config and user config. App detects auto
 
 `email`: email address that will be used to create a login for the Snowflake user
 `business_schemas`: array of schema names to be assigned to the new user as read-only
+`schemas`: array of objects containing schema name to be assigned to the new user and permission to assign (read|readwrite)
 `disabled`: user is not be able to log in while their account is disabled
 
 ## Changing access configs
