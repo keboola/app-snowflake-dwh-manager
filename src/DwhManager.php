@@ -78,11 +78,13 @@ class DwhManager
 
         $this->ensureSchemaExists($schemaName);
 
+        // create RW role and give it RW access to schema
         $this->ensureRoleExists($rwRole);
         $this->ensureRoleHasWarehousePrivileges($rwRole, self::PRIVILEGES_WAREHOUSE_MINIMAL);
         $this->ensureRoleHasDatabasePrivileges($rwRole, self::PRIVILEGES_DATABASE_MINIMAL);
         $this->ensureRoleHasSchemaPrivileges($rwRole, self::PRIVILEGES_SCHEMA_WRITER_ACCESS, $schemaName);
 
+        // create RO role and give it RO access to schema
         $this->ensureRoleExists($roRole);
         $this->ensureRoleHasWarehousePrivileges($roRole, self::PRIVILEGES_WAREHOUSE_MINIMAL);
         $this->ensureRoleHasDatabasePrivileges($roRole, self::PRIVILEGES_DATABASE_MINIMAL);
@@ -100,6 +102,7 @@ class DwhManager
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
 
+        // ensure that DWHM role has all the roles
         $this->ensureRoleGrantedToRole($rwRole, $currentRole);
         $this->ensureRoleGrantedToRole($roRole, $currentRole);
 
@@ -112,12 +115,12 @@ class DwhManager
         $userRole = $this->namingConventions->getRoleNameFromUser($user);
         $currentRole = $this->checker->getCurrentRole();
 
+        // create user's schema and role
         $this->ensureSchemaExists($userSchemaName);
-
         $this->ensureRoleExists($userRole);
-
         $this->ensureRoleHasSchemaPrivileges($userRole, self::PRIVILEGES_SCHEMA_WRITER_ACCESS, $userSchemaName);
 
+        // create user itself and grant them their role
         $userName = $this->namingConventions->getUsernameFromEmail($user);
         $this->ensureUserExists($userName, [
             'default_role' => $userRole,
@@ -130,11 +133,12 @@ class DwhManager
             'disabled' => new Expr($user->isDisabled() ? 'TRUE' : 'FALSE'),
             'email' => $user->getEmail(),
         ]);
-
         $this->ensureRoleGrantedToUser($userRole, $userName);
 
+        // grant user's role to DWHM role
         $this->ensureRoleGrantedToRole($userRole, $currentRole);
 
+        // grant user's role roles with access to respective schemas
         $desiredRoles = [];
         foreach ($user->getSchemas() as $linkedSchemaName) {
             if (!$this->checker->existsSchema($linkedSchemaName)) {
