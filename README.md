@@ -59,15 +59,15 @@ There are two types of configs - schema config and user config. App detects auto
 
 App can be run multiple times with the same config and the result is always the same. It will do it's best to put the resources in expected state. That means:
 
-* it will create missing user schemas or business schemas 
-* it will create missing roles if they were deleted by mistake
-* it will recreate users
-* it will grant privileges to new bussiness schemas to users
-* it will revoke business schema privileges from users
-* it will change users "disabled" flag accordingly
-* it will NOT drop business schemas  
-* it will NOT drop users
-* it will NOT drop roles
+* it WILL create missing user schemas or business schemas 
+* it WILL create missing roles if they were deleted by mistake
+* it WILL recreate users
+* it WILL grant privileges to new bussiness schemas to users
+* it WILL revoke business schema privileges from users
+* it WILL change users "disabled" flag accordingly
+* it WILL NOT drop business schemas  
+* it WILL NOT drop users
+* it WILL NOT drop roles
 
 ## Master user
 
