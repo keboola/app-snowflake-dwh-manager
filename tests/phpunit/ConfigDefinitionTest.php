@@ -107,7 +107,7 @@ class ConfigDefinitionTest extends TestCase
         $processor = new Processor();
         $this->expectException($expectedException);
         $this->expectExceptionMessage($expectedExceptionMessage);
-        $processedConfiguration = $processor->processConfiguration(
+        $processor->processConfiguration(
             $definition,
             [$configurationData]
         );
