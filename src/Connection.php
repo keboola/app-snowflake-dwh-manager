@@ -16,6 +16,9 @@ class Connection extends SnowflakeConnection
     public const OBJECT_TYPE_DATABASE = 'DATABASE';
     public const OBJECT_TYPE_ROLE = 'ROLE';
     public const OBJECT_TYPE_SCHEMA = 'SCHEMA';
+    public const OBJECT_TYPE_TABLE = 'TABLE';
+    public const OBJECT_TYPE_VIEW = 'VIEW';
+    public const OBJECT_TYPE_STAGE = 'STAGE';
     public const OBJECT_TYPE_USER = 'USER';
     public const OBJECT_TYPE_WAREHOUSE = 'WAREHOUSE';
 
@@ -219,6 +222,40 @@ class Connection extends SnowflakeConnection
                 $this->quoteIdentifier($grantToName),
             ]
         ));
+    }
+
+    private function grantToObjectTypeOnAllObjectTypesInSchema(
+        string $grantOnObjectType,
+        string $schemaName,
+        string $granteeObjectType,
+        string $grantToName,
+        array $grant
+    ): void {
+        $this->query(vsprintf(
+            'GRANT ' . implode(',', $grant) . ' 
+            ON ALL ' . $grantOnObjectType . 'S 
+            IN SCHEMA %s
+            TO ' . $granteeObjectType . ' %s',
+            [
+                $this->quoteIdentifier($schemaName),
+                $this->quoteIdentifier($grantToName),
+            ]
+        ));
+    }
+
+    public function grantOnAllObjectTypesInSchemaToRole(
+        string $grantOnObjectType,
+        string $schemaName,
+        string $roleName,
+        array $grant
+    ): void {
+        $this->grantToObjectTypeOnAllObjectTypesInSchema(
+            $grantOnObjectType,
+            $schemaName,
+            self::OBJECT_TYPE_ROLE,
+            $roleName,
+            $grant
+        );
     }
 
     public function query(string $sql, array $bind = []): void
