@@ -76,6 +76,44 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         return $this->getConnectionForConfig($config);
     }
 
+    /**
+     * @return array
+     */
+    private static function getSchema1Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('HOST'),
+                'master_user' => getenv('USER'),
+                '#master_password' => getenv('PASSWORD'),
+                'master_database' => getenv('DATABASE'),
+                'warehouse' => getenv('WAREHOUSE'),
+                'business_schema' => [
+                    'schema_name' => 'my_dwh_schema',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private static function getSchema2Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('HOST'),
+                'master_user' => getenv('USER'),
+                '#master_password' => getenv('PASSWORD'),
+                'master_database' => getenv('DATABASE'),
+                'warehouse' => getenv('WAREHOUSE'),
+                'business_schema' => [
+                    'schema_name' => 'my_dwh_schema2',
+                ],
+            ],
+        ];
+    }
+
     protected function getScript(): string
     {
         return $this->getTestFileDir() . '/../../../src/run.php';
@@ -88,32 +126,10 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     {
         return [
             'create-schema-1' => [
-                [
-                    'parameters' => [
-                        'master_host' => getenv('HOST'),
-                        'master_user' => getenv('USER'),
-                        '#master_password' => getenv('PASSWORD'),
-                        'master_database' => getenv('DATABASE'),
-                        'warehouse' => getenv('WAREHOUSE'),
-                        'business_schema' => [
-                            'schema_name' => 'my_dwh_schema',
-                        ],
-                    ],
-                ],
+                self::getSchema1Config(),
             ],
             'create-schema-2' => [
-                [
-                    'parameters' => [
-                        'master_host' => getenv('HOST'),
-                        'master_user' => getenv('USER'),
-                        '#master_password' => getenv('PASSWORD'),
-                        'master_database' => getenv('DATABASE'),
-                        'warehouse' => getenv('WAREHOUSE'),
-                        'business_schema' => [
-                            'schema_name' => 'my_dwh_schema2',
-                        ],
-                    ],
-                ],
+                self::getSchema2Config(),
             ],
             'create-user-user1' => [
                 self::getUser1Config(),
