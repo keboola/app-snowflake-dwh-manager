@@ -230,12 +230,22 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $masterConnection->query('DROP TABLE IF EXISTS read_schema_table');
         $masterConnection->query('CREATE TABLE read_schema_table (id INT)');
         $masterConnection->query('INSERT INTO read_schema_table VALUES (9), (8), (7)');
-        // need to re-grant to make new table visible
-        $readOnlyRole = $this->namingConventions->getRoRoleFromSchemaName($readSchema);
-        $masterConnection->grantSelectOnAllTablesInSchemaToRole($readSchema, $readOnlyRole);
 
-        // disconnect
         unset($masterConnection);
+
+        $user1connection = $this->getConnectionForUserFromUserConfig($user1ConfigArray);
+        try {
+            $user1connection->fetchAll('SELECT * FROM read_schema_table');
+            $this->fail('User does not have access to generated schema without re-running the schema config');
+        } catch (Throwable $e) {
+            $this->assertContains(
+                'Object \'READ_SCHEMA_TABLE\' does not exist., SQL state 02000 in SQLPrepare',
+                $e->getMessage()
+            );
+        }
+        unset($user1connection);
+
+        $this->runAppWithConfig(self::getSchema1Config());
 
         $user1connection = $this->getConnectionForUserFromUserConfig($user1ConfigArray);
         $userRwSchema = $this->namingConventions->getOwnSchemaNameFromUser($user1config->getUser());
