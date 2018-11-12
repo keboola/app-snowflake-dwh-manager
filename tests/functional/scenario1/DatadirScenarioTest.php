@@ -40,7 +40,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
     private function getConnectionForConfig(Config $config): Connection
     {
-        return new Connection(new NullLogger(), $config->getSnowflakeConnectionOptions());
+        return new Connection($config->getSnowflakeConnectionOptions());
     }
 
     /**
@@ -301,7 +301,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $testConfigs = self::getTestConfigs();
 
         $config = new Config(reset($testConfigs)[0], new ConfigDefinition());
-        $connection = new Connection(new NullLogger(), $config->getSnowflakeConnectionOptions());
+        $connection = new Connection($config->getSnowflakeConnectionOptions());
 
         foreach ($testConfigs as $config) {
             $config = new Config($config[0], new ConfigDefinition());
