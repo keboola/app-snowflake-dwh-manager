@@ -187,10 +187,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         return self::getTestConfigs();
     }
 
-    /**
-     * @dataProvider provideConfigs
-     */
-    public function testDatadir(array $config): void
+    private function runAppWithConfig(array $config): void
     {
         self::$logger->log(Logger::DEBUG, $this->getDataSetAsString());
 
@@ -205,6 +202,14 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $this->assertMatchesSpecification($specification, $process, $tempDatadir->getTmpFolder());
 
         self::$logger->log(Logger::DEBUG, $process->getOutput() . \PHP_EOL . $process->getErrorOutput());
+    }
+
+    /**
+     * @dataProvider provideConfigs
+     */
+    public function testDatadir(array $config): void
+    {
+        $this->runAppWithConfig($config);
     }
 
     /**
