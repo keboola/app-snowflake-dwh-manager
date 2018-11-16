@@ -76,6 +76,44 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         return $this->getConnectionForConfig($config);
     }
 
+    /**
+     * @return array
+     */
+    private static function getSchema1Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('HOST'),
+                'master_user' => getenv('USER'),
+                '#master_password' => getenv('PASSWORD'),
+                'master_database' => getenv('DATABASE'),
+                'warehouse' => getenv('WAREHOUSE'),
+                'business_schema' => [
+                    'schema_name' => 'my_dwh_schema',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private static function getSchema2Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('HOST'),
+                'master_user' => getenv('USER'),
+                '#master_password' => getenv('PASSWORD'),
+                'master_database' => getenv('DATABASE'),
+                'warehouse' => getenv('WAREHOUSE'),
+                'business_schema' => [
+                    'schema_name' => 'my_dwh_schema2',
+                ],
+            ],
+        ];
+    }
+
     protected function getScript(): string
     {
         return $this->getTestFileDir() . '/../../../src/run.php';
@@ -88,32 +126,10 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     {
         return [
             'create-schema-1' => [
-                [
-                    'parameters' => [
-                        'master_host' => getenv('HOST'),
-                        'master_user' => getenv('USER'),
-                        '#master_password' => getenv('PASSWORD'),
-                        'master_database' => getenv('DATABASE'),
-                        'warehouse' => getenv('WAREHOUSE'),
-                        'business_schema' => [
-                            'schema_name' => 'my_dwh_schema',
-                        ],
-                    ],
-                ],
+                self::getSchema1Config(),
             ],
             'create-schema-2' => [
-                [
-                    'parameters' => [
-                        'master_host' => getenv('HOST'),
-                        'master_user' => getenv('USER'),
-                        '#master_password' => getenv('PASSWORD'),
-                        'master_database' => getenv('DATABASE'),
-                        'warehouse' => getenv('WAREHOUSE'),
-                        'business_schema' => [
-                            'schema_name' => 'my_dwh_schema2',
-                        ],
-                    ],
-                ],
+                self::getSchema2Config(),
             ],
             'create-user-user1' => [
                 self::getUser1Config(),
@@ -171,10 +187,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         return self::getTestConfigs();
     }
 
-    /**
-     * @dataProvider provideConfigs
-     */
-    public function testDatadir(array $config): void
+    private function runAppWithConfig(array $config): void
     {
         self::$logger->log(Logger::DEBUG, $this->getDataSetAsString());
 
@@ -189,6 +202,14 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $this->assertMatchesSpecification($specification, $process, $tempDatadir->getTmpFolder());
 
         self::$logger->log(Logger::DEBUG, $process->getOutput() . \PHP_EOL . $process->getErrorOutput());
+    }
+
+    /**
+     * @dataProvider provideConfigs
+     */
+    public function testDatadir(array $config): void
+    {
+        $this->runAppWithConfig($config);
     }
 
     /**
@@ -209,12 +230,22 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $masterConnection->query('DROP TABLE IF EXISTS read_schema_table');
         $masterConnection->query('CREATE TABLE read_schema_table (id INT)');
         $masterConnection->query('INSERT INTO read_schema_table VALUES (9), (8), (7)');
-        // need to re-grant to make new table visible
-        $readOnlyRole = $this->namingConventions->getRoRoleFromSchemaName($readSchema);
-        $masterConnection->grantSelectOnAllTablesInSchemaToRole($readSchema, $readOnlyRole);
 
-        // disconnect
         unset($masterConnection);
+
+        $user1connection = $this->getConnectionForUserFromUserConfig($user1ConfigArray);
+        try {
+            $user1connection->fetchAll('SELECT * FROM read_schema_table');
+            $this->fail('User does not have access to generated schema without re-running the schema config');
+        } catch (Throwable $e) {
+            $this->assertContains(
+                'Object \'READ_SCHEMA_TABLE\' does not exist., SQL state 02000 in SQLPrepare',
+                $e->getMessage()
+            );
+        }
+        unset($user1connection);
+
+        $this->runAppWithConfig(self::getSchema1Config());
 
         $user1connection = $this->getConnectionForUserFromUserConfig($user1ConfigArray);
         $userRwSchema = $this->namingConventions->getOwnSchemaNameFromUser($user1config->getUser());
