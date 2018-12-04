@@ -418,7 +418,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         unset($user2connection);
 
         // other user can manipulate schema object created by other users because they share the same role
-        $user1connection = $this->getConnectionForConfig($user1Config);
+        $user1connection = $this->getConnectionForUserFromUserConfig($user1configArray);
         $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($writeSchema));
         $user2TableRows = $user1connection->fetchAll('SELECT * FROM user2_table_in_write_schema');
         $this->assertCount(2, $user2TableRows);
