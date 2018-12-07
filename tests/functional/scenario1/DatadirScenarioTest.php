@@ -156,7 +156,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'warehouse' => getenv('WAREHOUSE'),
                 'user' => [
                     'email' => 'user1@keboola.com',
-                    'business_schemas' => ['my_dwh_schema'],
+                    'business_schemas' => ['my_dwh_schema','my_dwh_schema2'],
                     'disabled' => false,
                 ],
             ],
@@ -417,8 +417,26 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         }
         unset($user2connection);
 
-        // other user can manipulate schema object created by other users because they share the same role
+        // user can not manipulate schema object created by other users before regranting
+        try {
+            $user1connection = $this->getConnectionForUserFromUserConfig($user1configArray);
+            $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($writeSchema));
+            $user1connection->fetchAll('SELECT * FROM user2_table_in_write_schema');
+            $this->fail('User cannot use other user\'s table before regranting');
+        } catch (Throwable $e) {
+            $this->assertContains(
+                "Object 'USER2_TABLE_IN_WRITE_SCHEMA' does not exist.",
+                $e->getMessage()
+            );
+        }
+
+        // regrant
+        $this->runAppWithConfig(self::getSchema2Config());
+
+        // user can manipulate schema object created by other users after regranting
         $user1connection = $this->getConnectionForUserFromUserConfig($user1configArray);
+        $readSchemaRole = $this->namingConventions->getRoRoleFromSchemaName($writeSchema);
+        $user1connection->query('USE ROLE ' . $user1connection->quoteIdentifier($readSchemaRole));
         $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($writeSchema));
         $user2TableRows = $user1connection->fetchAll('SELECT * FROM user2_table_in_write_schema');
         $this->assertCount(2, $user2TableRows);
