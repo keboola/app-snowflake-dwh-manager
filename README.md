@@ -74,7 +74,7 @@ App can be run multiple times with the same config and the result is always the 
 Master users needs to be able to create users, schemas and roles.  
 
 ```
-CREATE DATABASE "DWHM_MYDATAWAREHOUSE";
+CREATE DATABASE "DWHM_MYDATAWAREHOUSE" DATA_RETENTION_TIME_IN_DAYS = 0;
 
 CREATE ROLE "DWHM_MYDATAWAREHOUSE";
 
