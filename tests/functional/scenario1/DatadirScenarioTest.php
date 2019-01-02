@@ -282,7 +282,6 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $user2Config = $this->getConfigFromConfigArray($user2configArray);
         $user2Schema = $this->namingConventions->getOwnSchemaNameFromUser($user2Config->getUser());
 
-
         // cannot use other user's schema
         try {
             $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($user2Schema));
@@ -316,7 +315,8 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->namingConventions = new NamingConventions(getenv('DATABASE'));
+        $database = (string) getenv('DATABASE');
+        $this->namingConventions = new NamingConventions($database);
     }
 
     private static function setUpLogging(): void
