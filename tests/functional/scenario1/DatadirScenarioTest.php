@@ -179,7 +179,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                     'email' => 'user2@keboola.com',
                     'business_schemas' => ['my_dwh_schema'],
                     'schemas' => [
-                        ['name' => 'my_dwh_schema2', 'permission' => UserDefinition::PERMISSION_READWRITE],
+                        ['name' => 'my_dwh_schema2', 'permission' => UserDefinition::PERMISSION_WRITE],
                     ],
                     'disabled' => false,
                 ],
@@ -319,12 +319,12 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $masterConnection->query('INSERT INTO read_schema_table VALUES (9), (8), (7)');
 
         // create table in read write schema
-        $readWriteSchemas = $user2config->getUser()->getReadWriteSchemas();
-        $writeSchema = strtoupper($readWriteSchemas[0]);
+        $writeSchemas = $user2config->getUser()->getWriteSchemas();
+        $writeSchema = strtoupper($writeSchemas[0]);
         $masterConnection->query('USE SCHEMA ' . $masterConnection->quoteIdentifier($writeSchema));
-        $masterConnection->query('DROP TABLE IF EXISTS readwrite_schema_table');
-        $masterConnection->query('CREATE TABLE readwrite_schema_table (id INT)');
-        $masterConnection->query('INSERT INTO readwrite_schema_table VALUES (9), (8), (7), (6)');
+        $masterConnection->query('DROP TABLE IF EXISTS write_schema_table');
+        $masterConnection->query('CREATE TABLE write_schema_table (id INT)');
+        $masterConnection->query('INSERT INTO write_schema_table VALUES (9), (8), (7), (6)');
 
         // disconnect
         unset($masterConnection);
@@ -340,11 +340,11 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             );
         }
         try {
-            $user2connection->query('INSERT INTO readwrite_schema_table VALUES (19)');
+            $user2connection->query('INSERT INTO write_schema_table VALUES (19)');
             $this->fail('User does not have write access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
             $this->assertContains(
-                'Table \'READWRITE_SCHEMA_TABLE\' does not exist., SQL state 02000 in SQLPrepare',
+                'Table \'WRITE_SCHEMA_TABLE\' does not exist., SQL state 02000 in SQLPrepare',
                 $e->getMessage()
             );
         }
@@ -386,7 +386,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         // can read from write schema
         $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($writeSchema));
-        $rows = $user2connection->fetchAll('SELECT * FROM readwrite_schema_table');
+        $rows = $user2connection->fetchAll('SELECT * FROM write_schema_table');
         $this->assertCount(4, $rows);
 
         // can write to write schema
@@ -395,10 +395,10 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $user2connection->query('INSERT INTO user2_table_in_write_schema VALUES (1), (10)');
 
         // can write into existing table
-        $rows = $user2connection->fetchAll('SELECT * FROM readwrite_schema_table');
+        $rows = $user2connection->fetchAll('SELECT * FROM write_schema_table');
         $this->assertCount(4, $rows);
-        $user2connection->query('INSERT INTO readwrite_schema_table VALUES (5)');
-        $rows = $user2connection->fetchAll('SELECT * FROM readwrite_schema_table');
+        $user2connection->query('INSERT INTO write_schema_table VALUES (5)');
+        $rows = $user2connection->fetchAll('SELECT * FROM write_schema_table');
         $this->assertCount(5, $rows);
 
         $user1configArray = self::getUser1Config();

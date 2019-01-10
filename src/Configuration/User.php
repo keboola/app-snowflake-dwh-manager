@@ -44,9 +44,9 @@ class User extends BaseConfig
     /**
      * @return string[]
      */
-    public function getReadWriteSchemas(): array
+    public function getWriteSchemas(): array
     {
-        return $this->getSchemaNamesByPermission(UserDefinition::PERMISSION_READWRITE);
+        return $this->getSchemaNamesByPermission(UserDefinition::PERMISSION_WRITE);
     }
 
     /**

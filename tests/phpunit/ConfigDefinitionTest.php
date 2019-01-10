@@ -83,7 +83,7 @@ class ConfigDefinitionTest extends TestCase
                                 'dwh2',
                             ],
                             'schemas' => [
-                                ['name' => 'dwh3', 'permission' => UserDefinition::PERMISSION_READWRITE],
+                                ['name' => 'dwh3', 'permission' => UserDefinition::PERMISSION_WRITE],
                             ],
                             'disabled' => false,
                         ],
@@ -103,7 +103,7 @@ class ConfigDefinitionTest extends TestCase
                                 'dwh2',
                             ],
                             'schemas' => [
-                                ['name' => 'dwh3', 'permission' => UserDefinition::PERMISSION_READWRITE],
+                                ['name' => 'dwh3', 'permission' => UserDefinition::PERMISSION_WRITE],
                             ],
                         ],
                     ],
@@ -254,7 +254,7 @@ class ConfigDefinitionTest extends TestCase
                                 ],
                                 [
                                     'name' => 'dwh-2',
-                                    'permission' => UserDefinition::PERMISSION_READWRITE,
+                                    'permission' => UserDefinition::PERMISSION_WRITE,
                                 ],
                             ],
                         ],

@@ -10,7 +10,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class UserDefinition implements ConfigurationInterface
 {
-    public const PERMISSION_READWRITE = 'readwrite';
+    public const PERMISSION_WRITE = 'write';
     public const PERMISSION_READ = 'read';
 
     public function getConfigTreeBuilder(): TreeBuilder
@@ -93,7 +93,7 @@ class UserDefinition implements ConfigurationInterface
     {
         return in_array($permission, [
             self::PERMISSION_READ,
-            self::PERMISSION_READWRITE,
+            self::PERMISSION_WRITE,
         ]);
     }
 }

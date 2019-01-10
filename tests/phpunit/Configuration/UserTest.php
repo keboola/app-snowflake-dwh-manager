@@ -89,7 +89,7 @@ class UserTest extends TestCase
                     ],
                     'schemas' => [
                         ['name' => 'dwh3', 'permission' => UserDefinition::PERMISSION_READ],
-                        ['name' => 'dwh4', 'permission' => UserDefinition::PERMISSION_READWRITE],
+                        ['name' => 'dwh4', 'permission' => UserDefinition::PERMISSION_WRITE],
                         ['name' => 'dwh5', 'permission' => UserDefinition::PERMISSION_READ],
                     ],
                 ],
@@ -104,7 +104,7 @@ class UserTest extends TestCase
                     'schemas' => [
                         ['name' => 'dwh1', 'permission' => UserDefinition::PERMISSION_READ],
                         ['name' => 'dwh2', 'permission' => UserDefinition::PERMISSION_READ],
-                        ['name' => 'dwh4', 'permission' => UserDefinition::PERMISSION_READWRITE],
+                        ['name' => 'dwh4', 'permission' => UserDefinition::PERMISSION_WRITE],
                     ],
                 ],
             ],
@@ -120,18 +120,18 @@ class UserTest extends TestCase
     }
 
     /**
-     * @dataProvider provideConfigsGetReadWriteSchemas
+     * @dataProvider provideConfigsGetWriteSchemas
      */
-    public function testGetReadWriteSchemas(array $expected, array $config): void
+    public function testGetWriteSchemas(array $expected, array $config): void
     {
         $user = new User($config, new UserDefinition());
-        $this->assertSame($expected, $user->getReadWriteSchemas());
+        $this->assertSame($expected, $user->getWriteSchemas());
     }
 
     /**
      * @return mixed[][]
      */
-    public function provideConfigsGetReadWriteSchemas(): array
+    public function provideConfigsGetWriteSchemas(): array
     {
         return [
             'multiple schemas' => [
@@ -146,8 +146,8 @@ class UserTest extends TestCase
                         'dwh2',
                     ],
                     'schemas' => [
-                        ['name' => 'dwh1', 'permission' => UserDefinition::PERMISSION_READWRITE],
-                        ['name' => 'dwh2', 'permission' => UserDefinition::PERMISSION_READWRITE],
+                        ['name' => 'dwh1', 'permission' => UserDefinition::PERMISSION_WRITE],
+                        ['name' => 'dwh2', 'permission' => UserDefinition::PERMISSION_WRITE],
                     ],
                 ],
             ],
@@ -161,7 +161,7 @@ class UserTest extends TestCase
                         'dwh2',
                     ],
                     'schemas' => [
-                        ['name' => 'dwh1', 'permission' => UserDefinition::PERMISSION_READWRITE],
+                        ['name' => 'dwh1', 'permission' => UserDefinition::PERMISSION_WRITE],
                         ['name' => 'dwh2', 'permission' => UserDefinition::PERMISSION_READ],
                     ],
                 ],
