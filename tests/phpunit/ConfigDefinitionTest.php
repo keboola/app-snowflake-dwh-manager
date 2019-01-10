@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\SnowflakeDwhManager\Tests;
 
 use Keboola\SnowflakeDwhManager\ConfigDefinition;
+use Keboola\SnowflakeDwhManager\Configuration\UserDefinition;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
@@ -45,6 +46,7 @@ class ConfigDefinitionTest extends TestCase
                                 'dwh1',
                                 'dwh2',
                             ],
+                            'schemas' => [],
                             'disabled' => false,
                         ],
                     ],
@@ -61,6 +63,47 @@ class ConfigDefinitionTest extends TestCase
                             'business_schemas' => [
                                 'dwh1',
                                 'dwh2',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'user with write schema' => [
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                            'business_schemas' => [
+                                'dwh1',
+                                'dwh2',
+                            ],
+                            'schemas' => [
+                                ['name' => 'dwh3', 'permission' => UserDefinition::PERMISSION_READWRITE],
+                            ],
+                            'disabled' => false,
+                        ],
+                    ],
+                ],
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                            'business_schemas' => [
+                                'dwh1',
+                                'dwh2',
+                            ],
+                            'schemas' => [
+                                ['name' => 'dwh3', 'permission' => UserDefinition::PERMISSION_READWRITE],
                             ],
                         ],
                     ],
@@ -107,7 +150,7 @@ class ConfigDefinitionTest extends TestCase
         $processor = new Processor();
         $this->expectException($expectedException);
         $this->expectExceptionMessage($expectedExceptionMessage);
-        $processedConfiguration = $processor->processConfiguration(
+        $processor->processConfiguration(
             $definition,
             [$configurationData]
         );
@@ -158,7 +201,7 @@ class ConfigDefinitionTest extends TestCase
             'invalid schema name' => [
                 InvalidConfigurationException::class,
                 'Invalid configuration for path "root.parameters.business_schema.schema_name": '
-                . 'Schema name can only contain alphanumeric characters and underscore',
+                . 'Schema name can only contain alphanumeric characters and underscores',
                 [
                     'parameters' => [
                         'master_host' => 'host',
@@ -174,7 +217,7 @@ class ConfigDefinitionTest extends TestCase
             ],
             'invalid schema name in user' => [
                 InvalidConfigurationException::class,
-                'Schema name can only contain alphanumeric characters and underscore',
+                'Schema name can only contain alphanumeric characters and underscores',
                 [
                     'parameters' => [
                         'master_host' => 'host',
@@ -187,6 +230,58 @@ class ConfigDefinitionTest extends TestCase
                             'business_schemas' => [
                                 'dwh-1',
                                 'dwh-2',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'invalid write schema name in user' => [
+                InvalidConfigurationException::class,
+                'Schema name can only contain alphanumeric characters and underscores',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                            'schemas' => [
+                                [
+                                    'name' => 'dwh-1',
+                                    'permission' => UserDefinition::PERMISSION_READ,
+                                ],
+                                [
+                                    'name' => 'dwh-2',
+                                    'permission' => UserDefinition::PERMISSION_READWRITE,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'invalid write schema permission in user' => [
+                InvalidConfigurationException::class,
+                'Permission 37 is not valid',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                            'schemas' => [
+                                [
+                                    'name' => 'dwh1',
+                                    'permission' => UserDefinition::PERMISSION_READ,
+                                ],
+                                [
+                                    'name' => 'dwh2',
+                                    'permission' => 37,
+                                ],
                             ],
                         ],
                     ],

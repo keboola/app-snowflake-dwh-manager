@@ -30,6 +30,34 @@ class DwhManager
     private const PRIVILEGES_SCHEMA_READ_ONLY = [
         'USAGE',
     ];
+    private const PRIVILEGES_OBJECT_READ = [
+        Connection::OBJECT_TYPE_TABLE => [
+            'SELECT',
+        ],
+        Connection::OBJECT_TYPE_VIEW => [
+            'SELECT',
+        ],
+        Connection::OBJECT_TYPE_STAGE => [
+            'READ',
+        ],
+    ];
+    private const PRIVILEGES_OBJECT_WRITE = [
+        Connection::OBJECT_TYPE_TABLE => [
+            'SELECT',
+            'INSERT',
+            'UPDATE',
+            'DELETE',
+            'TRUNCATE',
+            'REFERENCES',
+        ],
+        Connection::OBJECT_TYPE_VIEW => [
+            'SELECT',
+        ],
+        Connection::OBJECT_TYPE_STAGE => [
+            'WRITE',
+            'READ',
+        ],
+    ];
     private const PRIVILEGES_WAREHOUSE_MINIMAL = [
         'USAGE',
     ];
@@ -78,15 +106,19 @@ class DwhManager
 
         $this->ensureSchemaExists($schemaName);
 
+        // create RW role and give it RW access to schema
         $this->ensureRoleExists($rwRole);
         $this->ensureRoleHasWarehousePrivileges($rwRole, self::PRIVILEGES_WAREHOUSE_MINIMAL);
         $this->ensureRoleHasDatabasePrivileges($rwRole, self::PRIVILEGES_DATABASE_MINIMAL);
         $this->ensureRoleHasSchemaPrivileges($rwRole, self::PRIVILEGES_SCHEMA_WRITER_ACCESS, $schemaName);
+        $this->ensureRoleHasAllObjectPrivilegesOnSchema($rwRole, self::PRIVILEGES_OBJECT_WRITE, $schemaName);
 
+        // create RO role and give it RO access to schema
         $this->ensureRoleExists($roRole);
         $this->ensureRoleHasWarehousePrivileges($roRole, self::PRIVILEGES_WAREHOUSE_MINIMAL);
         $this->ensureRoleHasDatabasePrivileges($roRole, self::PRIVILEGES_DATABASE_MINIMAL);
         $this->ensureRoleHasSchemaPrivileges($roRole, self::PRIVILEGES_SCHEMA_READ_ONLY, $schemaName);
+        $this->ensureRoleHasAllObjectPrivilegesOnSchema($roRole, self::PRIVILEGES_OBJECT_READ, $schemaName);
 
         $this->ensureUserExists($rwUser, [
             'default_role' => $rwRole,
@@ -100,10 +132,12 @@ class DwhManager
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
 
+        // ensure RW role has all the RO role privileges
+        $this->ensureRoleGrantedToRole($roRole, $rwRole);
+
+        // ensure that DWHM role has all the roles
         $this->ensureRoleGrantedToRole($rwRole, $currentRole);
         $this->ensureRoleGrantedToRole($roRole, $currentRole);
-
-        $this->ensureGrantedSelectOnAllTablesInSchemaToRole($schemaName, $roRole);
     }
 
     public function checkUser(User $user): void
@@ -112,12 +146,12 @@ class DwhManager
         $userRole = $this->namingConventions->getRoleNameFromUser($user);
         $currentRole = $this->checker->getCurrentRole();
 
+        // create user's schema and role
         $this->ensureSchemaExists($userSchemaName);
-
         $this->ensureRoleExists($userRole);
-
         $this->ensureRoleHasSchemaPrivileges($userRole, self::PRIVILEGES_SCHEMA_WRITER_ACCESS, $userSchemaName);
 
+        // create user itself and grant them their role
         $userName = $this->namingConventions->getUsernameFromEmail($user);
         $this->ensureUserExists($userName, [
             'default_role' => $userRole,
@@ -130,35 +164,40 @@ class DwhManager
             'disabled' => new Expr($user->isDisabled() ? 'TRUE' : 'FALSE'),
             'email' => $user->getEmail(),
         ]);
-
         $this->ensureRoleGrantedToUser($userRole, $userName);
 
+        // grant user's role to DWHM role
         $this->ensureRoleGrantedToRole($userRole, $currentRole);
 
+        // grant user's role roles with access to respective schemas
         $desiredRoles = [];
-        foreach ($user->getSchemas() as $linkedSchemaName) {
-            if (!$this->checker->existsSchema($linkedSchemaName)) {
+        foreach ($user->getReadOnlySchemas() as $linkedRoSchemaName) {
+            if (!$this->checker->existsSchema($linkedRoSchemaName)) {
                 throw new UserException(sprintf(
                     'The schema "%s" to link to user "%s" does not exist',
-                    $linkedSchemaName,
+                    $linkedRoSchemaName,
                     $userName
                 ));
             }
-            $desiredRoles[] = $this->namingConventions->getRoRoleFromSchemaName($linkedSchemaName);
+            $roRoleFromSchemaName = $this->namingConventions->getRoRoleFromSchemaName($linkedRoSchemaName);
+            $this->ensureRoleGrantedToRole($roRoleFromSchemaName, $currentRole);
+            $desiredRoles[] = $roRoleFromSchemaName;
         }
-        $this->ensureRoleOnlyHasRolesGranted($userRole, $desiredRoles);
-    }
 
-    private function ensureGrantedSelectOnAllTablesInSchemaToRole(
-        string $schemaName,
-        string $role
-    ): void {
-        $this->connection->grantSelectOnAllTablesInSchemaToRole($schemaName, $role);
-        $this->logger->info(sprintf(
-            'Granted SELECT to all tables in "%s" to "%s"',
-            $schemaName,
-            $role
-        ));
+        foreach ($user->getReadWriteSchemas() as $linkedRwSchemaName) {
+            if (!$this->checker->existsSchema($linkedRwSchemaName)) {
+                throw new UserException(sprintf(
+                    'The schema "%s" to link to user "%s" to write into does not exist',
+                    $linkedRwSchemaName,
+                    $userName
+                ));
+            }
+            $rwRoleFromSchemaName = $this->namingConventions->getRwRoleFromSchemaName($linkedRwSchemaName);
+            $this->ensureRoleGrantedToRole($rwRoleFromSchemaName, $currentRole);
+            $desiredRoles[] = $rwRoleFromSchemaName;
+        }
+
+        $this->ensureRoleOnlyHasRolesGranted($userRole, $desiredRoles);
     }
 
     private function ensureRoleExists(string $role): void
@@ -226,6 +265,23 @@ class DwhManager
             $role,
             $this->database
         ));
+    }
+
+    private function ensureRoleHasAllObjectPrivilegesOnSchema(
+        string $role,
+        array $privileges,
+        string $schemaName
+    ): void {
+        foreach ($privileges as $objectType => $privilege) {
+            $this->connection->grantOnAllObjectTypesInSchemaToRole($objectType, $schemaName, $role, $privilege);
+            $this->logger->info(sprintf(
+                'Granted [%s] to role "%s" on all  %ss in schema "%s"',
+                implode(',', $privilege),
+                $role,
+                $objectType,
+                $schemaName
+            ));
+        }
     }
 
     private function ensureRoleHasSchemaPrivileges(string $role, array $schemaPrivileges, string $schemaName): void

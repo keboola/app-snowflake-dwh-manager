@@ -18,7 +18,7 @@ class Component extends BaseComponent
         /** @var Config $config */
         $config = $this->getConfig();
         try {
-            $connection = new Connection(new NullLogger(), $config->getSnowflakeConnectionOptions());
+            $connection = new Connection($config->getSnowflakeConnectionOptions());
         } catch (\Keboola\Db\Import\Exception $e) {
             throw new UserException('Cannot connect to Snowflake, check your credentials.', 0, $e);
         }
