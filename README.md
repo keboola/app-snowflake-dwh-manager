@@ -57,7 +57,7 @@ There are two types of configs - schema config and user config. App detects auto
 
 `email`: email address that will be used to create a login for the Snowflake user
 `business_schemas`: array of schema names to be assigned to the new user as read-only
-`schemas`: array of objects containing schema name to be assigned to the new user and permission to assign (read|readwrite)
+`schemas`: array of objects containing schema name to be assigned to the new user and permission to assign (read|write)
 `disabled`: user is not be able to log in while their account is disabled
 
 ## Changing access configs

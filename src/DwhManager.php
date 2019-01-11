@@ -184,7 +184,7 @@ class DwhManager
             $desiredRoles[] = $roRoleFromSchemaName;
         }
 
-        foreach ($user->getReadWriteSchemas() as $linkedRwSchemaName) {
+        foreach ($user->getWriteSchemas() as $linkedRwSchemaName) {
             if (!$this->checker->existsSchema($linkedRwSchemaName)) {
                 throw new UserException(sprintf(
                     'The schema "%s" to link to user "%s" to write into does not exist',
