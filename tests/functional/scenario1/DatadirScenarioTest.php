@@ -335,7 +335,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User does not have access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
             $this->assertContains(
-                'Object \'READ_SCHEMA_TABLE\' does not exist., SQL state 02000 in SQLPrepare',
+                'Object \'READ_SCHEMA_TABLE\' does not exist.',
                 $e->getMessage()
             );
         }
@@ -344,7 +344,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User does not have write access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
             $this->assertContains(
-                'Table \'WRITE_SCHEMA_TABLE\' does not exist., SQL state 02000 in SQLPrepare',
+                'Table \'WRITE_SCHEMA_TABLE\' does not exist.',
                 $e->getMessage()
             );
         }
