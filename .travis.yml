@@ -11,7 +11,7 @@ before_script:
   - docker build -t $APP_IMAGE --build-arg AWS_SECRET_ACCESS_KEY --build-arg AWS_ACCESS_KEY_ID .
   - >-
     travis_wait
-    60
+    120
     docker
     run
     -e HOST

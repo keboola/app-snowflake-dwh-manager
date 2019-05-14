@@ -61,6 +61,7 @@ class DwhManager
     private const PRIVILEGES_WAREHOUSE_MINIMAL = [
         'USAGE',
     ];
+    private const DATA_RETENTION_TIME_IN_DAYS = 7;
 
     /** @var Checker */
     private $checker;
@@ -94,6 +95,8 @@ class DwhManager
         $this->namingConventions = $namingConventions;
         $this->warehouse = $warehouse;
         $this->database = $database;
+
+        $this->ensureMaximumDataRetention();
     }
 
     public function checkSchema(Schema $schema): void
@@ -383,5 +386,22 @@ class DwhManager
             ->getMediumStrengthGenerator()
             ->generateString(self::GENERATED_PASSWORD_LENGTH);
         return $password;
+    }
+
+    private function ensureMaximumDataRetention(): void
+    {
+        $query = sprintf(
+            'SHOW DATABASES LIKE %s',
+            $this->connection->quote($this->database)
+        );
+        $databaseInfo = $this->connection->fetchAll($query);
+        $retentionTime = $databaseInfo[0]['retention_time'];
+        if ($retentionTime > self::DATA_RETENTION_TIME_IN_DAYS) {
+            $this->connection->query(sprintf(
+                'ALTER DATABASE %s SET DATA_RETENTION_TIME_IN_DAYS = %s;',
+                $this->connection->quoteIdentifier($this->database),
+                self::DATA_RETENTION_TIME_IN_DAYS
+            ));
+        }
     }
 }
