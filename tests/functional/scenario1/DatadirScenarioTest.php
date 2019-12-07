@@ -244,10 +244,11 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User does not have access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
             $this->assertContains(
-                'Object \'READ_SCHEMA_TABLE\' does not exist.',
+                'Object \'READ_SCHEMA_TABLE\' does not exist',
                 $e->getMessage()
             );
         }
+
         unset($user1connection);
 
         $this->runAppWithConfig(self::getSchema1Config());
@@ -335,7 +336,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User does not have access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
             $this->assertContains(
-                'Object \'READ_SCHEMA_TABLE\' does not exist.',
+                'Object \'READ_SCHEMA_TABLE\' does not exist',
                 $e->getMessage()
             );
         }
@@ -344,7 +345,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User does not have write access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
             $this->assertContains(
-                'Table \'WRITE_SCHEMA_TABLE\' does not exist.',
+                'Table \'WRITE_SCHEMA_TABLE\' does not exist',
                 $e->getMessage()
             );
         }
@@ -425,7 +426,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User cannot use other user\'s table before regranting');
         } catch (Throwable $e) {
             $this->assertContains(
-                "Object 'USER2_TABLE_IN_WRITE_SCHEMA' does not exist.",
+                "Object 'USER2_TABLE_IN_WRITE_SCHEMA' does not exist",
                 $e->getMessage()
             );
         }

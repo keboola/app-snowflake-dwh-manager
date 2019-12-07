@@ -5,7 +5,7 @@
         "php": "^7.1",
         "ircmaxell/random-lib": "^1.2",
         "keboola/php-component": "^4.1",
-        "keboola/php-csv-db-import": "^4.1"
+        "keboola/php-csv-db-import": "^5.0"
     },
     "require-dev": {
         "jakub-onderka/php-parallel-lint": "^1.0",
