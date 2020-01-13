@@ -18,13 +18,19 @@ class Config extends BaseConfig
      */
     public function getSnowflakeConnectionOptions(): array
     {
-        return [
-            'host' => $this->getValue(['parameters','master_host']),
-            'user' => $this->getValue(['parameters','master_user']),
-            'password' => $this->getValue(['parameters','#master_password']),
-            'database' => $this->getValue(['parameters','master_database']),
-            'warehouse' => $this->getValue(['parameters','warehouse']),
+        $connectionOptions = [
+            'host' => $this->getValue(['parameters', 'master_host']),
+            'user' => $this->getValue(['parameters', 'master_user']),
+            'password' => $this->getValue(['parameters', '#master_password']),
+            'database' => $this->getValue(['parameters', 'master_database']),
+            'warehouse' => $this->getValue(['parameters', 'warehouse']),
         ];
+
+        if (getenv('KBC_RUNID')) {
+            $connectionOptions['runId'] = (string) getenv('KBC_RUNID');
+        }
+
+        return $connectionOptions;
     }
 
     public function isUserRow(): bool

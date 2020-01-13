@@ -7,6 +7,7 @@ namespace Keboola\SnowflakeDwhManager\DatadirTests;
 use Exception;
 use Keboola\DatadirTests\AbstractDatadirTestCase;
 use Keboola\DatadirTests\DatadirTestSpecification;
+use Keboola\DatadirTests\Exception\DatadirTestsException;
 use Keboola\SnowflakeDwhManager\Config;
 use Keboola\SnowflakeDwhManager\ConfigDefinition;
 use Keboola\SnowflakeDwhManager\Configuration\Schema;
@@ -20,6 +21,8 @@ use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use RandomLib\Factory;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
 use Throwable;
 
 class DatadirScenarioTest extends AbstractDatadirTestCase
@@ -209,6 +212,32 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         self::$logger->log(Logger::DEBUG, $process->getOutput() . \PHP_EOL . $process->getErrorOutput());
     }
 
+    protected function runScript(string $datadirPath): Process
+    {
+        $fs = new Filesystem();
+
+        $script = $this->getScript();
+        if (!$fs->exists($script)) {
+            throw new DatadirTestsException(sprintf(
+                'Cannot open script file "%s"',
+                $script
+            ));
+        }
+
+        $runCommand = [
+            "php",
+            $script,
+        ];
+        $runProcess = new Process($runCommand);
+        $runProcess->setEnv([
+            'KBC_DATADIR' => $datadirPath,
+            'KBC_RUNID' => 'dwhm_test_run_id',
+        ]);
+        $runProcess->setTimeout(0);
+        $runProcess->run();
+        return $runProcess;
+    }
+
     /**
      * @dataProvider provideConfigs
      */
@@ -244,10 +273,11 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User does not have access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
             $this->assertContains(
-                'Object \'READ_SCHEMA_TABLE\' does not exist.',
+                'Object \'READ_SCHEMA_TABLE\' does not exist',
                 $e->getMessage()
             );
         }
+
         unset($user1connection);
 
         $this->runAppWithConfig(self::getSchema1Config());
@@ -297,6 +327,34 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 $e->getMessage()
             );
         }
+
+        $user1ConfigArray = self::getUser1Config();
+        $user1config = $this->getConfigFromConfigArray($user1ConfigArray);
+
+        $masterConnection = $this->getConnectionForConfig($user1config);
+
+        // Check query tags are present
+        sleep(30);
+        // to make sure query is propagated to history table
+        $history = $masterConnection->fetchAll("
+            select 
+                QUERY_TEXT, QUERY_TAG, END_TIME 
+            from 
+                table(information_schema.query_history_by_user()) 
+            WHERE 
+                query_text='SELECT CURRENT_ROLE() AS \"name\"' 
+            order by end_time DESC
+            LIMIT 1;
+        ");
+        $this->assertSame(
+            '{"runId":"dwhm_test_run_id"}',
+            $history[0]['QUERY_TAG']
+        );
+        $this->assertGreaterThan(
+            (new \DateTimeImmutable())->sub(new \DateInterval('PT5M'))->setTimezone(new \DateTimeZone('UTC')),
+            (new \DateTimeImmutable($history[0]['END_TIME']))->setTimezone(new \DateTimeZone('UTC'))
+        );
+        unset($masterConnection);
     }
 
     /**
@@ -335,7 +393,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User does not have access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
             $this->assertContains(
-                'Object \'READ_SCHEMA_TABLE\' does not exist.',
+                'Object \'READ_SCHEMA_TABLE\' does not exist',
                 $e->getMessage()
             );
         }
@@ -344,7 +402,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User does not have write access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
             $this->assertContains(
-                'Table \'WRITE_SCHEMA_TABLE\' does not exist.',
+                'Table \'WRITE_SCHEMA_TABLE\' does not exist',
                 $e->getMessage()
             );
         }
@@ -425,7 +483,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User cannot use other user\'s table before regranting');
         } catch (Throwable $e) {
             $this->assertContains(
-                "Object 'USER2_TABLE_IN_WRITE_SCHEMA' does not exist.",
+                "Object 'USER2_TABLE_IN_WRITE_SCHEMA' does not exist",
                 $e->getMessage()
             );
         }
