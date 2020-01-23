@@ -345,6 +345,7 @@ class DwhManager
                 $schemaName
             ));
         } else {
+            $this->connection->grantManageAccessToSchema($schemaName);
             $this->logger->info(sprintf(
                 'Schema "%s" exists',
                 $schemaName
