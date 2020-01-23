@@ -253,6 +253,25 @@ class Connection extends SnowflakeConnection
         ));
     }
 
+    private function grantToObjectTypeOnFutureObjectTypesInSchema(
+        string $grantOnObjectType,
+        string $schemaName,
+        string $granteeObjectType,
+        string $grantToName,
+        array $grant
+    ): void {
+        $this->query(vsprintf(
+            'GRANT ' . implode(',', $grant) . ' 
+            ON FUTURE ' . $grantOnObjectType . 'S 
+            IN SCHEMA %s
+            TO ' . $granteeObjectType . ' %s',
+            [
+                $this->quoteIdentifier($schemaName),
+                $this->quoteIdentifier($grantToName),
+            ]
+        ));
+    }
+
     public function grantOnAllObjectTypesInSchemaToRole(
         string $grantOnObjectType,
         string $schemaName,
@@ -260,6 +279,21 @@ class Connection extends SnowflakeConnection
         array $grant
     ): void {
         $this->grantToObjectTypeOnAllObjectTypesInSchema(
+            $grantOnObjectType,
+            $schemaName,
+            self::OBJECT_TYPE_ROLE,
+            $roleName,
+            $grant
+        );
+    }
+
+    public function grantOnFutureObjectTypesInSchemaToRole(
+        string $grantOnObjectType,
+        string $schemaName,
+        string $roleName,
+        array $grant
+    ): void {
+        $this->grantToObjectTypeOnFutureObjectTypesInSchema(
             $grantOnObjectType,
             $schemaName,
             self::OBJECT_TYPE_ROLE,
