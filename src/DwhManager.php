@@ -167,6 +167,9 @@ class DwhManager
             'disabled' => new Expr($user->isDisabled() ? 'TRUE' : 'FALSE'),
             'email' => $user->getEmail(),
         ]);
+        if ($user->isResetPassword()) {
+            $this->ensureUserResetPassword($userName);
+        }
         $this->ensureRoleGrantedToUser($userRole, $userName);
 
         // grant user's role to DWHM role
@@ -403,5 +406,19 @@ class DwhManager
                 self::DATA_RETENTION_TIME_IN_DAYS
             ));
         }
+    }
+
+    private function ensureUserResetPassword(string $userName): void
+    {
+        $password = $this->generatePassword();
+        $this->connection->alterUser($userName, [
+            'password' => $password,
+            'must_change_password' => new Expr('TRUE')
+        ]);
+        $this->logger->info(sprintf(
+            'Alter user "%s" with password "%s"',
+            $userName,
+            $password
+        ));
     }
 }

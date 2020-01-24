@@ -71,6 +71,9 @@ class UserDefinition implements ConfigurationInterface
                 ->booleanNode('disabled')
                     ->defaultFalse()
                 ->end()
+                ->booleanNode('reset_password')
+                    ->defaultFalse()
+                ->end()
             ->end()
         ->end()
         ;
