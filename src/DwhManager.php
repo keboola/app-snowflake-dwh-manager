@@ -413,7 +413,7 @@ class DwhManager
         $password = $this->generatePassword();
         $this->connection->alterUser($userName, [
             'password' => $password,
-            'must_change_password' => new Expr('TRUE')
+            'must_change_password' => new Expr('TRUE'),
         ]);
         $this->logger->info(sprintf(
             'Alter user "%s" with password "%s"',
