@@ -114,7 +114,6 @@ class DwhManager
         $this->ensureRoleHasWarehousePrivileges($rwRole, self::PRIVILEGES_WAREHOUSE_MINIMAL);
         $this->ensureRoleHasDatabasePrivileges($rwRole, self::PRIVILEGES_DATABASE_MINIMAL);
         $this->ensureRoleHasSchemaPrivileges($rwRole, self::PRIVILEGES_SCHEMA_WRITER_ACCESS, $schemaName);
-        $this->ensureRoleHasAllObjectPrivilegesOnSchema($rwRole, self::PRIVILEGES_OBJECT_WRITE, $schemaName);
         $this->ensureRoleHasFutureObjectPrivilegesOnSchema($rwRole, self::PRIVILEGES_OBJECT_WRITE, $schemaName);
 
         // create RO role and give it RO access to schema
@@ -122,7 +121,6 @@ class DwhManager
         $this->ensureRoleHasWarehousePrivileges($roRole, self::PRIVILEGES_WAREHOUSE_MINIMAL);
         $this->ensureRoleHasDatabasePrivileges($roRole, self::PRIVILEGES_DATABASE_MINIMAL);
         $this->ensureRoleHasSchemaPrivileges($roRole, self::PRIVILEGES_SCHEMA_READ_ONLY, $schemaName);
-        $this->ensureRoleHasAllObjectPrivilegesOnSchema($roRole, self::PRIVILEGES_OBJECT_READ, $schemaName);
         $this->ensureRoleHasFutureObjectPrivilegesOnSchema($roRole, self::PRIVILEGES_OBJECT_READ, $schemaName);
 
         $this->ensureUserExists($rwUser, [
@@ -271,23 +269,6 @@ class DwhManager
             $role,
             $this->database
         ));
-    }
-
-    private function ensureRoleHasAllObjectPrivilegesOnSchema(
-        string $role,
-        array $privileges,
-        string $schemaName
-    ): void {
-        foreach ($privileges as $objectType => $privilege) {
-            $this->connection->grantOnAllObjectTypesInSchemaToRole($objectType, $schemaName, $role, $privilege);
-            $this->logger->info(sprintf(
-                'Granted [%s] to role "%s" on all  %ss in schema "%s"',
-                implode(',', $privilege),
-                $role,
-                $objectType,
-                $schemaName
-            ));
-        }
     }
 
     private function ensureRoleHasFutureObjectPrivilegesOnSchema(

@@ -195,17 +195,6 @@ class Connection extends SnowflakeConnection
         $this->grantRoleToObject($role, $userName, self::OBJECT_TYPE_USER);
     }
 
-    public function grantSelectOnAllTablesInSchemaToRole(string $schemaName, string $role): void
-    {
-        $this->query(vsprintf(
-            'GRANT SELECT ON ALL TABLES IN SCHEMA %s TO ROLE %s',
-            [
-                $this->quoteIdentifier($schemaName),
-                $this->quoteIdentifier($role),
-            ]
-        ));
-    }
-
     private function grantToObjectTypeOnObjectType(
         string $grantOnObjectType,
         string $grantOnName,
@@ -219,25 +208,6 @@ class Connection extends SnowflakeConnection
             TO ' . $granteeObjectType . ' %s',
             [
                 $this->quoteIdentifier($grantOnName),
-                $this->quoteIdentifier($grantToName),
-            ]
-        ));
-    }
-
-    private function grantToObjectTypeOnAllObjectTypesInSchema(
-        string $grantOnObjectType,
-        string $schemaName,
-        string $granteeObjectType,
-        string $grantToName,
-        array $grant
-    ): void {
-        $this->query(vsprintf(
-            'GRANT ' . implode(',', $grant) . ' 
-            ON ALL ' . $grantOnObjectType . 'S 
-            IN SCHEMA %s
-            TO ' . $granteeObjectType . ' %s',
-            [
-                $this->quoteIdentifier($schemaName),
                 $this->quoteIdentifier($grantToName),
             ]
         ));
@@ -260,21 +230,6 @@ class Connection extends SnowflakeConnection
                 $this->quoteIdentifier($grantToName),
             ]
         ));
-    }
-
-    public function grantOnAllObjectTypesInSchemaToRole(
-        string $grantOnObjectType,
-        string $schemaName,
-        string $roleName,
-        array $grant
-    ): void {
-        $this->grantToObjectTypeOnAllObjectTypesInSchema(
-            $grantOnObjectType,
-            $schemaName,
-            self::OBJECT_TYPE_ROLE,
-            $roleName,
-            $grant
-        );
     }
 
     public function grantOnFutureObjectTypesInSchemaToRole(
