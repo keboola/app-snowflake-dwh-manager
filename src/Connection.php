@@ -141,16 +141,6 @@ class Connection extends SnowflakeConnection
         ));
     }
 
-    public function grantManageAccessToSchema(string $schemaName): void
-    {
-        $this->query(vsprintf(
-            'ALTER SCHEMA IF EXISTS %s ENABLE MANAGED ACCESS',
-            [
-                $this->quoteIdentifier($schemaName),
-            ]
-        ));
-    }
-
     public function grantOnDatabaseToRole(string $database, string $role, array $grants): void
     {
         $this->grantToObjectTypeOnObjectType(
