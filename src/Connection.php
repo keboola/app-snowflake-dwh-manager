@@ -66,7 +66,7 @@ class Connection extends SnowflakeConnection
     public function createSchema(string $schema): void
     {
         $this->query(vsprintf(
-            'CREATE SCHEMA IF NOT EXISTS %s',
+            'CREATE SCHEMA IF NOT EXISTS %s WITH MANAGED ACCESS',
             [
                 $this->quoteIdentifier($schema),
             ]
