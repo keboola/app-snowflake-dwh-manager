@@ -475,23 +475,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         }
         unset($user2connection);
 
-        // user can not manipulate schema object created by other users before regranting
-        try {
-            $user1connection = $this->getConnectionForUserFromUserConfig($user1configArray);
-            $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($writeSchema));
-            $user1connection->fetchAll('SELECT * FROM user2_table_in_write_schema');
-            $this->fail('User cannot use other user\'s table before regranting');
-        } catch (Throwable $e) {
-            $this->assertContains(
-                "Object 'USER2_TABLE_IN_WRITE_SCHEMA' does not exist",
-                $e->getMessage()
-            );
-        }
-
-        // regrant
-        $this->runAppWithConfig(self::getSchema2Config());
-
-        // user can manipulate schema object created by other users after regranting
+        // user can manipulate schema object created by other users
         $user1connection = $this->getConnectionForUserFromUserConfig($user1configArray);
         $readSchemaRole = $this->namingConventions->getRoRoleFromSchemaName($writeSchema);
         $user1connection->query('USE ROLE ' . $user1connection->quoteIdentifier($readSchemaRole));

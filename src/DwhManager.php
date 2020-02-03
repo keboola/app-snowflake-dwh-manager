@@ -114,14 +114,14 @@ class DwhManager
         $this->ensureRoleHasWarehousePrivileges($rwRole, self::PRIVILEGES_WAREHOUSE_MINIMAL);
         $this->ensureRoleHasDatabasePrivileges($rwRole, self::PRIVILEGES_DATABASE_MINIMAL);
         $this->ensureRoleHasSchemaPrivileges($rwRole, self::PRIVILEGES_SCHEMA_WRITER_ACCESS, $schemaName);
-        $this->ensureRoleHasAllObjectPrivilegesOnSchema($rwRole, self::PRIVILEGES_OBJECT_WRITE, $schemaName);
+        $this->ensureRoleHasFutureObjectPrivilegesOnSchema($rwRole, self::PRIVILEGES_OBJECT_WRITE, $schemaName);
 
         // create RO role and give it RO access to schema
         $this->ensureRoleExists($roRole);
         $this->ensureRoleHasWarehousePrivileges($roRole, self::PRIVILEGES_WAREHOUSE_MINIMAL);
         $this->ensureRoleHasDatabasePrivileges($roRole, self::PRIVILEGES_DATABASE_MINIMAL);
         $this->ensureRoleHasSchemaPrivileges($roRole, self::PRIVILEGES_SCHEMA_READ_ONLY, $schemaName);
-        $this->ensureRoleHasAllObjectPrivilegesOnSchema($roRole, self::PRIVILEGES_OBJECT_READ, $schemaName);
+        $this->ensureRoleHasFutureObjectPrivilegesOnSchema($roRole, self::PRIVILEGES_OBJECT_READ, $schemaName);
 
         $this->ensureUserExists($rwUser, [
             'default_role' => $rwRole,
@@ -153,6 +153,7 @@ class DwhManager
         $this->ensureSchemaExists($userSchemaName);
         $this->ensureRoleExists($userRole);
         $this->ensureRoleHasSchemaPrivileges($userRole, self::PRIVILEGES_SCHEMA_WRITER_ACCESS, $userSchemaName);
+        $this->ensureRoleHasFutureObjectPrivilegesOnSchema($userRole, self::PRIVILEGES_OBJECT_WRITE, $userSchemaName);
 
         // create user itself and grant them their role
         $userName = $this->namingConventions->getUsernameFromEmail($user);
@@ -270,15 +271,15 @@ class DwhManager
         ));
     }
 
-    private function ensureRoleHasAllObjectPrivilegesOnSchema(
+    private function ensureRoleHasFutureObjectPrivilegesOnSchema(
         string $role,
         array $privileges,
         string $schemaName
     ): void {
         foreach ($privileges as $objectType => $privilege) {
-            $this->connection->grantOnAllObjectTypesInSchemaToRole($objectType, $schemaName, $role, $privilege);
+            $this->connection->grantOnFutureObjectTypesInSchemaToRole($objectType, $schemaName, $role, $privilege);
             $this->logger->info(sprintf(
-                'Granted [%s] to role "%s" on all  %ss in schema "%s"',
+                'Granted [%s] to role "%s" on future  %ss in schema "%s"',
                 implode(',', $privilege),
                 $role,
                 $objectType,

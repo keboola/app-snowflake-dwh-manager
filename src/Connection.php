@@ -195,17 +195,6 @@ class Connection extends SnowflakeConnection
         $this->grantRoleToObject($role, $userName, self::OBJECT_TYPE_USER);
     }
 
-    public function grantSelectOnAllTablesInSchemaToRole(string $schemaName, string $role): void
-    {
-        $this->query(vsprintf(
-            'GRANT SELECT ON ALL TABLES IN SCHEMA %s TO ROLE %s',
-            [
-                $this->quoteIdentifier($schemaName),
-                $this->quoteIdentifier($role),
-            ]
-        ));
-    }
-
     private function grantToObjectTypeOnObjectType(
         string $grantOnObjectType,
         string $grantOnName,
@@ -224,7 +213,7 @@ class Connection extends SnowflakeConnection
         ));
     }
 
-    private function grantToObjectTypeOnAllObjectTypesInSchema(
+    private function grantToObjectTypeOnFutureObjectTypesInSchema(
         string $grantOnObjectType,
         string $schemaName,
         string $granteeObjectType,
@@ -233,7 +222,7 @@ class Connection extends SnowflakeConnection
     ): void {
         $this->query(vsprintf(
             'GRANT ' . implode(',', $grant) . ' 
-            ON ALL ' . $grantOnObjectType . 'S 
+            ON FUTURE ' . $grantOnObjectType . 'S 
             IN SCHEMA %s
             TO ' . $granteeObjectType . ' %s',
             [
@@ -243,13 +232,13 @@ class Connection extends SnowflakeConnection
         ));
     }
 
-    public function grantOnAllObjectTypesInSchemaToRole(
+    public function grantOnFutureObjectTypesInSchemaToRole(
         string $grantOnObjectType,
         string $schemaName,
         string $roleName,
         array $grant
     ): void {
-        $this->grantToObjectTypeOnAllObjectTypesInSchema(
+        $this->grantToObjectTypeOnFutureObjectTypesInSchema(
             $grantOnObjectType,
             $schemaName,
             self::OBJECT_TYPE_ROLE,
