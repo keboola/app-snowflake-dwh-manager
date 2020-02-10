@@ -30,6 +30,16 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->end()
                 ->scalarNode('master_database')
                     ->isRequired()
+                    ->validate()
+                        ->ifTrue(function ($v) {
+                            if (!$v) {
+                                return false;
+                            }
+                            // looker does not support lowercase database names
+                            return strtoupper($v) !== $v;
+                        })
+                        ->thenInvalid('Database name containing lowercase characters is not supported in Looker.')
+                    ->end()
                 ->end()
                 ->scalarNode('warehouse')
                     ->isRequired()

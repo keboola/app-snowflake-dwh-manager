@@ -22,8 +22,8 @@ class Config extends BaseConfig
             'host' => $this->getValue(['parameters', 'master_host']),
             'user' => $this->getValue(['parameters', 'master_user']),
             'password' => $this->getValue(['parameters', '#master_password']),
-            'database' => $this->getValue(['parameters', 'master_database']),
-            'warehouse' => $this->getValue(['parameters', 'warehouse']),
+            'database' => $this->getDatabase(),
+            'warehouse' => $this->getWarehouse(),
         ];
 
         if (getenv('KBC_RUNID')) {
