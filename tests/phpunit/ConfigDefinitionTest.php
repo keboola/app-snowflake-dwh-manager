@@ -38,7 +38,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
@@ -56,7 +56,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
@@ -74,7 +74,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
@@ -94,7 +94,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
@@ -115,7 +115,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'business_schema' => [
                             'schema_name' => 'dwh1',
@@ -127,7 +127,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'business_schema' => [
                             'schema_name' => 'dwh1',
@@ -170,7 +170,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
@@ -193,7 +193,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                     ],
                 ],
@@ -207,7 +207,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'business_schema' => [
                             'schema_name' => 'dwh-1',
@@ -223,7 +223,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
@@ -243,7 +243,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
@@ -269,7 +269,7 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'password',
-                        'master_database' => 'DWHM_TEST',
+                        'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => 'test@example.com',
@@ -282,27 +282,6 @@ class ConfigDefinitionTest extends TestCase
                                     'name' => 'dwh2',
                                     'permission' => 37,
                                 ],
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-            'lowercase database name is not supported' => [
-                InvalidConfigurationException::class,
-                'Invalid configuration for path "root.parameters.master_database": '
-                . 'Database name containing lowercase characters is not supported in Looker.',
-                [
-                    'parameters' => [
-                        'master_host' => 'host',
-                        'master_user' => 'user',
-                        '#master_password' => 'password',
-                        'master_database' => 'sapi_1234',
-                        'warehouse' => 'warehouse',
-                        'user' => [
-                            'email' => 'test@example.com',
-                            'business_schemas' => [
-                                'dwh1',
-                                'dwh2',
                             ],
                         ],
                     ],

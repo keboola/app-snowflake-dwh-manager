@@ -19,7 +19,7 @@ class ConfigTest extends TestCase
                 'master_host' => 'host',
                 'master_user' => 'user',
                 '#master_password' => 'password',
-                'master_database' => 'DWHM_TEST',
+                'master_database' => 'database',
                 'warehouse' => 'warehouse',
                 'user' => [
                     'email' => 'test@example.com',
@@ -46,7 +46,7 @@ class ConfigTest extends TestCase
                 'master_host' => 'host',
                 'master_user' => 'user',
                 '#master_password' => 'password',
-                'master_database' => 'DWHM_TEST',
+                'master_database' => 'database',
                 'warehouse' => 'warehouse',
                 'business_schema' => [
                     'schema_name' => 'dwh1',
