@@ -190,6 +190,25 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ];
     }
 
+    private static function getUserResetPasswordConfig(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('HOST'),
+                'master_user' => getenv('USER'),
+                '#master_password' => getenv('PASSWORD'),
+                'master_database' => getenv('DATABASE'),
+                'warehouse' => getenv('WAREHOUSE'),
+                'user' => [
+                    'email' => 'user@keboola.com',
+                    'business_schemas' => [],
+                    'schemas' => [],
+                    'disabled' => false,
+                ],
+            ],
+        ];
+    }
+
     public function provideConfigs(): array
     {
         return self::getTestConfigs();
@@ -498,6 +517,21 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($writeSchema));
         $user2TableRows = $user1connection->fetchAll('SELECT * FROM user2_table_in_write_schema');
         $this->assertCount(2, $user2TableRows);
+    }
+
+    public function testUserResetPassword()
+    {
+        $configArray = self::getUserResetPasswordConfig();
+        $config = $this->getConfigFromConfigArray($configArray);
+
+        $connection = $this->getConnectionForConfig($config);
+
+        $this->runAppWithConfig($configArray);
+
+        $userName = $this->namingConventions->getUsernameFromEmail($config->getUser());
+        $userResetPasswordUrl = $connection->resetUserPassword($userName);
+
+        $this->assertStringContainsString('resetPasswordToken', $userResetPasswordUrl);
     }
 
     public static function setUpBeforeClass(): void
