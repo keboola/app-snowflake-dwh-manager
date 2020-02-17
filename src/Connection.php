@@ -44,7 +44,7 @@ class Connection extends SnowflakeConnection
         $this->query(vsprintf(
             'ALTER USER IF EXISTS %s RESET PASSWORD;',
             [
-                $this->quoteIdentifier($userName)
+                $this->quoteIdentifier($userName),
             ]
         ));
         $result = $this->fetchAll('SELECT * FROM table(result_scan(-1));');
