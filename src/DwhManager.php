@@ -414,7 +414,8 @@ class DwhManager
     {
         $password = $this->connection->resetUserPassword($userName);
         $this->logger->info(sprintf(
-            'Reset password for user "%s" use "%s"',
+            'Reset password for user "%s" use "%s". ' .
+            'Old password will keep working until you reset the password using provided link',
             $userName,
             $password
         ));
