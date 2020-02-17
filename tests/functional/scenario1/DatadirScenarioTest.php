@@ -519,7 +519,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $this->assertCount(2, $user2TableRows);
     }
 
-    public function testUserResetPassword()
+    public function testUserResetPassword(): void
     {
         $configArray = self::getUserResetPasswordConfig();
         $config = $this->getConfigFromConfigArray($configArray);
