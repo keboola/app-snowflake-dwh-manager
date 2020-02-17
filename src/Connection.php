@@ -39,6 +39,18 @@ class Connection extends SnowflakeConnection
         ));
     }
 
+    public function resetUserPassword(string $userName): string
+    {
+        $this->query(vsprintf(
+            'ALTER USER IF EXISTS %s RESET PASSWORD;',
+            [
+                $this->quoteIdentifier($userName)
+            ]
+        ));
+        $result = $this->fetchAll('SELECT * FROM table(result_scan(-1));');
+        return $result[0]['status'];
+    }
+
     /**
      * @param array $otherOptions
      * @return string
