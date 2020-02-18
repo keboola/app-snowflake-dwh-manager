@@ -190,31 +190,12 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ];
     }
 
-    private static function getUserResetPasswordConfig(): array
-    {
-        return [
-            'parameters' => [
-                'master_host' => getenv('HOST'),
-                'master_user' => getenv('USER'),
-                '#master_password' => getenv('PASSWORD'),
-                'master_database' => getenv('DATABASE'),
-                'warehouse' => getenv('WAREHOUSE'),
-                'user' => [
-                    'email' => 'user@keboola.com',
-                    'business_schemas' => [],
-                    'schemas' => [],
-                    'disabled' => false,
-                ],
-            ],
-        ];
-    }
-
     public function provideConfigs(): array
     {
         return self::getTestConfigs();
     }
 
-    private function runAppWithConfig(array $config): void
+    private function runAppWithConfig(array $config): Process
     {
         self::$logger->log(Logger::DEBUG, $this->getDataSetAsString());
 
@@ -229,6 +210,8 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $this->assertMatchesSpecification($specification, $process, $tempDatadir->getTmpFolder());
 
         self::$logger->log(Logger::DEBUG, $process->getOutput() . \PHP_EOL . $process->getErrorOutput());
+
+        return $process;
     }
 
     protected function runScript(string $datadirPath): Process
@@ -374,6 +357,12 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             (new \DateTimeImmutable($history[0]['END_TIME']))->setTimezone(new \DateTimeZone('UTC'))
         );
         unset($masterConnection);
+
+        $user1ConfigArray['parameters']['user']['reset_password'] = true;
+
+        $process = $this->runAppWithConfig($user1ConfigArray);
+
+        $this->assertStringContainsString('resetPasswordToken', $process->getOutput());
     }
 
     /**
@@ -517,21 +506,6 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($writeSchema));
         $user2TableRows = $user1connection->fetchAll('SELECT * FROM user2_table_in_write_schema');
         $this->assertCount(2, $user2TableRows);
-    }
-
-    public function testUserResetPassword(): void
-    {
-        $configArray = self::getUserResetPasswordConfig();
-        $config = $this->getConfigFromConfigArray($configArray);
-
-        $connection = $this->getConnectionForConfig($config);
-
-        $this->runAppWithConfig($configArray);
-
-        $userName = $this->namingConventions->getUsernameFromEmail($config->getUser());
-        $userResetPasswordUrl = $connection->resetUserPassword($userName);
-
-        $this->assertStringContainsString('resetPasswordToken', $userResetPasswordUrl);
     }
 
     public static function setUpBeforeClass(): void
