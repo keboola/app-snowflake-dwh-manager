@@ -79,4 +79,9 @@ class User extends BaseConfig
     {
         return (bool) $this->getValue(['disabled']);
     }
+
+    public function isResetPassword(): bool
+    {
+        return (bool) $this->getValue(['reset_password']);
+    }
 }

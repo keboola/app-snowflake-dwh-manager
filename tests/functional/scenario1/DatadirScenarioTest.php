@@ -195,7 +195,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         return self::getTestConfigs();
     }
 
-    private function runAppWithConfig(array $config): void
+    private function runAppWithConfig(array $config): Process
     {
         self::$logger->log(Logger::DEBUG, $this->getDataSetAsString());
 
@@ -210,6 +210,8 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $this->assertMatchesSpecification($specification, $process, $tempDatadir->getTmpFolder());
 
         self::$logger->log(Logger::DEBUG, $process->getOutput() . \PHP_EOL . $process->getErrorOutput());
+
+        return $process;
     }
 
     protected function runScript(string $datadirPath): Process
@@ -355,6 +357,12 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             (new \DateTimeImmutable($history[0]['END_TIME']))->setTimezone(new \DateTimeZone('UTC'))
         );
         unset($masterConnection);
+
+        $user1ConfigArray['parameters']['user']['reset_password'] = true;
+
+        $process = $this->runAppWithConfig($user1ConfigArray);
+
+        $this->assertStringContainsString('resetPasswordToken', $process->getOutput());
     }
 
     /**
