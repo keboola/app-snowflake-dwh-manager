@@ -69,6 +69,44 @@ class ConfigDefinitionTest extends TestCase
                     ],
                 ],
             ],
+            'user with reset password' => [
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                            'business_schemas' => [
+                                'dwh1',
+                                'dwh2',
+                            ],
+                            'reset_password' => true,
+                            'schemas' => [],
+                            'disabled' => false,
+                        ],
+                    ],
+                ],
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                            'business_schemas' => [
+                                'dwh1',
+                                'dwh2',
+                            ],
+                            'reset_password' => true,
+                        ],
+                    ],
+                ],
+            ],
             'user with write schema' => [
                 [
                     'parameters' => [
