@@ -159,6 +159,7 @@ class ConfigDefinitionTest extends TestCase
                         'warehouse' => 'warehouse',
                         'business_schema' => [
                             'schema_name' => 'dwh1',
+                            'reset_password' => false,
                         ],
                     ],
                 ],
@@ -171,6 +172,34 @@ class ConfigDefinitionTest extends TestCase
                         'warehouse' => 'warehouse',
                         'business_schema' => [
                             'schema_name' => 'dwh1',
+                        ],
+                    ],
+                ],
+            ],
+            'schema with reset password' => [
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'business_schema' => [
+                            'schema_name' => 'dwh1',
+                            'reset_password' => true,
+                        ],
+                    ],
+                ],
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'business_schema' => [
+                            'schema_name' => 'dwh1',
+                            'reset_password' => true,
                         ],
                     ],
                 ],

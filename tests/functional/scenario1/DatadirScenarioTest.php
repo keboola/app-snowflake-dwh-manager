@@ -95,6 +95,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'warehouse' => getenv('WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema',
+                    'reset_password' => true,
                 ],
             ],
         ];
@@ -282,7 +283,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         unset($user1connection);
 
-        $this->runAppWithConfig(self::getSchema1Config());
+        $process = $this->runAppWithConfig(self::getSchema1Config());
 
         $user1connection = $this->getConnectionForUserFromUserConfig($user1ConfigArray);
         $userRwSchema = $this->namingConventions->getOwnSchemaNameFromUser($user1config->getUser());
@@ -314,6 +315,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 $e->getMessage()
             );
         }
+        $this->assertStringContainsString('resetPasswordToken', $process->getOutput());
 
         $user2configArray = self::getUser2Config();
         $user2Config = $this->getConfigFromConfigArray($user2configArray);
