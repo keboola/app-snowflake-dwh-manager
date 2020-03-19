@@ -38,6 +38,9 @@ class SchemaDefinition implements ConfigurationInterface
                     ->end()
                     ->isRequired()
                 ->end()
+                ->booleanNode('reset_password')
+                    ->defaultFalse()
+                ->end()
             ->end()
         ->end()
         ;

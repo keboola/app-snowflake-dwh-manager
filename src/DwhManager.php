@@ -132,6 +132,9 @@ class DwhManager
                 $this->connection->quoteIdentifier($schemaName)
             ),
         ]);
+        if ($schema->isResetPassword()) {
+            $this->ensureUserResetPassword($rwUser);
+        }
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
 

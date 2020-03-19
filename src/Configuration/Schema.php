@@ -27,4 +27,9 @@ class Schema extends BaseConfig
     {
         return $this->getValue(['schema_name']);
     }
+
+    public function isResetPassword(): bool
+    {
+        return (bool) $this->getValue(['reset_password']);
+    }
 }
