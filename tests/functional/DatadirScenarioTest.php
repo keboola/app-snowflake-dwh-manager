@@ -122,7 +122,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
     protected function getScript(): string
     {
-        return $this->getTestFileDir() . '/../../../src/run.php';
+        return $this->getTestFileDir() . '/../../src/run.php';
     }
 
     /**
