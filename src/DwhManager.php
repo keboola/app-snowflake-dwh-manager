@@ -7,7 +7,8 @@ namespace Keboola\SnowflakeDwhManager;
 use Keboola\Component\UserException;
 use Keboola\SnowflakeDwhManager\Configuration\Schema;
 use Keboola\SnowflakeDwhManager\Configuration\User;
-use Keboola\SnowflakeDwhManager\Connection\Expr;
+use Keboola\SnowflakeDwhManager\Connection\ExprInt;
+use Keboola\SnowflakeDwhManager\Connection\ExprString;
 use Keboola\SnowflakeDwhManager\Manager\Checker;
 use Keboola\SnowflakeDwhManager\Manager\NamingConventions;
 use Psr\Log\LoggerInterface;
@@ -126,11 +127,12 @@ class DwhManager
         $this->ensureUserExists($rwUser, [
             'default_role' => $rwRole,
             'default_warehouse' => $this->warehouse,
-            'default_namespace' => new Expr(
+            'default_namespace' => new ExprString(
                 $this->connection->quoteIdentifier($this->database) .
                 '.' .
                 $this->connection->quoteIdentifier($schemaName)
             ),
+            'statement_timeout_in_seconds' => new ExprInt($schema->getStatementTimeout()),
         ]);
         if ($schema->isResetPassword()) {
             $this->ensureUserResetPassword($rwUser);
@@ -163,13 +165,14 @@ class DwhManager
         $this->ensureUserExists($userName, [
             'default_role' => $userRole,
             'default_warehouse' => $this->warehouse,
-            'default_namespace' => new Expr(
+            'default_namespace' => new ExprString(
                 $this->connection->quoteIdentifier($this->database) .
                 '.' .
                 $this->connection->quoteIdentifier($userSchemaName)
             ),
-            'disabled' => new Expr($user->isDisabled() ? 'TRUE' : 'FALSE'),
+            'disabled' => new ExprString($user->isDisabled() ? 'TRUE' : 'FALSE'),
             'email' => $user->getEmail(),
+            'statement_timeout_in_seconds' => new ExprInt($user->getStatementTimeout()),
         ]);
 
         if ($user->isResetPassword()) {
@@ -364,7 +367,7 @@ class DwhManager
     private function ensureUserExists(string $userName, array $options): void
     {
         if (!$this->checker->existsUser($userName)) {
-            $options['must_change_password'] = new Expr('TRUE');
+            $options['must_change_password'] = new ExprString('TRUE');
             $password = $this->generatePassword();
             $this->connection->createUser(
                 $userName,

@@ -494,6 +494,26 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $this->assertCount(2, $user2TableRows);
     }
 
+    /**
+     * @depends testDatadir
+     */
+    // phpcs:disable SlevomatCodingStandard.TypeHints.TypeHintDeclaration.UselessDocComment
+    public function testUserStatementTimeout(): void
+    {
+        // phpcs:enable
+        $userConfigArray = self::getUser1Config();
+        $userConfigArray['parameters']['user']['statement_timeout'] = 2;
+        $this->runAppWithConfig($userConfigArray);
+
+        $userConnection = $this->getConnectionForUserFromUserConfig($userConfigArray);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(
+            'Query reached its timeout 2 second(s)" while executing query "call system$wait(10);'
+        );
+        $userConnection->query('call system$wait(10);');
+    }
+
     public static function setUpBeforeClass(): void
     {
         self::setUpLogging();

@@ -75,6 +75,11 @@ class User extends BaseConfig
         }, $schemas);
     }
 
+    public function getStatementTimeout(): int
+    {
+        return (int) $this->getValue(['statement_timeout']);
+    }
+
     public function isDisabled(): bool
     {
         return (bool) $this->getValue(['disabled']);

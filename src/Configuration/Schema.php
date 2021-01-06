@@ -28,6 +28,11 @@ class Schema extends BaseConfig
         return $this->getValue(['schema_name']);
     }
 
+    public function getStatementTimeout(): int
+    {
+        return (int) $this->getValue(['statement_timeout']);
+    }
+
     public function isResetPassword(): bool
     {
         return (bool) $this->getValue(['reset_password']);

@@ -16,7 +16,7 @@ Used to create business schema, that will be written to by Snowflake writer and 
 
 There are two types of configs - schema config and user config. App detects automatically which is which. 
 
-## schema config
+## Schema config
 ```json
 {
     "parameters" : {
@@ -26,7 +26,8 @@ There are two types of configs - schema config and user config. App detects auto
         "master_database": "database_that_will_hold_the_schemas",
         "warehouse": "snowflake_warehouse",
         "business_schema": {
-            "schema_name": "accounting"
+            "schema_name": "accounting",
+            "statement_timeout": 3600
         }
     }
 }
@@ -34,7 +35,7 @@ There are two types of configs - schema config and user config. App detects auto
 
 `schema_name`: the name of the schema to be created, keep it short and simple
 
-## user config
+## User config
 ```json
 {
     "parameters" : {
@@ -49,6 +50,7 @@ There are two types of configs - schema config and user config. App detects auto
            "schemas" : [
                 {"name": "development","permission": "read"}
            ],
+           "statement_timeout": 3600,
            "disabled": false
        }
     }
@@ -59,6 +61,9 @@ There are two types of configs - schema config and user config. App detects auto
 `business_schemas`: array of schema names to be assigned to the new user as read-only
 `schemas`: array of objects containing schema name to be assigned to the new user and permission to assign (read|write)
 `disabled`: user is not be able to log in while their account is disabled
+`statement_timeout`: Amount of time, in seconds, after which a running SQL statement is canceled.
+    - For *schema config* it applies to schema's default RW user.
+    - For *user config* it applies to the user himself.
 
 ## Changing access configs
 
