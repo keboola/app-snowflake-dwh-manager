@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\SnowflakeDwhManager\Manager;
 
-use Keboola\SnowflakeDwhManager\Connection\Expr;
+use Keboola\SnowflakeDwhManager\Connection\ExprString;
 
 class CheckerHelper
 {

@@ -7,6 +7,7 @@ namespace Keboola\SnowflakeDwhManager;
 use Exception;
 use Keboola\Db\Import\Snowflake\Connection as SnowflakeConnection;
 use Keboola\SnowflakeDwhManager\Connection\Expr;
+use Keboola\SnowflakeDwhManager\Connection\ExprString;
 use RuntimeException;
 use Throwable;
 use function strtoupper;
@@ -130,10 +131,10 @@ class Connection extends SnowflakeConnection
 
     public function fetchRoles(?string $roleLike = null): array
     {
-        $sql = 'SHOW ROLES';
+        $sql = 'SELECT * FROM INFORMATION_SCHEMA.APPLICABLE_ROLES';
         $args = [];
         if ($roleLike !== null) {
-            $sql .= ' LIKE %s';
+            $sql .= ' WHERE ROLE_NAME = %s';
             $args[] = $this->quote($roleLike);
         }
 

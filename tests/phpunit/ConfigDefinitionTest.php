@@ -47,6 +47,7 @@ class ConfigDefinitionTest extends TestCase
                                 'dwh2',
                             ],
                             'schemas' => [],
+                            'statement_timeout' => 3600,
                             'disabled' => false,
                             'reset_password' => false,
                         ],
@@ -85,6 +86,7 @@ class ConfigDefinitionTest extends TestCase
                             ],
                             'reset_password' => true,
                             'schemas' => [],
+                            'statement_timeout' => 3600,
                             'disabled' => false,
                         ],
                     ],
@@ -124,6 +126,7 @@ class ConfigDefinitionTest extends TestCase
                             'schemas' => [
                                 ['name' => 'dwh3', 'permission' => UserDefinition::PERMISSION_WRITE],
                             ],
+                            'statement_timeout' => 3600,
                             'disabled' => false,
                             'reset_password' => false,
                         ],
@@ -149,6 +152,45 @@ class ConfigDefinitionTest extends TestCase
                     ],
                 ],
             ],
+            'user with statement timeout' => [
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                            'business_schemas' => [
+                                'dwh1',
+                                'dwh2',
+                            ],
+                            'statement_timeout' => 123,
+                            'schemas' => [],
+                            'disabled' => false,
+                            'reset_password' => false,
+                        ],
+                    ],
+                ],
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                            'business_schemas' => [
+                                'dwh1',
+                                'dwh2',
+                            ],
+                            'statement_timeout' => 123,
+                        ],
+                    ],
+                ],
+            ],
             'schema' => [
                 [
                     'parameters' => [
@@ -159,6 +201,7 @@ class ConfigDefinitionTest extends TestCase
                         'warehouse' => 'warehouse',
                         'business_schema' => [
                             'schema_name' => 'dwh1',
+                            'statement_timeout' => 3600,
                             'reset_password' => false,
                         ],
                     ],
@@ -176,6 +219,35 @@ class ConfigDefinitionTest extends TestCase
                     ],
                 ],
             ],
+            'schema with user statement timeout' => [
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'business_schema' => [
+                            'schema_name' => 'dwh1',
+                            'statement_timeout' => 123,
+                            'reset_password' => false,
+                        ],
+                    ],
+                ],
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'business_schema' => [
+                            'schema_name' => 'dwh1',
+                            'statement_timeout' => 123,
+                        ],
+                    ],
+                ],
+            ],
             'schema with reset password' => [
                 [
                     'parameters' => [
@@ -187,6 +259,7 @@ class ConfigDefinitionTest extends TestCase
                         'business_schema' => [
                             'schema_name' => 'dwh1',
                             'reset_password' => true,
+                            'statement_timeout' => 3600,
                         ],
                     ],
                 ],
