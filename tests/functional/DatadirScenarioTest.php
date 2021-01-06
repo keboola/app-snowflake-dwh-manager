@@ -210,7 +210,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         $this->assertMatchesSpecification($specification, $process, $tempDatadir->getTmpFolder());
 
-        self::$logger->log(Logger::DEBUG, $process->getOutput() . \PHP_EOL . $process->getErrorOutput());
+        self::$logger->log(Logger::DEBUG, $process->getErrorOutput());
 
         return $process;
     }
@@ -237,7 +237,13 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'KBC_RUNID' => 'dwhm_test_run_id',
         ]);
         $runProcess->setTimeout(0);
-        $runProcess->run();
+        $runProcess->run(function ($type, $buffer): void {
+            if (Process::ERR === $type) {
+                self::$logger->log(Logger::DEBUG, 'ERR > '.$buffer);
+            } else {
+                self::$logger->log(Logger::DEBUG, 'OUT > '.$buffer);
+            }
+        });
         return $runProcess;
     }
 
