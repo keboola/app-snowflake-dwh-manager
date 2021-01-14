@@ -129,19 +129,16 @@ class Connection extends SnowflakeConnection
         }
     }
 
-    public function fetchRoles(?string $roleLike = null): array
+    public function existsRole(string $role): bool
     {
-        $sql = 'SELECT * FROM INFORMATION_SCHEMA.APPLICABLE_ROLES';
-        $args = [];
-        if ($roleLike !== null) {
-            $sql .= ' WHERE ROLE_NAME = %s';
-            $args[] = $this->quote($roleLike);
-        }
+        $sql = 'SELECT COUNT(*) AS CNT FROM INFORMATION_SCHEMA.ENABLED_ROLES  WHERE ROLE_NAME = %s';
+        $args = [$this->quote($role)];
 
-        return $this->fetchAll(vsprintf(
+        $result = $this->fetchAll(vsprintf(
             $sql,
             $args
         ));
+        return $result[0]['CNT'] > 0;
     }
 
     public function fetchSchemasLike(string $schemaName): array

@@ -26,8 +26,7 @@ class Checker
 
     public function existsRole(string $role): bool
     {
-        $roles = $this->connection->fetchRoles($role);
-        return count($roles) > 0;
+        return $this->connection->existsRole($role);
     }
 
     public function existsSchema(string $schemaName): bool
