@@ -39,7 +39,7 @@ class SchemaDefinition implements ConfigurationInterface
                     ->isRequired()
                 ->end()
                 ->integerNode('statement_timeout')
-                    ->defaultValue(3600)
+                    ->defaultValue(10800)
                 ->end()
                 ->booleanNode('reset_password')
                     ->defaultFalse()

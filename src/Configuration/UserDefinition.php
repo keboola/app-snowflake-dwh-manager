@@ -69,7 +69,7 @@ class UserDefinition implements ConfigurationInterface
                     ->end()
                 ->end()
                 ->integerNode('statement_timeout')
-                    ->defaultValue(3600)
+                    ->defaultValue(10800)
                 ->end()
                 ->booleanNode('disabled')
                     ->defaultFalse()
