@@ -27,7 +27,7 @@ There are two types of configs - schema config and user config. App detects auto
         "warehouse": "snowflake_warehouse",
         "business_schema": {
             "schema_name": "accounting",
-            "statement_timeout": 3600
+            "statement_timeout": 10800
         }
     }
 }
@@ -50,7 +50,7 @@ There are two types of configs - schema config and user config. App detects auto
            "schemas" : [
                 {"name": "development","permission": "read"}
            ],
-           "statement_timeout": 3600,
+           "statement_timeout": 10800,
            "disabled": false
        }
     }
