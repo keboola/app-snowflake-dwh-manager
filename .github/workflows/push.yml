@@ -92,7 +92,7 @@ jobs:
       -
         name: Run tests
         run: |
-          docker run
+          docker run \
           -e KBC_RUNID \
           -e HOST \
           -e USER \
