@@ -1,7 +1,5 @@
 # Snowflake Data Warehouse Manager
 
-[![Build Status](https://travis-ci.org/keboola/app-snowflake-dwh-manager.svg?branch=master)](https://travis-ci.org/keboola/app-snowflake-dwh-manager)
-
 Used to create business schema, that will be written to by Snowflake writer and that will be read-only shared to a group of analytics. 
 
 ## Typical workflow
