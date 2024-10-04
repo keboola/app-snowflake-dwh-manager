@@ -429,6 +429,102 @@ class ConfigDefinitionTest extends TestCase
                     ],
                 ],
             ],
+            'empty master_host' => [
+                InvalidConfigurationException::class,
+                'The path "root.parameters.master_host" cannot contain an empty value',
+                [
+                    'parameters' => [
+                        'master_host' => '',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                        ],
+                    ],
+                ],
+            ],
+            'empty master_user' => [
+                InvalidConfigurationException::class,
+                'The path "root.parameters.master_user" cannot contain an empty value',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => '',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                        ],
+                    ],
+                ],
+            ],
+            'empty master_password' => [
+                InvalidConfigurationException::class,
+                'The path "root.parameters.#master_password" cannot contain an empty value',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => '',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                        ],
+                    ],
+                ],
+            ],
+            'empty master_database' => [
+                InvalidConfigurationException::class,
+                'The path "root.parameters.master_database" cannot contain an empty value',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => '',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                        ],
+                    ],
+                ],
+            ],
+            'empty warehouse' => [
+                InvalidConfigurationException::class,
+                'The path "root.parameters.warehouse" cannot contain an empty value',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => '',
+                        'user' => [
+                            'email' => 'test@example.com',
+                        ],
+                    ],
+                ],
+            ],
+            'empty user.email' => [
+                InvalidConfigurationException::class,
+                'The path "root.parameters.user.email" cannot contain an empty value',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => '',
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 }
