@@ -94,6 +94,7 @@ class Connection extends SnowflakeConnection
             'CREATE USER IF NOT EXISTS 
             %s
             PASSWORD = %s
+            TYPE = LEGACY_SERVICE
             ' . $otherOptionsString,
             [
                 $this->quoteIdentifier($userName),
