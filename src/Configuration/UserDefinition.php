@@ -32,6 +32,7 @@ class UserDefinition implements ConfigurationInterface
         $root
             ->children()
                 ->scalarNode('email')
+                    ->cannotBeEmpty()
                     ->isRequired()
                 ->end()
                 ->arrayNode('business_schemas')
