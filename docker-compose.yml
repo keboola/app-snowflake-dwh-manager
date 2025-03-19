@@ -1,11 +1,8 @@
-version: '2'
 services:
   dev:
+    platform: linux/amd64
     build:
       context: .
-      args:
-        - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-        - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
     volumes:
       - ./:/code
       - ./data:/data

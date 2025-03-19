@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Keboola\SnowflakeDwhManager;
 
 use Exception;
-use Keboola\Db\Import\Snowflake\Connection as SnowflakeConnection;
+use Keboola\SnowflakeDbAdapter\Connection as SnowflakeConnection;
 use Keboola\SnowflakeDwhManager\Connection\Expr;
-use Keboola\SnowflakeDwhManager\Connection\ExprString;
 use RuntimeException;
 use Throwable;
 use function strtoupper;
