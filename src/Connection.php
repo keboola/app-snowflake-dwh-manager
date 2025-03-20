@@ -10,6 +10,7 @@ use Keboola\SnowflakeDwhManager\Connection\Expr;
 use RuntimeException;
 use Throwable;
 use function strtoupper;
+use const PHP_EOL;
 
 class Connection extends SnowflakeConnection
 {
@@ -22,6 +23,9 @@ class Connection extends SnowflakeConnection
     public const OBJECT_TYPE_USER = 'USER';
     public const OBJECT_TYPE_WAREHOUSE = 'WAREHOUSE';
 
+    /**
+     * @param array<mixed> $options
+     */
     public function alterUser(string $userName, array $options): void
     {
         if (!count($options)) {
@@ -35,7 +39,7 @@ class Connection extends SnowflakeConnection
             ' . $this->createQuotedOptionsStringFromArray($options),
             [
                 $this->quoteIdentifier($userName),
-            ]
+            ],
         ));
     }
 
@@ -45,22 +49,21 @@ class Connection extends SnowflakeConnection
             'ALTER USER IF EXISTS %s RESET PASSWORD;',
             [
                 $this->quoteIdentifier($userName),
-            ]
+            ],
         ));
         $result = $this->fetchAll('SELECT * FROM table(result_scan(-1));');
         return $result[0]['status'];
     }
 
     /**
-     * @param array $otherOptions
-     * @return string
+     * @param array<mixed> $otherOptions
      */
     private function createQuotedOptionsStringFromArray(array $otherOptions): string
     {
         $otherOptionsString = '';
         foreach ($otherOptions as $option => $optionValue) {
             $quotedValue = $optionValue instanceof Expr ? $optionValue->getValue() : $this->quote($optionValue);
-            $otherOptionsString .= strtoupper($option) . '=' . $quotedValue . \PHP_EOL;
+            $otherOptionsString .= strtoupper($option) . '=' . $quotedValue . PHP_EOL;
         }
         return $otherOptionsString;
     }
@@ -71,7 +74,7 @@ class Connection extends SnowflakeConnection
             'CREATE ROLE IF NOT EXISTS %s',
             [
                 $this->quoteIdentifier($roleName),
-            ]
+            ],
         ));
     }
 
@@ -81,10 +84,13 @@ class Connection extends SnowflakeConnection
             'CREATE SCHEMA IF NOT EXISTS %s WITH MANAGED ACCESS',
             [
                 $this->quoteIdentifier($schema),
-            ]
+            ],
         ));
     }
 
+    /**
+     * @param array<mixed> $otherOptions
+     */
     public function createUser(string $userName, string $password, array $otherOptions): void
     {
         $otherOptionsString = $this->createQuotedOptionsStringFromArray($otherOptions);
@@ -98,7 +104,7 @@ class Connection extends SnowflakeConnection
             [
                 $this->quoteIdentifier($userName),
                 $this->quote($password),
-            ]
+            ],
         ));
     }
 
@@ -111,7 +117,7 @@ class Connection extends SnowflakeConnection
             'DESCRIBE USER %s',
             [
                 $this->quoteIdentifier($userName),
-            ]
+            ],
         ));
         $result = [];
         foreach ($userFields as $userField) {
@@ -120,6 +126,10 @@ class Connection extends SnowflakeConnection
         return $result;
     }
 
+    /**
+     * @param array<mixed> $bind
+     * @return array<stirng, mixed>
+     */
     public function fetchAll(string $sql, array $bind = []): array
     {
         try {
@@ -136,21 +146,27 @@ class Connection extends SnowflakeConnection
 
         $result = $this->fetchAll(vsprintf(
             $sql,
-            $args
+            $args,
         ));
         return $result[0]['CNT'] > 0;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function fetchSchemasLike(string $schemaName): array
     {
         return $this->fetchAll(vsprintf(
             'SHOW SCHEMAS LIKE %s',
             [
                 $this->quote($schemaName),
-            ]
+            ],
         ));
     }
 
+    /**
+     * @param array<mixed> $grants
+     */
     public function grantOnDatabaseToRole(string $database, string $role, array $grants): void
     {
         $this->grantToObjectTypeOnObjectType(
@@ -158,10 +174,13 @@ class Connection extends SnowflakeConnection
             $database,
             Connection::OBJECT_TYPE_ROLE,
             $role,
-            $grants
+            $grants,
         );
     }
 
+    /**
+     * @param array<mixed> $grants
+     */
     public function grantOnSchemaToRole(string $schemaName, string $role, array $grants): void
     {
         $this->grantToObjectTypeOnObjectType(
@@ -169,10 +188,13 @@ class Connection extends SnowflakeConnection
             $schemaName,
             Connection::OBJECT_TYPE_ROLE,
             $role,
-            $grants
+            $grants,
         );
     }
 
+    /**
+     * @param array<mixed> $grants
+     */
     public function grantOnWarehouseToRole(string $warehouse, string $role, array $grants): void
     {
         $this->grantToObjectTypeOnObjectType(
@@ -180,7 +202,7 @@ class Connection extends SnowflakeConnection
             $warehouse,
             Connection::OBJECT_TYPE_ROLE,
             $role,
-            $grants
+            $grants,
         );
     }
 
@@ -191,7 +213,7 @@ class Connection extends SnowflakeConnection
             [
                 $this->quoteIdentifier($role),
                 $this->quoteIdentifier($granteeName),
-            ]
+            ],
         ));
     }
 
@@ -205,12 +227,15 @@ class Connection extends SnowflakeConnection
         $this->grantRoleToObject($role, $userName, self::OBJECT_TYPE_USER);
     }
 
+    /**
+     * @param array<mixed> $grant
+     */
     private function grantToObjectTypeOnObjectType(
         string $grantOnObjectType,
         string $grantOnName,
         string $granteeObjectType,
         string $grantToName,
-        array $grant
+        array $grant,
     ): void {
         $this->query(vsprintf(
             'GRANT ' . implode(',', $grant) . ' 
@@ -219,16 +244,19 @@ class Connection extends SnowflakeConnection
             [
                 $this->quoteIdentifier($grantOnName),
                 $this->quoteIdentifier($grantToName),
-            ]
+            ],
         ));
     }
 
+    /**
+     * @param array<mixed> $grant
+     */
     private function grantToObjectTypeOnFutureObjectTypesInSchema(
         string $grantOnObjectType,
         string $schemaName,
         string $granteeObjectType,
         string $grantToName,
-        array $grant
+        array $grant,
     ): void {
         $this->query(vsprintf(
             'GRANT ' . implode(',', $grant) . ' 
@@ -238,25 +266,31 @@ class Connection extends SnowflakeConnection
             [
                 $this->quoteIdentifier($schemaName),
                 $this->quoteIdentifier($grantToName),
-            ]
+            ],
         ));
     }
 
+    /**
+     * @param array<mixed> $grant
+     */
     public function grantOnFutureObjectTypesInSchemaToRole(
         string $grantOnObjectType,
         string $schemaName,
         string $roleName,
-        array $grant
+        array $grant,
     ): void {
         $this->grantToObjectTypeOnFutureObjectTypesInSchema(
             $grantOnObjectType,
             $schemaName,
             self::OBJECT_TYPE_ROLE,
             $roleName,
-            $grant
+            $grant,
         );
     }
 
+    /**
+     * @param array<mixed> $bind
+     */
     public function query(string $sql, array $bind = []): void
     {
         try {
@@ -275,7 +309,7 @@ class Connection extends SnowflakeConnection
     private function revokeRoleFromObjectType(
         string $grantedRole,
         string $roleGrantedTo,
-        string $objectTypeGrantedTo
+        string $objectTypeGrantedTo,
     ): void {
         $this->query(vsprintf(
             'REVOKE ROLE %s
@@ -283,7 +317,7 @@ class Connection extends SnowflakeConnection
             [
                 $this->quoteIdentifier($grantedRole),
                 $this->quoteIdentifier($roleGrantedTo),
-            ]
+            ],
         ));
     }
 
@@ -301,7 +335,7 @@ class Connection extends SnowflakeConnection
             'SHOW GRANTS OF ROLE %s',
             [
                 $this->quoteIdentifier($role),
-            ]
+            ],
         ));
     }
 
@@ -314,7 +348,7 @@ class Connection extends SnowflakeConnection
             'SHOW GRANTS TO ROLE %s',
             [
                 $this->quoteIdentifier($role),
-            ]
+            ],
         ));
     }
 

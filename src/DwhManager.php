@@ -64,23 +64,17 @@ class DwhManager
     ];
     private const DATA_RETENTION_TIME_IN_DAYS = 7;
 
-    /** @var Checker */
-    private $checker;
+    private Checker $checker;
 
-    /** @var Connection */
-    private $connection;
+    private Connection $connection;
 
-    /** @var LoggerInterface */
-    private $logger;
+    private LoggerInterface $logger;
 
-    /** @var NamingConventions */
-    private $namingConventions;
+    private NamingConventions $namingConventions;
 
-    /** @var string */
-    private $warehouse;
+    private string $warehouse;
 
-    /** @var string */
-    private $database;
+    private string $database;
 
     public function __construct(
         Checker $checker,
@@ -88,7 +82,7 @@ class DwhManager
         LoggerInterface $logger,
         NamingConventions $namingConventions,
         string $warehouse,
-        string $database
+        string $database,
     ) {
         $this->checker = $checker;
         $this->connection = $connection;
@@ -130,7 +124,7 @@ class DwhManager
             'default_namespace' => new ExprString(
                 $this->connection->quoteIdentifier($this->database) .
                 '.' .
-                $this->connection->quoteIdentifier($schemaName)
+                $this->connection->quoteIdentifier($schemaName),
             ),
             'statement_timeout_in_seconds' => new ExprInt($schema->getStatementTimeout()),
         ]);
@@ -168,7 +162,7 @@ class DwhManager
             'default_namespace' => new ExprString(
                 $this->connection->quoteIdentifier($this->database) .
                 '.' .
-                $this->connection->quoteIdentifier($userSchemaName)
+                $this->connection->quoteIdentifier($userSchemaName),
             ),
             'disabled' => new ExprString($user->isDisabled() ? 'TRUE' : 'FALSE'),
             'email' => $user->getEmail(),
@@ -191,7 +185,7 @@ class DwhManager
                 throw new UserException(sprintf(
                     'The schema "%s" to link to user "%s" does not exist',
                     $linkedRoSchemaName,
-                    $userName
+                    $userName,
                 ));
             }
             $roRoleFromSchemaName = $this->namingConventions->getRoRoleFromSchemaName($linkedRoSchemaName);
@@ -204,7 +198,7 @@ class DwhManager
                 throw new UserException(sprintf(
                     'The schema "%s" to link to user "%s" to write into does not exist',
                     $linkedRwSchemaName,
-                    $userName
+                    $userName,
                 ));
             }
             $rwRoleFromSchemaName = $this->namingConventions->getRwRoleFromSchemaName($linkedRwSchemaName);
@@ -221,12 +215,12 @@ class DwhManager
             $this->connection->createRole($role);
             $this->logger->info(sprintf(
                 'Created role "%s"',
-                $role
+                $role,
             ));
         } else {
             $this->logger->info(sprintf(
                 'Role "%s" exists',
-                $role
+                $role,
             ));
         }
     }
@@ -238,13 +232,13 @@ class DwhManager
             $this->logger->info(sprintf(
                 'Role "%s" has been granted to role "%s"',
                 $roleThatIsGranted,
-                $roleToGrantTo
+                $roleToGrantTo,
             ));
         } else {
             $this->logger->info(sprintf(
                 'Role "%s" has already been granted to role "%s"',
                 $roleThatIsGranted,
-                $roleToGrantTo
+                $roleToGrantTo,
             ));
         }
     }
@@ -256,36 +250,42 @@ class DwhManager
             $this->logger->info(sprintf(
                 'Role "%s" has been granted to user "%s"',
                 $role,
-                $userName
+                $userName,
             ));
         } else {
             $this->logger->info(sprintf(
                 'Role "%s" has already been granted to user "%s"',
                 $role,
-                $userName
+                $userName,
             ));
         }
     }
 
+    /**
+     * @param array<mixed> $databasePrivileges
+     */
     private function ensureRoleHasDatabasePrivileges(string $role, array $databasePrivileges): void
     {
         $this->connection->grantOnDatabaseToRole(
             $this->database,
             $role,
-            $databasePrivileges
+            $databasePrivileges,
         );
         $this->logger->info(sprintf(
             'Granted [%s] to role "%s" on database "%s"',
             implode(',', $databasePrivileges),
             $role,
-            $this->database
+            $this->database,
         ));
     }
 
+    /**
+     * @param array<mixed> $privileges
+     */
     private function ensureRoleHasFutureObjectPrivilegesOnSchema(
         string $role,
         array $privileges,
-        string $schemaName
+        string $schemaName,
     ): void {
         foreach ($privileges as $objectType => $privilege) {
             $this->connection->grantOnFutureObjectTypesInSchemaToRole($objectType, $schemaName, $role, $privilege);
@@ -294,11 +294,14 @@ class DwhManager
                 implode(',', $privilege),
                 $role,
                 $objectType,
-                $schemaName
+                $schemaName,
             ));
         }
     }
 
+    /**
+     * @param array<mixed> $schemaPrivileges
+     */
     private function ensureRoleHasSchemaPrivileges(string $role, array $schemaPrivileges, string $schemaName): void
     {
         $this->connection->grantOnSchemaToRole($schemaName, $role, $schemaPrivileges);
@@ -306,25 +309,31 @@ class DwhManager
             'Granted [%s] to role "%s" on schema "%s"',
             implode(',', $schemaPrivileges),
             $role,
-            $schemaName
+            $schemaName,
         ));
     }
 
+    /**
+     * @param array<mixed> $warehousePrivileges
+     */
     private function ensureRoleHasWarehousePrivileges(string $role, array $warehousePrivileges): void
     {
         $this->connection->grantOnWarehouseToRole(
             $this->warehouse,
             $role,
-            $warehousePrivileges
+            $warehousePrivileges,
         );
         $this->logger->info(sprintf(
             'Granted [%s] to role "%s" on warehouse "%s"',
             implode(',', $warehousePrivileges),
             $role,
-            $this->warehouse
+            $this->warehouse,
         ));
     }
 
+    /**
+     * @param array<string> $desiredRoles
+     */
     private function ensureRoleOnlyHasRolesGranted(string $roleName, array $desiredRoles): void
     {
         $grantedRoles = $this->checker->getGrantedRolesOfRole($roleName);
@@ -335,7 +344,7 @@ class DwhManager
             $this->logger->info(sprintf(
                 'Role "%s" has been revoked from role "%s"',
                 $revokedRole,
-                $roleName
+                $roleName,
             ));
         }
         foreach ($toBeGranted as $grantedRole) {
@@ -343,7 +352,7 @@ class DwhManager
             $this->logger->info(sprintf(
                 'Role "%s" has been granted to role "%s"',
                 $grantedRole,
-                $roleName
+                $roleName,
             ));
         }
     }
@@ -354,16 +363,19 @@ class DwhManager
             $this->connection->createSchema($schemaName);
             $this->logger->info(sprintf(
                 'Created schema "%s"',
-                $schemaName
+                $schemaName,
             ));
         } else {
             $this->logger->info(sprintf(
                 'Schema "%s" exists',
-                $schemaName
+                $schemaName,
             ));
         }
     }
 
+    /**
+     * @param array<mixed> $options
+     */
     private function ensureUserExists(string $userName, array $options): void
     {
         if (!$this->checker->existsUser($userName)) {
@@ -372,21 +384,21 @@ class DwhManager
             $this->connection->createUser(
                 $userName,
                 $password,
-                $options
+                $options,
             );
             $this->logger->info(sprintf(
                 'Created user "%s" with password "%s"',
                 $userName,
-                $password
+                $password,
             ));
         } else {
             $this->connection->alterUser(
                 $userName,
-                $options
+                $options,
             );
             $this->logger->info(sprintf(
                 'User "%s" already exists',
-                $userName
+                $userName,
             ));
         }
     }
@@ -404,7 +416,7 @@ class DwhManager
     {
         $query = sprintf(
             'SHOW DATABASES LIKE %s',
-            $this->connection->quote($this->database)
+            $this->connection->quote($this->database),
         );
         $databaseInfo = $this->connection->fetchAll($query);
         $retentionTime = $databaseInfo[0]['retention_time'];
@@ -412,7 +424,7 @@ class DwhManager
             $this->connection->query(sprintf(
                 'ALTER DATABASE %s SET DATA_RETENTION_TIME_IN_DAYS = %s;',
                 $this->connection->quoteIdentifier($this->database),
-                self::DATA_RETENTION_TIME_IN_DAYS
+                self::DATA_RETENTION_TIME_IN_DAYS,
             ));
         }
     }
@@ -424,7 +436,7 @@ class DwhManager
             'Reset password for user "%s" use "%s". ' .
             'Old password will keep working until you reset the password using provided link',
             $userName,
-            $password
+            $password,
         ));
     }
 }

@@ -16,7 +16,7 @@ class SchemaDefinitionTest extends TestCase
     {
         $this->assertSame(
             $expected,
-            SchemaDefinition::isSchemaNameValid($schemaName)
+            SchemaDefinition::isSchemaNameValid($schemaName),
         );
     }
 

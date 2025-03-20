@@ -10,14 +10,17 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Schema extends BaseConfig
 {
+    /**
+     * @param array<string> $config
+     */
     public function __construct(
         array $config,
-        ?ConfigurationInterface $configDefinition = null
+        ?ConfigurationInterface $configDefinition = null,
     ) {
         if (!$configDefinition instanceof SchemaDefinition) {
             throw new Exception(sprintf(
                 'Config definition must be %s',
-                SchemaDefinition::class
+                SchemaDefinition::class,
             ));
         }
         parent::__construct($config, $configDefinition);

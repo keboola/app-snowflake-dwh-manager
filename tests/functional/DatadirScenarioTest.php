@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Keboola\SnowflakeDwhManager\DatadirTests;
 
+use DateInterval;
+use DateTimeImmutable;
+use DateTimeZone;
 use Exception;
 use Keboola\DatadirTests\AbstractDatadirTestCase;
 use Keboola\DatadirTests\DatadirTestSpecification;
@@ -21,21 +24,20 @@ use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use RandomLib\Factory;
+use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Throwable;
+use const PHP_EOL;
 
 class DatadirScenarioTest extends AbstractDatadirTestCase
 {
-    /** @var LoggerInterface */
-    private static $logger;
+    private static LoggerInterface $logger;
 
-    /** @var NamingConventions */
-    private $namingConventions;
+    private NamingConventions $namingConventions;
 
     /**
-     * @param array $userConfig
-     * @return Config
+     * @param array<mixed> $userConfig
      */
     private function getConfigFromConfigArray(array $userConfig): Config
     {
@@ -82,7 +84,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array<mixed>>
      */
     private static function getSchema1Config(): array
     {
@@ -102,7 +104,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array<mixed>>
      */
     private static function getSchema2Config(): array
     {
@@ -126,7 +128,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array<mixed>>
      */
     private static function getTestConfigs(): array
     {
@@ -147,7 +149,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array<mixed>>
      */
     private static function getUser1Config(): array
     {
@@ -168,7 +170,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array<mixed>>
      */
     private static function getUser2Config(): array
     {
@@ -191,11 +193,17 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function provideConfigs(): array
     {
         return self::getTestConfigs();
     }
 
+    /**
+     * @param arra<mixed> $config
+     */
     private function runAppWithConfig(array $config): Process
     {
         self::$logger->log(Logger::DEBUG, $this->getDataSetAsString());
@@ -223,12 +231,12 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         if (!$fs->exists($script)) {
             throw new DatadirTestsException(sprintf(
                 'Cannot open script file "%s"',
-                $script
+                $script,
             ));
         }
 
         $runCommand = [
-            "php",
+            'php',
             $script,
         ];
         $runProcess = new Process($runCommand);
@@ -238,7 +246,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ]);
         $runProcess->setTimeout(0);
         $runProcess->run(function ($type, $buffer): void {
-            if (Process::ERR === $type) {
+            if ($type === Process::ERR) {
                 self::$logger->log(Logger::DEBUG, 'ERR > '.$buffer);
             } else {
                 self::$logger->log(Logger::DEBUG, 'OUT > '.$buffer);
@@ -248,6 +256,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
+     * @param array<mixed> $config
      * @dataProvider provideConfigs
      */
     public function testDatadir(array $config): void
@@ -283,7 +292,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         } catch (Throwable $e) {
             $this->assertContains(
                 'Object \'READ_SCHEMA_TABLE\' does not exist',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
 
@@ -318,7 +327,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         } catch (Throwable $e) {
             $this->assertContains(
                 'Insufficient privileges to operate on schema \'MY_DWH_SCHEMA\'',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
         $this->assertStringContainsString('resetPasswordToken', $process->getOutput());
@@ -333,8 +342,8 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User must not be allowed to use other user\'s schema');
         } catch (Throwable $e) {
             $this->assertContains(
-                "Object does not exist, or operation cannot be performed.",
-                $e->getMessage()
+                'Object does not exist, or operation cannot be performed.',
+                $e->getMessage(),
             );
         }
 
@@ -358,11 +367,11 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ");
         $this->assertSame(
             '{"runId":"dwhm_test_run_id"}',
-            $history[0]['QUERY_TAG']
+            $history[0]['QUERY_TAG'],
         );
         $this->assertGreaterThan(
-            (new \DateTimeImmutable())->sub(new \DateInterval('PT5M'))->setTimezone(new \DateTimeZone('UTC')),
-            (new \DateTimeImmutable($history[0]['END_TIME']))->setTimezone(new \DateTimeZone('UTC'))
+            (new DateTimeImmutable())->sub(new DateInterval('PT5M'))->setTimezone(new DateTimeZone('UTC')),
+            (new DateTimeImmutable($history[0]['END_TIME']))->setTimezone(new DateTimeZone('UTC')),
         );
         unset($masterConnection);
 
@@ -410,7 +419,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         } catch (Throwable $e) {
             $this->assertContains(
                 'Object \'READ_SCHEMA_TABLE\' does not exist',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
         try {
@@ -419,7 +428,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         } catch (Throwable $e) {
             $this->assertContains(
                 'Table \'WRITE_SCHEMA_TABLE\' does not exist',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
 
@@ -454,7 +463,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         } catch (Throwable $e) {
             $this->assertContains(
                 'Insufficient privileges to operate on schema \'MY_DWH_SCHEMA\'',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
 
@@ -485,8 +494,8 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->fail('User must not be allowed to use other user\'s schema');
         } catch (Throwable $e) {
             $this->assertContains(
-                "Object does not exist, or operation cannot be performed.",
-                $e->getMessage()
+                'Object does not exist, or operation cannot be performed.',
+                $e->getMessage(),
             );
         }
         unset($user2connection);
@@ -513,9 +522,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         $userConnection = $this->getConnectionForUserFromUserConfig($userConfigArray);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage(
-            'Query reached its timeout 2 second(s)" while executing query "call system$wait(10);'
+            'Query reached its timeout 2 second(s)" while executing query "call system$wait(10);',
         );
         $userConnection->query('call system$wait(10);');
     }
@@ -562,21 +571,21 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $namingConventions = new NamingConventions($prefix);
         $connection->query(
             'DROP SCHEMA IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getSchemaNameFromSchema($schema))
+            . $connection->quoteIdentifier($namingConventions->getSchemaNameFromSchema($schema)),
         );
         $connection->query(
             'DROP ROLE IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRwRoleFromSchema($schema))
+            . $connection->quoteIdentifier($namingConventions->getRwRoleFromSchema($schema)),
         );
         $connection->query(
             'DROP ROLE IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRoRoleFromSchema($schema))
+            . $connection->quoteIdentifier($namingConventions->getRoRoleFromSchema($schema)),
         );
         $connection->query(
             'DROP USER IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRwUserFromSchema($schema))
+            . $connection->quoteIdentifier($namingConventions->getRwUserFromSchema($schema)),
         );
-        self::$logger->log(Logger::DEBUG, sprintf('Dropped schema "%s"' . \PHP_EOL, $schema->getName()));
+        self::$logger->log(Logger::DEBUG, sprintf('Dropped schema "%s"' . PHP_EOL, $schema->getName()));
     }
 
     private static function dropCreatedUser(Connection $connection, string $prefix, User $user): void
@@ -585,16 +594,16 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         $connection->query(
             'DROP SCHEMA IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getOwnSchemaNameFromUser($user))
+            . $connection->quoteIdentifier($namingConventions->getOwnSchemaNameFromUser($user)),
         );
         $connection->query(
             'DROP ROLE IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRoleNameFromUser($user))
+            . $connection->quoteIdentifier($namingConventions->getRoleNameFromUser($user)),
         );
         $connection->query(
             'DROP USER IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getUsernameFromEmail($user))
+            . $connection->quoteIdentifier($namingConventions->getUsernameFromEmail($user)),
         );
-        self::$logger->log(Logger::DEBUG, sprintf('Dropped user "%s"' . \PHP_EOL, $user->getEmail()));
+        self::$logger->log(Logger::DEBUG, sprintf('Dropped user "%s"' . PHP_EOL, $user->getEmail()));
     }
 }

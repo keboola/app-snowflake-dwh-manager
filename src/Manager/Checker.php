@@ -10,15 +10,13 @@ use function array_filter;
 
 class Checker
 {
-    /** @var CheckerHelper */
-    private $checkerHelper;
+    private CheckerHelper $checkerHelper;
 
-    /** @var Connection */
-    private $connection;
+    private Connection $connection;
 
     public function __construct(
         CheckerHelper $checkerHelper,
-        Connection $connection
+        Connection $connection,
     ) {
         $this->checkerHelper = $checkerHelper;
         $this->connection = $connection;
@@ -42,7 +40,7 @@ class Checker
         } catch (Throwable $e) {
             $position = strpos(
                 $e->getMessage(),
-                'User \'"' . $userName . '"\' does not exist.'
+                'User \'"' . $userName . '"\' does not exist.',
             );
             if ($position !== false) {
                 return false;
@@ -59,6 +57,9 @@ class Checker
         return $this->connection->getCurrentRole();
     }
 
+    /**
+     * @return string[]
+     */
     public function getGrantedRolesOfRole(string $roleName): array
     {
         $grants = $this->connection->showGrantsToRole($roleName);
@@ -81,7 +82,7 @@ class Checker
                 $userMatches = $grant['grantee_name'] === $granteeName;
 
                 return $grantedToUser && $userMatches;
-            }
+            },
         );
         return count($roleGrants) >= 1;
     }

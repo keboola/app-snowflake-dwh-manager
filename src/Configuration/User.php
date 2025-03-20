@@ -10,14 +10,17 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class User extends BaseConfig
 {
+    /**
+     * @param array<string, string|array<mixed>> $config
+     */
     public function __construct(
         array $config,
-        ?ConfigurationInterface $configDefinition = null
+        ?ConfigurationInterface $configDefinition = null,
     ) {
         if (!$configDefinition instanceof UserDefinition) {
             throw new Exception(sprintf(
                 'Config definition must be %s',
-                UserDefinition::class
+                UserDefinition::class,
             ));
         }
         parent::__construct($config, $configDefinition);
@@ -37,7 +40,7 @@ class User extends BaseConfig
         $newReadOnlySchemaNames = $this->getSchemaNamesByPermission(UserDefinition::PERMISSION_READ);
         return array_unique(array_merge(
             array_values($legacyReadOnlySchemaNames),
-            array_values($newReadOnlySchemaNames)
+            array_values($newReadOnlySchemaNames),
         ));
     }
 
@@ -59,8 +62,8 @@ class User extends BaseConfig
                 $this->getValue(['schemas']),
                 function (array $schema) use ($permission) {
                     return $schema['permission'] === $permission;
-                }
-            )
+                },
+            ),
         );
     }
 

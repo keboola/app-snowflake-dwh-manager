@@ -6,6 +6,7 @@ namespace Keboola\SnowflakeDwhManager;
 
 use Keboola\Component\BaseComponent;
 use Keboola\Component\UserException;
+use Keboola\Db\Import\Exception;
 use Keboola\SnowflakeDwhManager\Manager\Checker;
 use Keboola\SnowflakeDwhManager\Manager\CheckerHelper;
 use Keboola\SnowflakeDwhManager\Manager\NamingConventions;
@@ -19,7 +20,7 @@ class Component extends BaseComponent
         $config = $this->getConfig();
         try {
             $connection = new Connection($config->getSnowflakeConnectionOptions());
-        } catch (\Keboola\Db\Import\Exception $e) {
+        } catch (Exception $e) {
             throw new UserException('Cannot connect to Snowflake, check your credentials.', 0, $e);
         }
         $prefix = $config->getDatabase();
@@ -29,7 +30,7 @@ class Component extends BaseComponent
             $this->getLogger(),
             new NamingConventions($prefix),
             $config->getWarehouse(),
-            $config->getDatabase()
+            $config->getDatabase(),
         );
         if ($config->isSchemaRow()) {
             $manager->checkSchema($config->getSchema());

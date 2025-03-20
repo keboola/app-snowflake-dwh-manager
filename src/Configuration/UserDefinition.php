@@ -92,11 +92,7 @@ class UserDefinition implements ConfigurationInterface
         return $this->buildRootDefinition($treeBuilder);
     }
 
-    /**
-     * @param mixed $permission
-     * @return bool
-     */
-    public static function isValidSchemaPermission($permission): bool
+    public static function isValidSchemaPermission(mixed $permission): bool
     {
         return in_array($permission, [
             self::PERMISSION_READ,

@@ -57,10 +57,7 @@ class SchemaDefinition implements ConfigurationInterface
         return $this->buildRootDefinition($treeBuilder);
     }
 
-    /**
-     * @param mixed $value
-     */
-    public static function isSchemaNameValid($value): bool
+    public static function isSchemaNameValid(mixed $value): bool
     {
         return preg_match('~' . self::REGEX_SCHEMA_NAME . '~', $value) === 1;
     }

@@ -6,8 +6,5 @@ namespace Keboola\SnowflakeDwhManager\Connection;
 
 interface Expr
 {
-    /**
-     * @return mixed
-     */
-    public function getValue();
+    public function getValue(): mixed;
 }

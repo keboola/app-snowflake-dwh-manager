@@ -13,6 +13,9 @@ use Symfony\Component\Config\Definition\Processor;
 class ConfigDefinitionTest extends TestCase
 {
     /**
+     * @param array<string, string|array<mixed>> $expected
+     * @param array<string, string|array<mixed>> $configurationData
+     *
      * @dataProvider provideValidConfigs
      */
     public function testValidConfigs(array $expected, array $configurationData): void
@@ -21,7 +24,7 @@ class ConfigDefinitionTest extends TestCase
         $processor = new Processor();
         $processedConfiguration = $processor->processConfiguration(
             $definition,
-            [$configurationData]
+            [$configurationData],
         );
         $this->assertSame($expected, $processedConfiguration);
     }
@@ -281,12 +284,13 @@ class ConfigDefinitionTest extends TestCase
     }
 
     /**
+     * @param array<string, array<mixed>> $configurationData
      * @dataProvider provideInvalidConfigs
      */
     public function testInvalidConfigs(
         string $expectedException,
         string $expectedExceptionMessage,
-        array $configurationData
+        array $configurationData,
     ): void {
         $definition = new ConfigDefinition();
         $processor = new Processor();
@@ -294,7 +298,7 @@ class ConfigDefinitionTest extends TestCase
         $this->expectExceptionMessage($expectedExceptionMessage);
         $processor->processConfiguration(
             $definition,
-            [$configurationData]
+            [$configurationData],
         );
     }
 

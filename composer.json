@@ -28,9 +28,7 @@
         "phpstan": "phpstan analyse ./src ./tests --level=max --no-progress -c phpstan.neon",
         "phpcs": "phpcs -n --ignore=vendor --extensions=php .",
         "phpcbf": "phpcbf -n --ignore=vendor --extensions=php .",
-        "phplint": "parallel-lint -j 10 --exclude vendor .",
         "build": [
-            "@phplint",
             "@phpcs",
             "@phpstan",
             "@tests"
@@ -49,6 +47,7 @@
     },
     "require-dev": {
         "keboola/coding-standard": "^15.0",
+        "keboola/datadir-tests": "^5.6",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^9.6"
