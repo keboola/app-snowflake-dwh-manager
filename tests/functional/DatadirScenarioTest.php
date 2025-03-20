@@ -223,7 +223,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         return $process;
     }
 
-    protected function runScript(string $datadirPath): Process
+    protected function runScript(string $datadirPath, ?string $runId = null): Process
     {
         $fs = new Filesystem();
 
