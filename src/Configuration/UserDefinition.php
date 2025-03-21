@@ -15,7 +15,7 @@ class UserDefinition implements ConfigurationInterface
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
+        $treeBuilder = new TreeBuilder('user');
         $this->buildRootDefinition($treeBuilder);
 
         return $treeBuilder;
@@ -24,7 +24,7 @@ class UserDefinition implements ConfigurationInterface
     private function buildRootDefinition(TreeBuilder $treeBuilder): ArrayNodeDefinition
     {
         /** @var ArrayNodeDefinition $root */
-        $root = $treeBuilder->root('user');
+        $root = $treeBuilder->getRootNode();
 
         // @formatter:off
         /** @noinspection NullPointerExceptionInspection */
@@ -36,7 +36,7 @@ class UserDefinition implements ConfigurationInterface
                     ->isRequired()
                 ->end()
                 ->arrayNode('business_schemas')
-                    ->setDeprecated('"business_schemas" is deprecated, use "schemas" instead')
+                    ->setDeprecated('"business_schemas" is deprecated, use "schemas" instead', '3.0.0')
                     ->scalarPrototype()
                     ->validate()
                         ->ifTrue(function ($value) {
@@ -88,7 +88,8 @@ class UserDefinition implements ConfigurationInterface
 
     public function getRootDefinition(): ArrayNodeDefinition
     {
-        $treeBuilder = new TreeBuilder();
+        $treeBuilder = new TreeBuilder('user');
+
         return $this->buildRootDefinition($treeBuilder);
     }
 

@@ -14,7 +14,7 @@ class SchemaDefinition implements ConfigurationInterface
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
+        $treeBuilder = new TreeBuilder('business_schema');
         $this->buildRootDefinition($treeBuilder);
 
         return $treeBuilder;
@@ -23,7 +23,7 @@ class SchemaDefinition implements ConfigurationInterface
     private function buildRootDefinition(TreeBuilder $treeBuilder): ArrayNodeDefinition
     {
         /** @var ArrayNodeDefinition $root */
-        $root = $treeBuilder->root('business_schema');
+        $root = $treeBuilder->getRootNode();
 
         // @formatter:off
         /** @noinspection NullPointerExceptionInspection */
@@ -53,7 +53,8 @@ class SchemaDefinition implements ConfigurationInterface
 
     public function getRootDefinition(): ArrayNodeDefinition
     {
-        $treeBuilder = new TreeBuilder();
+        $treeBuilder = new TreeBuilder('business_schema');
+
         return $this->buildRootDefinition($treeBuilder);
     }
 

@@ -3,6 +3,13 @@ services:
     platform: linux/amd64
     build:
       context: .
+    environment:
+      - KBC_RUNID
+      - HOST
+      - USER
+      - PASSWORD
+      - DATABASE
+      - WAREHOUSE
     volumes:
       - ./:/code
       - ./data:/data
