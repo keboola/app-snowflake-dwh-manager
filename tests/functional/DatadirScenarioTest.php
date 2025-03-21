@@ -90,11 +90,11 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     {
         return [
             'parameters' => [
-                'master_host' => getenv('HOST'),
-                'master_user' => getenv('USER'),
-                '#master_password' => getenv('PASSWORD'),
-                'master_database' => getenv('DATABASE'),
-                'warehouse' => getenv('WAREHOUSE'),
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema',
                     'reset_password' => true,
@@ -110,11 +110,11 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     {
         return [
             'parameters' => [
-                'master_host' => getenv('HOST'),
-                'master_user' => getenv('USER'),
-                '#master_password' => getenv('PASSWORD'),
-                'master_database' => getenv('DATABASE'),
-                'warehouse' => getenv('WAREHOUSE'),
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema2',
                 ],
@@ -155,11 +155,11 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     {
         return [
             'parameters' => [
-                'master_host' => getenv('HOST'),
-                'master_user' => getenv('USER'),
-                '#master_password' => getenv('PASSWORD'),
-                'master_database' => getenv('DATABASE'),
-                'warehouse' => getenv('WAREHOUSE'),
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [
                     'email' => 'user1@keboola.com',
                     'business_schemas' => ['my_dwh_schema','my_dwh_schema2'],
@@ -176,11 +176,11 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     {
         return [
             'parameters' => [
-                'master_host' => getenv('HOST'),
-                'master_user' => getenv('USER'),
-                '#master_password' => getenv('PASSWORD'),
-                'master_database' => getenv('DATABASE'),
-                'warehouse' => getenv('WAREHOUSE'),
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [
                     'email' => 'user2@keboola.com',
                     'business_schemas' => ['my_dwh_schema'],
@@ -290,8 +290,8 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user1connection->fetchAll('SELECT * FROM read_schema_table');
             $this->fail('User does not have access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
-            $this->assertContains(
-                'Object \'READ_SCHEMA_TABLE\' does not exist',
+            $this->assertStringContainsString(
+                'Object \'READ_SCHEMA_TABLE\' does not exist or not authorized',
                 $e->getMessage(),
             );
         }
@@ -325,7 +325,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user1connection->query('CREATE TABLE table_in_read_schema (id INT)');
             $this->fail('User must not be allowed to create a table in shared read only schema');
         } catch (Throwable $e) {
-            $this->assertContains(
+            $this->assertStringContainsString(
                 'Insufficient privileges to operate on schema \'MY_DWH_SCHEMA\'',
                 $e->getMessage(),
             );
@@ -341,8 +341,8 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($user2Schema));
             $this->fail('User must not be allowed to use other user\'s schema');
         } catch (Throwable $e) {
-            $this->assertContains(
-                'Object does not exist, or operation cannot be performed.',
+            $this->assertStringContainsString(
+                'Cannot access object or it does not exist',
                 $e->getMessage(),
             );
         }
@@ -417,8 +417,8 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user2connection->fetchAll('SELECT * FROM read_schema_table');
             $this->fail('User does not have access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
-            $this->assertContains(
-                'Object \'READ_SCHEMA_TABLE\' does not exist',
+            $this->assertStringContainsString(
+                'Object \'READ_SCHEMA_TABLE\' does not exist or not authorized',
                 $e->getMessage(),
             );
         }
@@ -426,7 +426,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user2connection->query('INSERT INTO write_schema_table VALUES (19)');
             $this->fail('User does not have write access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
-            $this->assertContains(
+            $this->assertStringContainsString(
                 'Table \'WRITE_SCHEMA_TABLE\' does not exist',
                 $e->getMessage(),
             );
@@ -461,7 +461,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user2connection->query('CREATE TABLE table_in_read_schema (id INT)');
             $this->fail('User must not be allowed to create a table in shared read only schema');
         } catch (Throwable $e) {
-            $this->assertContains(
+            $this->assertStringContainsString(
                 'Insufficient privileges to operate on schema \'MY_DWH_SCHEMA\'',
                 $e->getMessage(),
             );
@@ -493,8 +493,8 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($user1Schema));
             $this->fail('User must not be allowed to use other user\'s schema');
         } catch (Throwable $e) {
-            $this->assertContains(
-                'Object does not exist, or operation cannot be performed.',
+            $this->assertStringContainsString(
+                'Cannot access object or it does not exist',
                 $e->getMessage(),
             );
         }
@@ -550,7 +550,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $database = (string) getenv('DATABASE');
+        $database = (string) getenv('SNOWFLAKE_DATABASE');
         $this->namingConventions = new NamingConventions($database);
     }
 

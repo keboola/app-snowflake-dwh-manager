@@ -301,12 +301,6 @@ parameters:
 			path: tests/functional/DatadirScenarioTest.php
 
 		-
-			message: '#^Parameter \#2 \$haystack of method PHPUnit\\Framework\\Assert\:\:assertContains\(\) expects iterable, string given\.$#'
-			identifier: argument.type
-			count: 7
-			path: tests/functional/DatadirScenarioTest.php
-
-		-
 			message: '#^Parameter \$config of method Keboola\\SnowflakeDwhManager\\DatadirTests\\DatadirScenarioTest\:\:runAppWithConfig\(\) has invalid type Keboola\\SnowflakeDwhManager\\DatadirTests\\arra\.$#'
 			identifier: class.notFound
 			count: 1

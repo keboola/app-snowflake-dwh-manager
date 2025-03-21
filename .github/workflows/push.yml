@@ -16,11 +16,11 @@ env:
   DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
   # Snflk credentials
-  HOST: "kebooladev.snowflakecomputing.com"
-  WAREHOUSE: "DEV"
-  USER: "DWHM_TRAVIS_TESTS"
-  PASSWORD: "${{ secrets.SNOWFLAKE_PASSWORD }}"
-  DATABASE: "DWHM_TRAVIS_TESTS"
+  SNOWFLAKE_HOST: "kebooladev.snowflakecomputing.com"
+  SNOWFLAKE_WAREHOUSE: "DEV"
+  SNOWFLAKE_USER: "DWHM_TRAVIS_TESTS"
+  SNOWFLAKE_PASSWORD: "${{ secrets.SNOWFLAKE_PASSWORD }}"
+  SNOWFLAKE_DATABASE: "DWHM_TRAVIS_TESTS"
   KBC_RUNID: "runId"
 
   # Test KBC project
@@ -94,11 +94,11 @@ jobs:
         run: |
           docker run \
           -e KBC_RUNID \
-          -e HOST \
-          -e USER \
-          -e PASSWORD \
-          -e DATABASE \
-          -e WAREHOUSE \
+          -e SNOWFLAKE_HOST \
+          -e SNOWFLAKE_USER \
+          -e SNOWFLAKE_PASSWORD \
+          -e SNOWFLAKE_DATABASE \
+          -e SNOWFLAKE_WAREHOUSE \
           -e CI \
           ${{env.APP_IMAGE}} \
           composer ci
