@@ -39,8 +39,8 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->cannotBeEmpty()
                     ->isRequired()
                 ->end()
-                ->append((new SchemaDefinition())->getRootDefinition())
-                ->append((new UserDefinition())->getRootDefinition())
+                ->append(new SchemaDefinition()->getRootDefinition())
+                ->append(new UserDefinition()->getRootDefinition())
             ->end()
             ->validate()
                 ->ifTrue(function ($v) {
