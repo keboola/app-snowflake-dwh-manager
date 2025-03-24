@@ -381,20 +381,31 @@ class DwhManager
     private function ensureUserExists(string $userName, string $type, array $options, ?string $keyPair = null): void
     {
         if (!$this->checker->existsUser($userName)) {
-            $options['must_change_password'] = new ExprString('TRUE');
-            $password = $this->generatePassword();
+            if ($keyPair === null) {
+                $options['must_change_password'] = new ExprString('TRUE');
+
+                $password = $this->generatePassword();
+                $this->connection->createUser(
+                    $userName,
+                    $password,
+                    $type,
+                    $options,
+                );
+                $this->logger->info(sprintf(
+                    'Created user "%s" with password "%s"',
+                    $userName,
+                    $password,
+                ));
+
+                return;
+            }
+
             $this->connection->createUser(
                 $userName,
-                $password,
+                $keyPair,
                 $type,
                 $options,
-                $keyPair,
             );
-            $this->logger->info(sprintf(
-                'Created user "%s" with password "%s"',
-                $userName,
-                $password,
-            ));
         } else {
             $this->connection->alterUser(
                 $userName,
