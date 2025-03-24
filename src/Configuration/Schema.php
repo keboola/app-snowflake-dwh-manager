@@ -38,7 +38,7 @@ class Schema extends BaseConfig
 
     public function hasKeyPair(): bool
     {
-        return !empty($this->getStringValue(['key_pair'], ''));
+        return !empty($this->getValue(['key_pair']));
     }
 
     public function getKeyPair(): ?string
