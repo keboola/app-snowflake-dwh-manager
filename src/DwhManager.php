@@ -96,7 +96,6 @@ class DwhManager
 
     public function checkSchema(Schema $schema): void
     {
-        $this->connection->query('use role ACCOUNTADMIN');
         $schemaName = $this->namingConventions->getSchemaNameFromSchema($schema);
         $rwUser = $this->namingConventions->getRwUserFromSchema($schema);
         $rwRole = $this->namingConventions->getRwRoleFromSchema($schema);
