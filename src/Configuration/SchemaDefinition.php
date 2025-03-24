@@ -44,6 +44,9 @@ class SchemaDefinition implements ConfigurationInterface
                 ->booleanNode('reset_password')
                     ->defaultFalse()
                 ->end()
+                ->scalarNode('key_pair')
+                    ->defaultNull()
+                ->end()
             ->end()
         ->end()
         ;

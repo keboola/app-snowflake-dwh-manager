@@ -91,15 +91,36 @@ class Connection extends SnowflakeConnection
     /**
      * @param array<mixed> $otherOptions
      */
-    public function createUser(string $userName, string $password, array $otherOptions): void
-    {
+    public function createUser(
+        string $userName,
+        string $password,
+        string $type,
+        array $otherOptions,
+        ?string $keyPair = null,
+    ): void {
         $otherOptionsString = $this->createQuotedOptionsStringFromArray($otherOptions);
+
+        if ($keyPair !== null) {
+            $this->query(vsprintf(
+                'CREATE USER IF NOT EXISTS 
+            %s
+            RSA_PUBLIC_KEY = %s
+            TYPE = ' . $type . '
+            ' . $otherOptionsString,
+                [
+                    $this->quoteIdentifier($userName),
+                    $this->quote($keyPair),
+                ],
+            ));
+
+            return;
+        }
 
         $this->query(vsprintf(
             'CREATE USER IF NOT EXISTS 
             %s
             PASSWORD = %s
-            TYPE = LEGACY_SERVICE
+            TYPE = ' . $type . '
             ' . $otherOptionsString,
             [
                 $this->quoteIdentifier($userName),

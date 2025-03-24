@@ -36,6 +36,20 @@ class Schema extends BaseConfig
         return (int) $this->getValue(['statement_timeout']);
     }
 
+    public function hasKeyPair(): bool
+    {
+        return !empty($this->getStringValue(['key_pair'], ''));
+    }
+
+    public function getKeyPair(): ?string
+    {
+        if (!$this->hasKeyPair()) {
+            return null;
+        }
+
+        return $this->getStringValue(['key_pair']);
+    }
+
     public function isResetPassword(): bool
     {
         return (bool) $this->getValue(['reset_password']);

@@ -96,6 +96,7 @@ class DwhManager
 
     public function checkSchema(Schema $schema): void
     {
+        $this->connection->query('use role ACCOUNTADMIN');
         $schemaName = $this->namingConventions->getSchemaNameFromSchema($schema);
         $rwUser = $this->namingConventions->getRwUserFromSchema($schema);
         $rwRole = $this->namingConventions->getRwRoleFromSchema($schema);
@@ -118,7 +119,8 @@ class DwhManager
         $this->ensureRoleHasSchemaPrivileges($roRole, self::PRIVILEGES_SCHEMA_READ_ONLY, $schemaName);
         $this->ensureRoleHasFutureObjectPrivilegesOnSchema($roRole, self::PRIVILEGES_OBJECT_READ, $schemaName);
 
-        $this->ensureUserExists($rwUser, [
+        $type = $schema->hasKeyPair() ? 'SERVICE' : 'LEGACY_SERVICE';
+        $this->ensureUserExists($rwUser, $type, [
             'default_role' => $rwRole,
             'default_warehouse' => $this->warehouse,
             'default_namespace' => new ExprString(
@@ -127,7 +129,7 @@ class DwhManager
                 $this->connection->quoteIdentifier($schemaName),
             ),
             'statement_timeout_in_seconds' => new ExprInt($schema->getStatementTimeout()),
-        ]);
+        ], $schema->getKeyPair());
         if ($schema->isResetPassword()) {
             $this->ensureUserResetPassword($rwUser);
         }
@@ -156,7 +158,7 @@ class DwhManager
 
         // create user itself and grant them their role
         $userName = $this->namingConventions->getUsernameFromEmail($user);
-        $this->ensureUserExists($userName, [
+        $this->ensureUserExists($userName, 'PERSON', [
             'default_role' => $userRole,
             'default_warehouse' => $this->warehouse,
             'default_namespace' => new ExprString(
@@ -376,7 +378,7 @@ class DwhManager
     /**
      * @param array<mixed> $options
      */
-    private function ensureUserExists(string $userName, array $options): void
+    private function ensureUserExists(string $userName, string $type, array $options, ?string $keyPair = null): void
     {
         if (!$this->checker->existsUser($userName)) {
             $options['must_change_password'] = new ExprString('TRUE');
@@ -384,7 +386,9 @@ class DwhManager
             $this->connection->createUser(
                 $userName,
                 $password,
+                $type,
                 $options,
+                $keyPair,
             );
             $this->logger->info(sprintf(
                 'Created user "%s" with password "%s"',
