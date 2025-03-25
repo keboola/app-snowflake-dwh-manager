@@ -179,8 +179,6 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         $userName = implode('_', [$schema3config->getDatabase(), $schema3config->getSchema()->getName()]);
 
-        var_dump($userName);
-
         /** @var array<int, array<string, string|int>> $users */
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
 

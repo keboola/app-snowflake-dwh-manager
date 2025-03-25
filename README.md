@@ -128,7 +128,7 @@ Clone this repository and init the workspace with following command:
 ```
 git clone https://github.com/keboola/app-snowflake-dwh-manager
 cd app-snowflake-dwh-manager
-docker-compose build #On ARM: "DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose build"
+docker-compose build
 docker-compose run --rm dev composer install --no-scripts
 ```
 
