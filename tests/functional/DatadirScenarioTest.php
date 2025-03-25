@@ -123,7 +123,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
-     * @return array<string, array<string, string|array<string, string>>>
+     * @return array<string, array<mixed>>
      */
     private static function getSchema3Config(): array
     {
@@ -136,7 +136,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema3',
-                    'key_pair' => getenv('SNOWFLAKE_SCHEMA_KEYPAIR')
+                    'key_pair' => getenv('SNOWFLAKE_SCHEMA_KEYPAIR'),
                 ],
             ],
         ];
@@ -179,7 +179,10 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         $user = implode('_', [$schema3config->getDatabase(), $schema3config->getSchema()->getName()]);
 
-        self::assertSame('SERVICE', $connection->fetchAll('SHOW USERS LIKE \'%' . $user . '%\' LIMIT 1')[0]['type']);
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $user . '%\' LIMIT 1');
+
+        self::assertSame('SERVICE', $users[0]['type']);
     }
 
     /**
