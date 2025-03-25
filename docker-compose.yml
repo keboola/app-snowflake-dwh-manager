@@ -10,6 +10,7 @@ services:
       - SNOWFLAKE_PASSWORD
       - SNOWFLAKE_DATABASE
       - SNOWFLAKE_WAREHOUSE
+      - SNOWFLAKE_SCHEMA_KEYPAIR
     volumes:
       - ./:/code
       - ./data:/data
