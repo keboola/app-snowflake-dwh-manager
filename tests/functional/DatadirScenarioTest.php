@@ -177,10 +177,12 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         $this->runAppWithConfig(self::getSchema3Config());
 
-        $user = implode('_', [$schema3config->getDatabase(), $schema3config->getSchema()->getName()]);
+        $userName = implode('_', [$schema3config->getDatabase(), $schema3config->getSchema()->getName()]);
+
+        var_dump($userName);
 
         /** @var array<int, array<string, string|int>> $users */
-        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $user . '%\' LIMIT 1');
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
 
         self::assertSame('SERVICE', $users[0]['type']);
     }
