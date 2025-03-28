@@ -10,14 +10,17 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Schema extends BaseConfig
 {
+    /**
+     * @param array<string> $config
+     */
     public function __construct(
         array $config,
-        ?ConfigurationInterface $configDefinition = null
+        ?ConfigurationInterface $configDefinition = null,
     ) {
         if (!$configDefinition instanceof SchemaDefinition) {
             throw new Exception(sprintf(
                 'Config definition must be %s',
-                SchemaDefinition::class
+                SchemaDefinition::class,
             ));
         }
         parent::__construct($config, $configDefinition);
@@ -31,6 +34,20 @@ class Schema extends BaseConfig
     public function getStatementTimeout(): int
     {
         return (int) $this->getValue(['statement_timeout']);
+    }
+
+    public function hasKeyPair(): bool
+    {
+        return !empty($this->getValue(['key_pair']));
+    }
+
+    public function getKeyPair(): ?string
+    {
+        if (!$this->hasKeyPair()) {
+            return null;
+        }
+
+        return $this->getStringValue(['key_pair']);
     }
 
     public function isResetPassword(): bool

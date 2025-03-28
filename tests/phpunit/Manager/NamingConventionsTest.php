@@ -46,7 +46,7 @@ class NamingConventionsTest extends TestCase
 
         $this->assertSame(
             'USER_EXAMPLE_COM',
-            $namingConventions->getOwnSchemaNameFromUser($this->getUser())
+            $namingConventions->getOwnSchemaNameFromUser($this->getUser()),
         );
     }
 
@@ -56,7 +56,7 @@ class NamingConventionsTest extends TestCase
 
         $this->assertSame(
             'DWHM_TEST_MY_SCHEMA_NAME_RO',
-            $namingConventions->getRoRoleFromSchema($this->getSchema())
+            $namingConventions->getRoRoleFromSchema($this->getSchema()),
         );
     }
 
@@ -66,7 +66,7 @@ class NamingConventionsTest extends TestCase
 
         $this->assertSame(
             'DWHM_TEST_MY_SCHEMA_NAME_RO',
-            $namingConventions->getRoRoleFromSchemaName($this->getSchema()->getName())
+            $namingConventions->getRoRoleFromSchemaName($this->getSchema()->getName()),
         );
     }
 
@@ -76,7 +76,7 @@ class NamingConventionsTest extends TestCase
 
         $this->assertSame(
             'DWHM_TEST_USER_EXAMPLE_COM',
-            $namingConventions->getRoleNameFromUser($this->getUser())
+            $namingConventions->getRoleNameFromUser($this->getUser()),
         );
     }
 
@@ -86,7 +86,7 @@ class NamingConventionsTest extends TestCase
 
         $this->assertSame(
             'DWHM_TEST_MY_SCHEMA_NAME_RW',
-            $namingConventions->getRwRoleFromSchema($this->getSchema())
+            $namingConventions->getRwRoleFromSchema($this->getSchema()),
         );
     }
 
@@ -96,7 +96,7 @@ class NamingConventionsTest extends TestCase
 
         $this->assertSame(
             'DWHM_TEST_MY_SCHEMA_NAME',
-            $namingConventions->getRwUserFromSchema($this->getSchema())
+            $namingConventions->getRwUserFromSchema($this->getSchema()),
         );
     }
 
@@ -106,7 +106,7 @@ class NamingConventionsTest extends TestCase
 
         $this->assertSame(
             'MY_SCHEMA_NAME',
-            $namingConventions->getSchemaNameFromSchema($this->getSchema())
+            $namingConventions->getSchemaNameFromSchema($this->getSchema()),
         );
     }
 
@@ -116,7 +116,7 @@ class NamingConventionsTest extends TestCase
 
         $this->assertSame(
             'DWHM_TEST_USER_EXAMPLE_COM',
-            $namingConventions->getUsernameFromEmail($this->getUser())
+            $namingConventions->getUsernameFromEmail($this->getUser()),
         );
     }
 
@@ -126,7 +126,7 @@ class NamingConventionsTest extends TestCase
 
         $this->assertSame(
             'DWHM_TEST_MY_SCHEMA_NAME1_RW',
-            $namingConventions->getRwRoleFromSchemaName('my_schema_name1')
+            $namingConventions->getRwRoleFromSchemaName('my_schema_name1'),
         );
     }
 
@@ -138,7 +138,7 @@ class NamingConventionsTest extends TestCase
         $namingConventions = new NamingConventions('DWHM_TEST');
         $this->assertSame(
             $expected,
-            $namingConventions->sanitizeAsIdentifier($input)
+            $namingConventions->sanitizeAsIdentifier($input),
         );
     }
 
@@ -173,7 +173,7 @@ class NamingConventionsTest extends TestCase
             [
                 'schema_name' => 'my_schema_name',
             ],
-            new SchemaDefinition()
+            new SchemaDefinition(),
         );
     }
 
@@ -185,7 +185,7 @@ class NamingConventionsTest extends TestCase
                 'business_schemas' => ['my_schema_name2'],
                 'disabled' => false,
             ],
-            new UserDefinition()
+            new UserDefinition(),
         );
     }
 }

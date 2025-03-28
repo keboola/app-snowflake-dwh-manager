@@ -11,6 +11,8 @@ use PHPUnit\Framework\TestCase;
 class UserTest extends TestCase
 {
     /**
+     * @param string[] $expected
+     * @param array<string, string|array<string>> $config
      * @dataProvider provideConfigsForGetReadOnlySchema
      */
     public function testGetReadOnlySchemas(array $expected, array $config): void
@@ -120,6 +122,8 @@ class UserTest extends TestCase
     }
 
     /**
+     * @param string[] $expected
+     * @param array<string, string|array<string>> $config
      * @dataProvider provideConfigsGetWriteSchemas
      */
     public function testGetWriteSchemas(array $expected, array $config): void

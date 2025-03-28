@@ -11,12 +11,14 @@ use PHPUnit\Framework\TestCase;
 class CheckerHelperTest extends TestCase
 {
     /**
+     * @param array<mixed> $expected
+     * @param array<mixed> $grants
      * @dataProvider provideGrantsArrayToFilterByObjectType
      */
     public function testGetGrantsOfObjectTypeFromGrantsArray(
         array $expected,
         string $objectType,
-        array $grants
+        array $grants,
     ): void {
         $helper = new CheckerHelper();
         $actual = $helper->filterGrantsByObjectTypeGrantedOn($objectType, $grants);
@@ -24,6 +26,9 @@ class CheckerHelperTest extends TestCase
         $this->assertSame($expected, $actual);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function provideGrantsArrayToFilterByObjectType(): array
     {
         $grantsFromDb = [
@@ -105,7 +110,10 @@ class CheckerHelperTest extends TestCase
     }
 
     /**
-     * @dataProvider  provideGrantsArrayToMap
+     * @param array<mixed> $expected
+     * @param array<mixed> $grants
+     *
+     * @dataProvider provideGrantsArrayToMap
      */
     public function testMapGrantsToNames(array $expected, array $grants): void
     {
@@ -115,6 +123,9 @@ class CheckerHelperTest extends TestCase
         $this->assertSame($expected, $actual);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function provideGrantsArrayToMap(): array
     {
         $grantsFromDb = [
@@ -184,6 +195,9 @@ class CheckerHelperTest extends TestCase
         $this->assertSame($expected, $actual);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function provideDataForStripQuotes(): array
     {
         return [

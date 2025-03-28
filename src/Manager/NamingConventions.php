@@ -13,11 +13,10 @@ class NamingConventions
     private const SUFFIX_ROLE_RO = '_RO';
     private const SUFFIX_ROLE_RW = '_RW';
 
-    /** @var string */
-    private $uniquePrefix;
+    private string $uniquePrefix;
 
     public function __construct(
-        string $uniquePrefix
+        string $uniquePrefix,
     ) {
         $this->uniquePrefix = $uniquePrefix;
     }

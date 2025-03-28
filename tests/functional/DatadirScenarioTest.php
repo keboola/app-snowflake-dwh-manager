@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Keboola\SnowflakeDwhManager\DatadirTests;
 
+use DateInterval;
+use DateTimeImmutable;
+use DateTimeZone;
 use Exception;
 use Keboola\DatadirTests\AbstractDatadirTestCase;
 use Keboola\DatadirTests\DatadirTestSpecification;
@@ -21,21 +24,20 @@ use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use RandomLib\Factory;
+use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Throwable;
+use const PHP_EOL;
 
 class DatadirScenarioTest extends AbstractDatadirTestCase
 {
-    /** @var LoggerInterface */
-    private static $logger;
+    private static LoggerInterface $logger;
 
-    /** @var NamingConventions */
-    private $namingConventions;
+    private NamingConventions $namingConventions;
 
     /**
-     * @param array $userConfig
-     * @return Config
+     * @param array<mixed> $userConfig
      */
     private function getConfigFromConfigArray(array $userConfig): Config
     {
@@ -82,17 +84,17 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array<mixed>>
      */
     private static function getSchema1Config(): array
     {
         return [
             'parameters' => [
-                'master_host' => getenv('HOST'),
-                'master_user' => getenv('USER'),
-                '#master_password' => getenv('PASSWORD'),
-                'master_database' => getenv('DATABASE'),
-                'warehouse' => getenv('WAREHOUSE'),
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema',
                     'reset_password' => true,
@@ -102,19 +104,39 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array<mixed>>
      */
     private static function getSchema2Config(): array
     {
         return [
             'parameters' => [
-                'master_host' => getenv('HOST'),
-                'master_user' => getenv('USER'),
-                '#master_password' => getenv('PASSWORD'),
-                'master_database' => getenv('DATABASE'),
-                'warehouse' => getenv('WAREHOUSE'),
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema2',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getSchema3Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'business_schema' => [
+                    'schema_name' => 'my_dwh_schema3',
+                    'key_pair' => getenv('SNOWFLAKE_SCHEMA_KEYPAIR'),
                 ],
             ],
         ];
@@ -126,7 +148,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array<mixed>>
      */
     private static function getTestConfigs(): array
     {
@@ -146,18 +168,52 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ];
     }
 
+    public function testCreateSchemaWithKeyPairUser(): void
+    {
+        $schema3config = $this->getConfigFromConfigArray(self::getSchema3Config());
+        $connection = $this->getConnectionForConfig($schema3config);
+
+        self::dropCreatedSchema($connection, $schema3config->getDatabase(), $schema3config->getSchema());
+
+        $this->runAppWithConfig(self::getSchema3Config());
+
+        $userName = implode('_', [$schema3config->getDatabase(), $schema3config->getSchema()->getName()]);
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+
+        self::assertSame('SERVICE', $users[0]['type']);
+    }
+
+    public function testCreateUserAsPersonType(): void
+    {
+        $user3config = $this->getConfigFromConfigArray(self::getUser3Config());
+        $connection = $this->getConnectionForConfig($user3config);
+
+        self::dropCreatedUser($connection, $user3config->getDatabase(), $user3config->getUser());
+
+        $this->runAppWithConfig(self::getUser3Config());
+
+        $userName = new NamingConventions($user3config->getDatabase())->getUsernameFromEmail($user3config->getUser());
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+
+        self::assertSame('PERSON', $users[0]['type']);
+    }
+
     /**
-     * @return array
+     * @return array<string, array<mixed>>
      */
     private static function getUser1Config(): array
     {
         return [
             'parameters' => [
-                'master_host' => getenv('HOST'),
-                'master_user' => getenv('USER'),
-                '#master_password' => getenv('PASSWORD'),
-                'master_database' => getenv('DATABASE'),
-                'warehouse' => getenv('WAREHOUSE'),
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [
                     'email' => 'user1@keboola.com',
                     'business_schemas' => ['my_dwh_schema','my_dwh_schema2'],
@@ -168,17 +224,17 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array<mixed>>
      */
     private static function getUser2Config(): array
     {
         return [
             'parameters' => [
-                'master_host' => getenv('HOST'),
-                'master_user' => getenv('USER'),
-                '#master_password' => getenv('PASSWORD'),
-                'master_database' => getenv('DATABASE'),
-                'warehouse' => getenv('WAREHOUSE'),
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [
                     'email' => 'user2@keboola.com',
                     'business_schemas' => ['my_dwh_schema'],
@@ -191,11 +247,38 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ];
     }
 
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getUser3Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'user' => [
+                    'email' => 'user3@keboola.com',
+                    'business_schemas' => ['my_dwh_schema3'],
+                    'disabled' => false,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<mixed>
+     */
     public function provideConfigs(): array
     {
         return self::getTestConfigs();
     }
 
+    /**
+     * @param arra<mixed> $config
+     */
     private function runAppWithConfig(array $config): Process
     {
         self::$logger->log(Logger::DEBUG, $this->getDataSetAsString());
@@ -215,7 +298,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         return $process;
     }
 
-    protected function runScript(string $datadirPath): Process
+    protected function runScript(string $datadirPath, ?string $runId = null): Process
     {
         $fs = new Filesystem();
 
@@ -223,12 +306,12 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         if (!$fs->exists($script)) {
             throw new DatadirTestsException(sprintf(
                 'Cannot open script file "%s"',
-                $script
+                $script,
             ));
         }
 
         $runCommand = [
-            "php",
+            'php',
             $script,
         ];
         $runProcess = new Process($runCommand);
@@ -238,7 +321,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ]);
         $runProcess->setTimeout(0);
         $runProcess->run(function ($type, $buffer): void {
-            if (Process::ERR === $type) {
+            if ($type === Process::ERR) {
                 self::$logger->log(Logger::DEBUG, 'ERR > '.$buffer);
             } else {
                 self::$logger->log(Logger::DEBUG, 'OUT > '.$buffer);
@@ -248,6 +331,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     }
 
     /**
+     * @param array<mixed> $config
      * @dataProvider provideConfigs
      */
     public function testDatadir(array $config): void
@@ -281,9 +365,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user1connection->fetchAll('SELECT * FROM read_schema_table');
             $this->fail('User does not have access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
-            $this->assertContains(
-                'Object \'READ_SCHEMA_TABLE\' does not exist',
-                $e->getMessage()
+            $this->assertStringContainsString(
+                'Object \'READ_SCHEMA_TABLE\' does not exist or not authorized',
+                $e->getMessage(),
             );
         }
 
@@ -316,9 +400,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user1connection->query('CREATE TABLE table_in_read_schema (id INT)');
             $this->fail('User must not be allowed to create a table in shared read only schema');
         } catch (Throwable $e) {
-            $this->assertContains(
+            $this->assertStringContainsString(
                 'Insufficient privileges to operate on schema \'MY_DWH_SCHEMA\'',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
         $this->assertStringContainsString('resetPasswordToken', $process->getOutput());
@@ -332,9 +416,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($user2Schema));
             $this->fail('User must not be allowed to use other user\'s schema');
         } catch (Throwable $e) {
-            $this->assertContains(
-                "Object does not exist, or operation cannot be performed.",
-                $e->getMessage()
+            $this->assertStringContainsString(
+                'Cannot access object or it does not exist',
+                $e->getMessage(),
             );
         }
 
@@ -358,11 +442,11 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ");
         $this->assertSame(
             '{"runId":"dwhm_test_run_id"}',
-            $history[0]['QUERY_TAG']
+            $history[0]['QUERY_TAG'],
         );
         $this->assertGreaterThan(
-            (new \DateTimeImmutable())->sub(new \DateInterval('PT5M'))->setTimezone(new \DateTimeZone('UTC')),
-            (new \DateTimeImmutable($history[0]['END_TIME']))->setTimezone(new \DateTimeZone('UTC'))
+            (new DateTimeImmutable())->sub(new DateInterval('PT5M'))->setTimezone(new DateTimeZone('UTC')),
+            (new DateTimeImmutable($history[0]['END_TIME']))->setTimezone(new DateTimeZone('UTC')),
         );
         unset($masterConnection);
 
@@ -408,18 +492,18 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user2connection->fetchAll('SELECT * FROM read_schema_table');
             $this->fail('User does not have access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
-            $this->assertContains(
-                'Object \'READ_SCHEMA_TABLE\' does not exist',
-                $e->getMessage()
+            $this->assertStringContainsString(
+                'Object \'READ_SCHEMA_TABLE\' does not exist or not authorized',
+                $e->getMessage(),
             );
         }
         try {
             $user2connection->query('INSERT INTO write_schema_table VALUES (19)');
             $this->fail('User does not have write access to generated schema without re-running the schema config');
         } catch (Throwable $e) {
-            $this->assertContains(
+            $this->assertStringContainsString(
                 'Table \'WRITE_SCHEMA_TABLE\' does not exist',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
 
@@ -452,9 +536,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user2connection->query('CREATE TABLE table_in_read_schema (id INT)');
             $this->fail('User must not be allowed to create a table in shared read only schema');
         } catch (Throwable $e) {
-            $this->assertContains(
+            $this->assertStringContainsString(
                 'Insufficient privileges to operate on schema \'MY_DWH_SCHEMA\'',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
 
@@ -484,9 +568,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($user1Schema));
             $this->fail('User must not be allowed to use other user\'s schema');
         } catch (Throwable $e) {
-            $this->assertContains(
-                "Object does not exist, or operation cannot be performed.",
-                $e->getMessage()
+            $this->assertStringContainsString(
+                'Cannot access object or it does not exist',
+                $e->getMessage(),
             );
         }
         unset($user2connection);
@@ -513,9 +597,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         $userConnection = $this->getConnectionForUserFromUserConfig($userConfigArray);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage(
-            'Query reached its timeout 2 second(s)" while executing query "call system$wait(10);'
+            'Query reached its timeout 2 second(s)" while executing query "call system$wait(10);',
         );
         $userConnection->query('call system$wait(10);');
     }
@@ -541,7 +625,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $database = (string) getenv('DATABASE');
+        $database = (string) getenv('SNOWFLAKE_DATABASE');
         $this->namingConventions = new NamingConventions($database);
     }
 
@@ -562,21 +646,21 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $namingConventions = new NamingConventions($prefix);
         $connection->query(
             'DROP SCHEMA IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getSchemaNameFromSchema($schema))
+            . $connection->quoteIdentifier($namingConventions->getSchemaNameFromSchema($schema)),
         );
         $connection->query(
             'DROP ROLE IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRwRoleFromSchema($schema))
+            . $connection->quoteIdentifier($namingConventions->getRwRoleFromSchema($schema)),
         );
         $connection->query(
             'DROP ROLE IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRoRoleFromSchema($schema))
+            . $connection->quoteIdentifier($namingConventions->getRoRoleFromSchema($schema)),
         );
         $connection->query(
             'DROP USER IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRwUserFromSchema($schema))
+            . $connection->quoteIdentifier($namingConventions->getRwUserFromSchema($schema)),
         );
-        self::$logger->log(Logger::DEBUG, sprintf('Dropped schema "%s"' . \PHP_EOL, $schema->getName()));
+        self::$logger->log(Logger::DEBUG, sprintf('Dropped schema "%s"' . PHP_EOL, $schema->getName()));
     }
 
     private static function dropCreatedUser(Connection $connection, string $prefix, User $user): void
@@ -585,16 +669,16 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         $connection->query(
             'DROP SCHEMA IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getOwnSchemaNameFromUser($user))
+            . $connection->quoteIdentifier($namingConventions->getOwnSchemaNameFromUser($user)),
         );
         $connection->query(
             'DROP ROLE IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRoleNameFromUser($user))
+            . $connection->quoteIdentifier($namingConventions->getRoleNameFromUser($user)),
         );
         $connection->query(
             'DROP USER IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getUsernameFromEmail($user))
+            . $connection->quoteIdentifier($namingConventions->getUsernameFromEmail($user)),
         );
-        self::$logger->log(Logger::DEBUG, sprintf('Dropped user "%s"' . \PHP_EOL, $user->getEmail()));
+        self::$logger->log(Logger::DEBUG, sprintf('Dropped user "%s"' . PHP_EOL, $user->getEmail()));
     }
 }

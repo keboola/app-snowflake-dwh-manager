@@ -6,11 +6,10 @@ namespace Keboola\SnowflakeDwhManager\Connection;
 
 class ExprInt implements Expr
 {
-    /** @var int */
-    private $value;
+    private int $value;
 
     public function __construct(
-        int $value
+        int $value,
     ) {
         $this->value = $value;
     }

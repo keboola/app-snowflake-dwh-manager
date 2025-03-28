@@ -14,7 +14,7 @@ class SchemaDefinition implements ConfigurationInterface
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
+        $treeBuilder = new TreeBuilder('business_schema');
         $this->buildRootDefinition($treeBuilder);
 
         return $treeBuilder;
@@ -23,7 +23,7 @@ class SchemaDefinition implements ConfigurationInterface
     private function buildRootDefinition(TreeBuilder $treeBuilder): ArrayNodeDefinition
     {
         /** @var ArrayNodeDefinition $root */
-        $root = $treeBuilder->root('business_schema');
+        $root = $treeBuilder->getRootNode();
 
         // @formatter:off
         /** @noinspection NullPointerExceptionInspection */
@@ -44,6 +44,9 @@ class SchemaDefinition implements ConfigurationInterface
                 ->booleanNode('reset_password')
                     ->defaultFalse()
                 ->end()
+                ->scalarNode('key_pair')
+                    ->defaultNull()
+                ->end()
             ->end()
         ->end()
         ;
@@ -53,14 +56,12 @@ class SchemaDefinition implements ConfigurationInterface
 
     public function getRootDefinition(): ArrayNodeDefinition
     {
-        $treeBuilder = new TreeBuilder();
+        $treeBuilder = new TreeBuilder('business_schema');
+
         return $this->buildRootDefinition($treeBuilder);
     }
 
-    /**
-     * @param mixed $value
-     */
-    public static function isSchemaNameValid($value): bool
+    public static function isSchemaNameValid(mixed $value): bool
     {
         return preg_match('~' . self::REGEX_SCHEMA_NAME . '~', $value) === 1;
     }
