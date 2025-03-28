@@ -136,6 +136,9 @@ docker-compose run --rm dev composer install --no-scripts
 
 Functional tests need `.env` file with Snowflake server credentials. You can create this file from `.env.dist`. By default scenario tests present the component output in console. On Travis, this behavior is suppressed using environment variable `CI=true` to prevent leaking test user credentials into the build log. 
 
+Public key used in tests for user creation has to be generated and placed in `SNOWFLAKE_SCHEMA_KEYPAIR` environment.
+Take a look how to generate keys: https://docs.snowflake.com/en/user-guide/key-pair-auth#generate-the-private-key
+
 Run the test suite using this command:
 
 ```
