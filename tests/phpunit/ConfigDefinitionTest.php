@@ -54,6 +54,7 @@ class ConfigDefinitionTest extends TestCase
                             'disabled' => false,
                             'reset_password' => false,
                         ],
+                        '#master_key_pair' => null,
                     ],
                 ],
                 [
@@ -92,6 +93,7 @@ class ConfigDefinitionTest extends TestCase
                             'statement_timeout' => 10800,
                             'disabled' => false,
                         ],
+                        '#master_key_pair' => null,
                     ],
                 ],
                 [
@@ -133,6 +135,7 @@ class ConfigDefinitionTest extends TestCase
                             'disabled' => false,
                             'reset_password' => false,
                         ],
+                        '#master_key_pair' => null,
                     ],
                 ],
                 [
@@ -174,6 +177,7 @@ class ConfigDefinitionTest extends TestCase
                             'disabled' => false,
                             'reset_password' => false,
                         ],
+                        '#master_key_pair' => null,
                     ],
                 ],
                 [
@@ -208,6 +212,7 @@ class ConfigDefinitionTest extends TestCase
                             'reset_password' => false,
                             'key_pair' => null,
                         ],
+                        '#master_key_pair' => null,
                     ],
                 ],
                 [
@@ -237,6 +242,7 @@ class ConfigDefinitionTest extends TestCase
                             'reset_password' => false,
                             'key_pair' => null,
                         ],
+                        '#master_key_pair' => null,
                     ],
                 ],
                 [
@@ -267,6 +273,7 @@ class ConfigDefinitionTest extends TestCase
                             'statement_timeout' => 10800,
                             'key_pair' => null,
                         ],
+                        '#master_key_pair' => null,
                     ],
                 ],
                 [
@@ -460,22 +467,6 @@ class ConfigDefinitionTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => '',
                         '#master_password' => 'password',
-                        'master_database' => 'database',
-                        'warehouse' => 'warehouse',
-                        'user' => [
-                            'email' => 'test@example.com',
-                        ],
-                    ],
-                ],
-            ],
-            'empty master_password' => [
-                InvalidConfigurationException::class,
-                'The path "root.parameters.#master_password" cannot contain an empty value',
-                [
-                    'parameters' => [
-                        'master_host' => 'host',
-                        'master_user' => 'user',
-                        '#master_password' => '',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
