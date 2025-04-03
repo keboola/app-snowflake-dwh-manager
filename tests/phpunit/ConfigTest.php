@@ -68,9 +68,9 @@ class ConfigTest extends TestCase
      * @param class-string<Throwable> $exceptionClass
      * @param array<string, array<class-string|string|array<mixed>>> $rawConfig
      *
-     * @dataProvider configsDataProvider
+     * @dataProvider invalidConfigsDataProvider
      */
-    public function testConfigs(string $exceptionClass, string $exceptionMessage, array $rawConfig): void
+    public function testInvalidConfigs(string $exceptionClass, string $exceptionMessage, array $rawConfig): void
     {
         self::expectException($exceptionClass);
         self::expectExceptionMessage($exceptionMessage);
@@ -80,7 +80,7 @@ class ConfigTest extends TestCase
     /**
      * @return array<string, array<class-string|string|array<mixed>>>
      */
-    public static function configsDataProvider(): array
+    public static function invalidConfigsDataProvider(): array
     {
         return [
             'empty master_password & master_key_pair' => [
@@ -91,6 +91,23 @@ class ConfigTest extends TestCase
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => '',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                        ],
+                    ],
+                ],
+            ],
+            'master_password & master_key_pair' => [
+                UserException::class,
+                'Both "password" and "keyPair" cannot be set at the same time.',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'gr3eatpassword',
+                        '#master_key_pair' => getenv('SNOWFLAKE_KEYPAIR'),
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
