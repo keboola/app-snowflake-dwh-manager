@@ -142,6 +142,26 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ];
     }
 
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getSchema4Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_key_pair' => getenv('SNOWFLAKE_KEYPAIR'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'business_schema' => [
+                    'schema_name' => 'my_dwh_schema4',
+                    'key_pair' => getenv('SNOWFLAKE_SCHEMA_KEYPAIR'),
+                ],
+            ],
+        ];
+    }
+
     protected function getScript(): string
     {
         return $this->getTestFileDir() . '/../../src/run.php';
@@ -166,6 +186,23 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 self::getUser2Config(),
             ],
         ];
+    }
+
+    public function testCreateSchemaAsMasterUserWithKeyPair(): void
+    {
+        $schema4config = $this->getConfigFromConfigArray(self::getSchema4Config());
+        $connection = $this->getConnectionForConfig($schema4config);
+
+        self::dropCreatedSchema($connection, $schema4config->getDatabase(), $schema4config->getSchema());
+
+        $this->runAppWithConfig(self::getSchema4Config());
+
+        $userName = implode('_', [$schema4config->getDatabase(), $schema4config->getSchema()->getName()]);
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+
+        self::assertSame('SERVICE', $users[0]['type']);
     }
 
     public function testCreateSchemaWithKeyPairUser(): void
