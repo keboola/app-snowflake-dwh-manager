@@ -160,6 +160,14 @@ class DwhManager
             $this->ensureUserResetPassword($userName);
         }
 
+        if ($user->isResetMFA()) {
+            $this->ensureUserResetMFA($userName);
+        }
+
+        if ($user->isPersonType()) {
+            $this->ensureUserTypePerson($userName);
+        }
+
         $this->ensureRoleGrantedToUser($userRole, $userName);
 
         // grant user's role to DWHM role
@@ -441,6 +449,24 @@ class DwhManager
         $this->connection->resetUserKeyPair($userName, $keyPair);
         $this->logger->info(sprintf(
             'Reset key pair for user "%s"',
+            $userName,
+        ));
+    }
+
+    private function ensureUserResetMFA(string $userName): void
+    {
+        $this->connection->resetUserMFA($userName);
+        $this->logger->info(sprintf(
+            'Reset MFA for user "%s"',
+            $userName,
+        ));
+    }
+
+    private function ensureUserTypePerson(string $userName): void
+    {
+        $this->connection->migrateUserToTypePerson($userName);
+        $this->logger->info(sprintf(
+            'Set user type to "PERSON" for user "%s"',
             $userName,
         ));
     }
