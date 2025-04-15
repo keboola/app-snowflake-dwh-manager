@@ -55,6 +55,17 @@ class Connection extends SnowflakeConnection
         return $result[0]['status'];
     }
 
+    public function resetUserKeyPair(string $userName, string $keyPair): void
+    {
+        $this->query(vsprintf(
+            'ALTER USER IF EXISTS %s SET RSA_PUBLIC_KEY=%s;',
+            [
+                $this->quoteIdentifier($userName),
+                $this->quoteIdentifier($keyPair),
+            ],
+        ));
+    }
+
     /**
      * @param array<mixed> $otherOptions
      */

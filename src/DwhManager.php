@@ -64,33 +64,14 @@ class DwhManager
     ];
     private const DATA_RETENTION_TIME_IN_DAYS = 7;
 
-    private Checker $checker;
-
-    private Connection $connection;
-
-    private LoggerInterface $logger;
-
-    private NamingConventions $namingConventions;
-
-    private string $warehouse;
-
-    private string $database;
-
     public function __construct(
-        Checker $checker,
-        Connection $connection,
-        LoggerInterface $logger,
-        NamingConventions $namingConventions,
-        string $warehouse,
-        string $database,
+        private Checker $checker,
+        private Connection $connection,
+        private LoggerInterface $logger,
+        private NamingConventions $namingConventions,
+        private string $warehouse,
+        private string $database,
     ) {
-        $this->checker = $checker;
-        $this->connection = $connection;
-        $this->logger = $logger;
-        $this->namingConventions = $namingConventions;
-        $this->warehouse = $warehouse;
-        $this->database = $database;
-
         $this->ensureMaximumDataRetention();
     }
 
@@ -129,8 +110,13 @@ class DwhManager
             ),
             'statement_timeout_in_seconds' => new ExprInt($schema->getStatementTimeout()),
         ], $schema->getKeyPair());
+
         if ($schema->isResetPassword()) {
             $this->ensureUserResetPassword($rwUser);
+        }
+
+        if ($schema->isResetKeyPair() && $schema->hasKeyPair()) {
+            $this->ensureUserResetKeyPair($rwUser, $schema->getKeyPair());
         }
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
@@ -405,16 +391,12 @@ class DwhManager
                 $type,
                 $options,
             );
-        } else {
-            $this->connection->alterUser(
-                $userName,
-                $options,
-            );
-            $this->logger->info(sprintf(
-                'User "%s" already exists',
-                $userName,
-            ));
+
+            return;
         }
+
+        $this->connection->alterUser($userName, $options);
+        $this->logger->info(sprintf('User "%s" already exists', $userName));
     }
 
     private function generatePassword(): string
@@ -451,6 +433,15 @@ class DwhManager
             'Old password will keep working until you reset the password using provided link',
             $userName,
             $password,
+        ));
+    }
+
+    private function ensureUserResetKeyPair(string $userName, string $keyPair): void
+    {
+        $this->connection->resetUserKeyPair($userName, $keyPair);
+        $this->logger->info(sprintf(
+            'Reset key pair for user "%s"',
+            $userName,
         ));
     }
 }
