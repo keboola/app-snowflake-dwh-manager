@@ -72,7 +72,7 @@ class Connection extends SnowflakeConnection
             'ALTER USER IF EXISTS %s SET DISABLE_MFA=true;',
             [
                 $this->quoteIdentifier($userName),
-            ]
+            ],
         ));
     }
 
@@ -82,7 +82,7 @@ class Connection extends SnowflakeConnection
             'ALTER USER IF EXISTS %s SET type=PERSON;',
             [
                 $this->quoteIdentifier($userName),
-            ]
+            ],
         ));
     }
 

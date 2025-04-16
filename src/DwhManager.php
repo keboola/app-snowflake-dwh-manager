@@ -115,8 +115,9 @@ class DwhManager
             $this->ensureUserResetPassword($rwUser);
         }
 
-        if ($schema->isResetKeyPair() && $schema->hasKeyPair()) {
-            $this->ensureUserResetKeyPair($rwUser, $schema->getKeyPair());
+        $keyPair = $schema->getKeyPair();
+        if ($schema->isResetKeyPair() && $keyPair !== null) {
+            $this->ensureUserResetKeyPair($rwUser, $keyPair);
         }
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
