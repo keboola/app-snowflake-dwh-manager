@@ -185,6 +185,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'create-user-user2' => [
                 self::getUser2Config(),
             ],
+            'create-user-user4' => [
+                self::getUser4Config(),
+            ],
         ];
     }
 
@@ -232,6 +235,23 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $this->runAppWithConfig(self::getUser3Config());
 
         $userName = new NamingConventions($user3config->getDatabase())->getUsernameFromEmail($user3config->getUser());
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+
+        self::assertSame('PERSON', $users[0]['type']);
+    }
+
+    public function testChangeUserToPersonType(): void
+    {
+        $user4config = $this->getConfigFromConfigArray(self::getUser4Config());
+        $connection = $this->getConnectionForConfig($user4config);
+
+        $userName = new NamingConventions($user4config->getDatabase())->getUsernameFromEmail($user4config->getUser());
+
+        $connection->query(sprintf('ALTER USER %s SET TYPE=LEGACY_SERVICE', $userName));
+
+        $this->runAppWithConfig(self::getUser4Config());
 
         /** @var array<int, array<string, string|int>> $users */
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
@@ -300,6 +320,28 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                     'email' => 'user3@keboola.com',
                     'business_schemas' => ['my_dwh_schema3'],
                     'disabled' => false,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getUser4Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'user' => [
+                    'email' => 'user4@keboola.com',
+                    'business_schemas' => ['my_dwh_schema3'],
+                    'disabled' => false,
+                    'person_type' => true,
                 ],
             ],
         ];
