@@ -162,6 +162,46 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ];
     }
 
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getSchemaWithoutKeyPairConfig(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_key_pair' => getenv('SNOWFLAKE_KEYPAIR'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'business_schema' => [
+                    'schema_name' => 'my_dwh_schema_5',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getSchemaWithKeyPairConfig(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_key_pair' => getenv('SNOWFLAKE_KEYPAIR'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'business_schema' => [
+                    'schema_name' => 'my_dwh_schema_5',
+                    'key_pair' => getenv('SNOWFLAKE_SCHEMA_KEYPAIR'),
+                    'reset_key_pair' => true,
+                ],
+            ],
+        ];
+    }
+
     protected function getScript(): string
     {
         return $this->getTestFileDir() . '/../../src/run.php';
@@ -223,6 +263,30 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
 
         self::assertSame('SERVICE', $users[0]['type']);
+    }
+
+    public function testSetKeyPairForSchemaUser(): void
+    {
+        $schemaWithoutKeyPairConfig = $this->getConfigFromConfigArray(self::getSchemaWithoutKeyPairConfig());
+        $connection = $this->getConnectionForConfig($schemaWithoutKeyPairConfig);
+
+        self::dropCreatedSchema($connection, $schemaWithoutKeyPairConfig->getDatabase(), $schemaWithoutKeyPairConfig->getSchema());
+
+        $this->runAppWithConfig(self::getSchemaWithoutKeyPairConfig());
+
+        $userName = implode('_', [$schemaWithoutKeyPairConfig->getDatabase(), $schemaWithoutKeyPairConfig->getSchema()->getName()]);
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+
+        self::assertSame('false', $users[0]['has_rsa_public_key']);
+
+        $this->runAppWithConfig(self::getSchemaWithKeyPairConfig());
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+
+        self::assertSame('true', $users[0]['has_rsa_public_key']);
     }
 
     public function testCreateUserAsPersonType(): void
