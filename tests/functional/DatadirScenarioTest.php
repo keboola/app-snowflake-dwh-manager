@@ -247,15 +247,20 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $user4config = $this->getConfigFromConfigArray(self::getUser4Config());
         $connection = $this->getConnectionForConfig($user4config);
 
+        $this->runAppWithConfig(self::getUser4Config());
+
         $userName = new NamingConventions($user4config->getDatabase())->getUsernameFromEmail($user4config->getUser());
 
         $connection->query(sprintf('ALTER USER %s SET TYPE=LEGACY_SERVICE', $userName));
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+        self::assertSame('LEGACY_SERVICE', $users[0]['type']);
 
         $this->runAppWithConfig(self::getUser4Config());
 
         /** @var array<int, array<string, string|int>> $users */
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
-
         self::assertSame('PERSON', $users[0]['type']);
     }
 
