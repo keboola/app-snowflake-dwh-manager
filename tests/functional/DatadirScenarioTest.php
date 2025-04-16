@@ -7,14 +7,10 @@ namespace Keboola\SnowflakeDwhManager\DatadirTests;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
-use Exception;
 use Keboola\DatadirTests\AbstractDatadirTestCase;
-use Keboola\DatadirTests\DatadirTestSpecification;
 use Keboola\DatadirTests\Exception\DatadirTestsException;
 use Keboola\SnowflakeDwhManager\Config;
 use Keboola\SnowflakeDwhManager\ConfigDefinition;
-use Keboola\SnowflakeDwhManager\Configuration\Schema;
-use Keboola\SnowflakeDwhManager\Configuration\User;
 use Keboola\SnowflakeDwhManager\Configuration\UserDefinition;
 use Keboola\SnowflakeDwhManager\Connection;
 use Keboola\SnowflakeDwhManager\Manager\NamingConventions;
@@ -23,65 +19,18 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use RandomLib\Factory;
 use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Throwable;
-use const PHP_EOL;
 
 class DatadirScenarioTest extends AbstractDatadirTestCase
 {
+    use DatadirTrait;
+
     private static LoggerInterface $logger;
 
     private NamingConventions $namingConventions;
-
-    /**
-     * @param array<mixed> $userConfig
-     */
-    private function getConfigFromConfigArray(array $userConfig): Config
-    {
-        return new Config($userConfig, new ConfigDefinition());
-    }
-
-    private function getConnectionForConfig(Config $config): Connection
-    {
-        return new Connection($config->getSnowflakeConnectionOptions());
-    }
-
-    /**
-     * @param mixed[] $userConfig
-     */
-    private function getConnectionForUserFromUserConfig(array $userConfig): Connection
-    {
-        $config = $this->getConfigFromConfigArray($userConfig);
-        if (!$config->isUserRow()) {
-            throw new Exception('This is not a user config');
-        }
-
-        // get master connection to change the password
-        $connection = $this->getConnectionForConfig($config);
-
-        // change the password to known one
-        $user1Username = $this->namingConventions->getUsernameFromEmail($config->getUser());
-        $randomLibFactory = new Factory();
-        $userNewPassword = $randomLibFactory
-            ->getMediumStrengthGenerator()
-            ->generateString(30);
-        $connection->alterUser($user1Username, ['password' => $userNewPassword]);
-
-        // alter the original config to use new user and password
-        $loginAsUser1Config = $userConfig;
-        $loginAsUser1Config['parameters']['master_user'] = $user1Username;
-        $loginAsUser1Config['parameters']['#master_password'] = $userNewPassword;
-
-        // force destructor to disconnect
-        unset($connection);
-
-        // get connection as the user
-        $config = new Config($loginAsUser1Config, new ConfigDefinition());
-        return $this->getConnectionForConfig($config);
-    }
 
     /**
      * @return array<string, array<mixed>>
@@ -267,14 +216,14 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
     public function testSetKeyPairForSchemaUser(): void
     {
-        $schemaWithoutKeyPairConfig = $this->getConfigFromConfigArray(self::getSchemaWithoutKeyPairConfig());
-        $connection = $this->getConnectionForConfig($schemaWithoutKeyPairConfig);
+        $schemaConfig = $this->getConfigFromConfigArray(self::getSchemaWithoutKeyPairConfig());
+        $connection = $this->getConnectionForConfig($schemaConfig);
 
-        self::dropCreatedSchema($connection, $schemaWithoutKeyPairConfig->getDatabase(), $schemaWithoutKeyPairConfig->getSchema());
+        self::dropCreatedSchema($connection, $schemaConfig->getDatabase(), $schemaConfig->getSchema());
 
         $this->runAppWithConfig(self::getSchemaWithoutKeyPairConfig());
 
-        $userName = implode('_', [$schemaWithoutKeyPairConfig->getDatabase(), $schemaWithoutKeyPairConfig->getSchema()->getName()]);
+        $userName = implode('_', [$schemaConfig->getDatabase(), $schemaConfig->getSchema()->getName()]);
 
         /** @var array<int, array<string, string|int>> $users */
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
@@ -422,28 +371,6 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     public function provideConfigs(): array
     {
         return self::getTestConfigs();
-    }
-
-    /**
-     * @param arra<mixed> $config
-     */
-    private function runAppWithConfig(array $config): Process
-    {
-        self::$logger->log(Logger::DEBUG, $this->getDataSetAsString());
-
-        $specification = new DatadirTestSpecification(null, 0, null, null, null);
-
-        $tempDatadir = $this->getTempDatadir($specification);
-
-        file_put_contents($tempDatadir->getTmpFolder() . '/config.json', json_encode($config));
-
-        $process = $this->runScript($tempDatadir->getTmpFolder());
-
-        $this->assertMatchesSpecification($specification, $process, $tempDatadir->getTmpFolder());
-
-        self::$logger->log(Logger::DEBUG, $process->getErrorOutput());
-
-        return $process;
     }
 
     protected function runScript(string $datadirPath, ?string $runId = null): Process
@@ -787,46 +714,5 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $logger = new NullLogger();
         }
         self::$logger = $logger;
-    }
-
-    private static function dropCreatedSchema(Connection $connection, string $prefix, Schema $schema): void
-    {
-        $namingConventions = new NamingConventions($prefix);
-        $connection->query(
-            'DROP SCHEMA IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getSchemaNameFromSchema($schema)),
-        );
-        $connection->query(
-            'DROP ROLE IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRwRoleFromSchema($schema)),
-        );
-        $connection->query(
-            'DROP ROLE IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRoRoleFromSchema($schema)),
-        );
-        $connection->query(
-            'DROP USER IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRwUserFromSchema($schema)),
-        );
-        self::$logger->log(Logger::DEBUG, sprintf('Dropped schema "%s"' . PHP_EOL, $schema->getName()));
-    }
-
-    private static function dropCreatedUser(Connection $connection, string $prefix, User $user): void
-    {
-        $namingConventions = new NamingConventions($prefix);
-
-        $connection->query(
-            'DROP SCHEMA IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getOwnSchemaNameFromUser($user)),
-        );
-        $connection->query(
-            'DROP ROLE IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getRoleNameFromUser($user)),
-        );
-        $connection->query(
-            'DROP USER IF EXISTS '
-            . $connection->quoteIdentifier($namingConventions->getUsernameFromEmail($user)),
-        );
-        self::$logger->log(Logger::DEBUG, sprintf('Dropped user "%s"' . PHP_EOL, $user->getEmail()));
     }
 }
