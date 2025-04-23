@@ -58,7 +58,7 @@ class SchemaDefinition implements ConfigurationInterface
             ->validate()
                 /** @phpstan-ignore-next-line */
                 ->ifTrue(fn ($v) => $v['reset_public_key'] === true && $v['public_key'] === null)
-                ->thenInvalid('Cannot reset public key when key_pair is not set');
+                ->thenInvalid('Cannot reset public key when public_key is not set');
         // @formatter:on
         return $root;
     }

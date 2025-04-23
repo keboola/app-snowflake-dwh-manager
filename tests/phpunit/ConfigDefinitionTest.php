@@ -537,7 +537,7 @@ class ConfigDefinitionTest extends TestCase
             'key pair reset with NULL value' => [
                 InvalidConfigurationException::class,
                 <<< INVALID_MESSAGE
-Invalid configuration for path "root.parameters.business_schema": Cannot reset public key when key_pair is not set
+Invalid configuration for path "root.parameters.business_schema": Cannot reset public key when public_key is not set
 INVALID_MESSAGE,
                 [
                     'parameters' => [
