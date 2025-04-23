@@ -47,7 +47,7 @@ class SchemaDefinition implements ConfigurationInterface
                 ->scalarNode('key_pair')
                     ->defaultNull()
                 ->end()
-                ->booleanNode('reset_key_pair')
+                ->booleanNode('reset_public_key')
                     ->defaultFalse()
                 ->end()
             ->end()

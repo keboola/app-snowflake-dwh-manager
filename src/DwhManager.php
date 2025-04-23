@@ -116,8 +116,8 @@ class DwhManager
         }
 
         $keyPair = $schema->getKeyPair();
-        if ($schema->isResetKeyPair() && $keyPair !== null) {
-            $this->ensureUserResetKeyPair($rwUser, $keyPair);
+        if ($schema->isResetPublicKey() && $keyPair !== null) {
+            $this->ensureUserResetPublicKey($rwUser, $keyPair);
         }
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
@@ -445,11 +445,11 @@ class DwhManager
         ));
     }
 
-    private function ensureUserResetKeyPair(string $userName, string $keyPair): void
+    private function ensureUserResetPublicKey(string $userName, string $publicKey): void
     {
-        $this->connection->resetUserKeyPair($userName, $keyPair);
+        $this->connection->resetUserPublicKey($userName, $publicKey);
         $this->logger->info(sprintf(
-            'Reset key pair for user "%s"',
+            'Reset public key for user "%s"',
             $userName,
         ));
     }

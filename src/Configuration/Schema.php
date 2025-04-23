@@ -55,8 +55,8 @@ class Schema extends BaseConfig
         return (bool) $this->getValue(['reset_password']);
     }
 
-    public function isResetKeyPair(): bool
+    public function isResetPublicKey(): bool
     {
-        return (bool) $this->getValue(['reset_key_pair']);
+        return (bool) $this->getValue(['reset_public_key']);
     }
 }

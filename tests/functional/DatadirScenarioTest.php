@@ -145,7 +145,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema_5',
                     'key_pair' => getenv('SNOWFLAKE_SCHEMA_KEYPAIR'),
-                    'reset_key_pair' => true,
+                    'reset_public_key' => true,
                 ],
             ],
         ];
