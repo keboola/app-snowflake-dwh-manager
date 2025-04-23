@@ -99,7 +99,7 @@ class DwhManager
         $this->ensureRoleHasSchemaPrivileges($roRole, self::PRIVILEGES_SCHEMA_READ_ONLY, $schemaName);
         $this->ensureRoleHasFutureObjectPrivilegesOnSchema($roRole, self::PRIVILEGES_OBJECT_READ, $schemaName);
 
-        $type = $schema->hasKeyPair() ? 'SERVICE' : 'LEGACY_SERVICE';
+        $type = $schema->hasPublicKey() ? 'SERVICE' : 'LEGACY_SERVICE';
         $this->ensureUserExists($rwUser, $type, [
             'default_role' => $rwRole,
             'default_warehouse' => $this->warehouse,
@@ -109,13 +109,13 @@ class DwhManager
                 $this->connection->quoteIdentifier($schemaName),
             ),
             'statement_timeout_in_seconds' => new ExprInt($schema->getStatementTimeout()),
-        ], $schema->getKeyPair());
+        ], $schema->getPublicKey());
 
         if ($schema->isResetPassword()) {
             $this->ensureUserResetPassword($rwUser);
         }
 
-        $keyPair = $schema->getKeyPair();
+        $keyPair = $schema->getPublicKey();
         if ($schema->isResetPublicKey() && $keyPair !== null) {
             $this->ensureUserResetPublicKey($rwUser, $keyPair);
         }

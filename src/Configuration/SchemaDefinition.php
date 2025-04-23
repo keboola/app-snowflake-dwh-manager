@@ -44,7 +44,7 @@ class SchemaDefinition implements ConfigurationInterface
                 ->booleanNode('reset_password')
                     ->defaultFalse()
                 ->end()
-                ->scalarNode('key_pair')
+                ->scalarNode('public_key')
                     ->defaultNull()
                 ->end()
                 ->booleanNode('reset_public_key')
@@ -56,7 +56,8 @@ class SchemaDefinition implements ConfigurationInterface
 
         $root
             ->validate()
-                ->ifTrue(fn ($v) => $v['reset_public_key'] === true && $v['key_pair'] === null)
+                /** @phpstan-ignore-next-line */
+                ->ifTrue(fn ($v) => $v['reset_public_key'] === true && $v['public_key'] === null)
                 ->thenInvalid('Cannot reset public key when key_pair is not set');
         // @formatter:on
         return $root;
