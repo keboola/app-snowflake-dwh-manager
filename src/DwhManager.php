@@ -64,33 +64,14 @@ class DwhManager
     ];
     private const DATA_RETENTION_TIME_IN_DAYS = 7;
 
-    private Checker $checker;
-
-    private Connection $connection;
-
-    private LoggerInterface $logger;
-
-    private NamingConventions $namingConventions;
-
-    private string $warehouse;
-
-    private string $database;
-
     public function __construct(
-        Checker $checker,
-        Connection $connection,
-        LoggerInterface $logger,
-        NamingConventions $namingConventions,
-        string $warehouse,
-        string $database,
+        private Checker $checker,
+        private Connection $connection,
+        private LoggerInterface $logger,
+        private NamingConventions $namingConventions,
+        private string $warehouse,
+        private string $database,
     ) {
-        $this->checker = $checker;
-        $this->connection = $connection;
-        $this->logger = $logger;
-        $this->namingConventions = $namingConventions;
-        $this->warehouse = $warehouse;
-        $this->database = $database;
-
         $this->ensureMaximumDataRetention();
     }
 
@@ -118,7 +99,7 @@ class DwhManager
         $this->ensureRoleHasSchemaPrivileges($roRole, self::PRIVILEGES_SCHEMA_READ_ONLY, $schemaName);
         $this->ensureRoleHasFutureObjectPrivilegesOnSchema($roRole, self::PRIVILEGES_OBJECT_READ, $schemaName);
 
-        $type = $schema->hasKeyPair() ? 'SERVICE' : 'LEGACY_SERVICE';
+        $type = $schema->hasPublicKey() ? 'SERVICE' : 'LEGACY_SERVICE';
         $this->ensureUserExists($rwUser, $type, [
             'default_role' => $rwRole,
             'default_warehouse' => $this->warehouse,
@@ -128,9 +109,15 @@ class DwhManager
                 $this->connection->quoteIdentifier($schemaName),
             ),
             'statement_timeout_in_seconds' => new ExprInt($schema->getStatementTimeout()),
-        ], $schema->getKeyPair());
+        ], $schema->getPublicKey());
+
         if ($schema->isResetPassword()) {
             $this->ensureUserResetPassword($rwUser);
+        }
+
+        $keyPair = $schema->getPublicKey();
+        if ($schema->isResetPublicKey() && $keyPair !== null) {
+            $this->ensureUserResetPublicKey($rwUser, $keyPair);
         }
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
@@ -172,6 +159,14 @@ class DwhManager
 
         if ($user->isResetPassword()) {
             $this->ensureUserResetPassword($userName);
+        }
+
+        if ($user->isResetMFA()) {
+            $this->ensureUserResetMFA($userName);
+        }
+
+        if ($user->isPersonType()) {
+            $this->ensureUserTypePerson($userName);
         }
 
         $this->ensureRoleGrantedToUser($userRole, $userName);
@@ -405,16 +400,12 @@ class DwhManager
                 $type,
                 $options,
             );
-        } else {
-            $this->connection->alterUser(
-                $userName,
-                $options,
-            );
-            $this->logger->info(sprintf(
-                'User "%s" already exists',
-                $userName,
-            ));
+
+            return;
         }
+
+        $this->connection->alterUser($userName, $options);
+        $this->logger->info(sprintf('User "%s" already exists', $userName));
     }
 
     private function generatePassword(): string
@@ -451,6 +442,33 @@ class DwhManager
             'Old password will keep working until you reset the password using provided link',
             $userName,
             $password,
+        ));
+    }
+
+    private function ensureUserResetPublicKey(string $userName, string $publicKey): void
+    {
+        $this->connection->resetUserPublicKey($userName, $publicKey);
+        $this->logger->info(sprintf(
+            'Reset public key for user "%s"',
+            $userName,
+        ));
+    }
+
+    private function ensureUserResetMFA(string $userName): void
+    {
+        $this->connection->resetUserMFA($userName);
+        $this->logger->info(sprintf(
+            'Reset MFA for user "%s"',
+            $userName,
+        ));
+    }
+
+    private function ensureUserTypePerson(string $userName): void
+    {
+        $this->connection->migrateUserToTypePerson($userName);
+        $this->logger->info(sprintf(
+            'Set user type to "PERSON" for user "%s"',
+            $userName,
         ));
     }
 }

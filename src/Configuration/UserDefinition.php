@@ -78,6 +78,12 @@ class UserDefinition implements ConfigurationInterface
                 ->booleanNode('reset_password')
                     ->defaultFalse()
                 ->end()
+                ->booleanNode('reset_mfa')
+                    ->defaultFalse()
+                ->end()
+                ->booleanNode('person_type')
+                    ->defaultFalse()
+                ->end()
             ->end()
         ->end()
         ;

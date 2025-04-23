@@ -55,6 +55,37 @@ class Connection extends SnowflakeConnection
         return $result[0]['status'];
     }
 
+    public function resetUserPublicKey(string $userName, string $publicKey): void
+    {
+        $this->query(vsprintf(
+            'ALTER USER IF EXISTS %s SET RSA_PUBLIC_KEY=%s;',
+            [
+                $this->quoteIdentifier($userName),
+                $this->quoteIdentifier($publicKey),
+            ],
+        ));
+    }
+
+    public function resetUserMFA(string $userName): void
+    {
+        $this->query(vsprintf(
+            'ALTER USER IF EXISTS %s SET DISABLE_MFA=true;',
+            [
+                $this->quoteIdentifier($userName),
+            ],
+        ));
+    }
+
+    public function migrateUserToTypePerson(string $userName): void
+    {
+        $this->query(vsprintf(
+            'ALTER USER IF EXISTS %s SET type=PERSON;',
+            [
+                $this->quoteIdentifier($userName),
+            ],
+        ));
+    }
+
     /**
      * @param array<mixed> $otherOptions
      */

@@ -36,22 +36,27 @@ class Schema extends BaseConfig
         return (int) $this->getValue(['statement_timeout']);
     }
 
-    public function hasKeyPair(): bool
+    public function hasPublicKey(): bool
     {
-        return !empty($this->getValue(['key_pair']));
+        return !empty($this->getValue(['public_key']));
     }
 
-    public function getKeyPair(): ?string
+    public function getPublicKey(): ?string
     {
-        if (!$this->hasKeyPair()) {
+        if (!$this->hasPublicKey()) {
             return null;
         }
 
-        return $this->getStringValue(['key_pair']);
+        return $this->getStringValue(['public_key']);
     }
 
     public function isResetPassword(): bool
     {
         return (bool) $this->getValue(['reset_password']);
+    }
+
+    public function isResetPublicKey(): bool
+    {
+        return (bool) $this->getValue(['reset_public_key']);
     }
 }
