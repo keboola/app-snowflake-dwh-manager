@@ -534,6 +534,29 @@ class ConfigDefinitionTest extends TestCase
                     ],
                 ],
             ],
+            'key pair reset with NULL value' => [
+                InvalidConfigurationException::class,
+                <<< INVALID_MESSAGE
+Invalid configuration for path "root.parameters.business_schema": Cannot reset public key when key_pair is not set
+INVALID_MESSAGE,
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'password',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'business_schema' => [
+                            'schema_name' => 'dwh1',
+                            'statement_timeout' => 10800,
+                            'reset_password' => false,
+                            'key_pair' => null,
+                            'reset_public_key' => true,
+                        ],
+                        '#master_key_pair' => null,
+                    ],
+                ],
+            ],
         ];
     }
 }

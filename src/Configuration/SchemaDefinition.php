@@ -53,6 +53,11 @@ class SchemaDefinition implements ConfigurationInterface
             ->end()
         ->end()
         ;
+
+        $root
+            ->validate()
+                ->ifTrue(fn ($v) => $v['reset_public_key'] === true && $v['key_pair'] === null)
+                ->thenInvalid('Cannot reset public key when key_pair is not set');
         // @formatter:on
         return $root;
     }
