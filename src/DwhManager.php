@@ -115,9 +115,9 @@ class DwhManager
             $this->ensureUserResetPassword($rwUser);
         }
 
-        $keyPair = $schema->getPublicKey();
-        if ($schema->isResetPublicKey() && $keyPair !== null) {
-            $this->ensureUserResetPublicKey($rwUser, $keyPair);
+        $privateKey = $schema->getPublicKey();
+        if ($schema->isResetPublicKey() && $privateKey !== null) {
+            $this->ensureUserResetPublicKey($rwUser, $privateKey);
         }
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
@@ -372,10 +372,10 @@ class DwhManager
     /**
      * @param array<mixed> $options
      */
-    private function ensureUserExists(string $userName, string $type, array $options, ?string $keyPair = null): void
+    private function ensureUserExists(string $userName, string $type, array $options, ?string $privateKey = null): void
     {
         if (!$this->checker->existsUser($userName)) {
-            if ($keyPair === null) {
+            if ($privateKey === null) {
                 $options['must_change_password'] = new ExprString('TRUE');
 
                 $password = $this->generatePassword();
@@ -396,7 +396,7 @@ class DwhManager
 
             $this->connection->createUser(
                 $userName,
-                $keyPair,
+                $privateKey,
                 $type,
                 $options,
             );

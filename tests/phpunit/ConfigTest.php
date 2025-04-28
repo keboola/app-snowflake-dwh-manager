@@ -83,9 +83,9 @@ class ConfigTest extends TestCase
     public static function invalidConfigsDataProvider(): array
     {
         return [
-            'empty master_password & master_key_pair' => [
+            'empty master_password & master_private_key' => [
                 UserException::class,
-                'Either "password" or "keyPair" must be provided.',
+                'Either "password" or "privateKey" must be provided.',
                 [
                     'parameters' => [
                         'master_host' => 'host',
@@ -99,15 +99,15 @@ class ConfigTest extends TestCase
                     ],
                 ],
             ],
-            'master_password & master_key_pair' => [
+            'master_password & master_private_key' => [
                 UserException::class,
-                'Both "password" and "keyPair" cannot be set at the same time.',
+                'Both "password" and "privateKey" cannot be set at the same time.',
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
                         '#master_password' => 'gr3eatpassword',
-                        '#master_key_pair' => getenv('SNOWFLAKE_KEYPAIR'),
+                        '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [

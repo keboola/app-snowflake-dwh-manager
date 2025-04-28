@@ -56,7 +56,7 @@ class ConfigDefinitionTest extends TestCase
                             'reset_mfa' => false,
                             'person_type' => false,
                         ],
-                        '#master_key_pair' => null,
+                        '#master_private_key' => null,
                     ],
                 ],
                 [
@@ -97,7 +97,7 @@ class ConfigDefinitionTest extends TestCase
                             'reset_mfa' => false,
                             'person_type' => false,
                         ],
-                        '#master_key_pair' => null,
+                        '#master_private_key' => null,
                     ],
                 ],
                 [
@@ -141,7 +141,7 @@ class ConfigDefinitionTest extends TestCase
                             'reset_mfa' => false,
                             'person_type' => false,
                         ],
-                        '#master_key_pair' => null,
+                        '#master_private_key' => null,
                     ],
                 ],
                 [
@@ -185,7 +185,7 @@ class ConfigDefinitionTest extends TestCase
                             'reset_mfa' => false,
                             'person_type' => false,
                         ],
-                        '#master_key_pair' => null,
+                        '#master_private_key' => null,
                     ],
                 ],
                 [
@@ -221,7 +221,7 @@ class ConfigDefinitionTest extends TestCase
                             'public_key' => null,
                             'reset_public_key' => false,
                         ],
-                        '#master_key_pair' => null,
+                        '#master_private_key' => null,
                     ],
                 ],
                 [
@@ -252,7 +252,7 @@ class ConfigDefinitionTest extends TestCase
                             'public_key' => null,
                             'reset_public_key' => false,
                         ],
-                        '#master_key_pair' => null,
+                        '#master_private_key' => null,
                     ],
                 ],
                 [
@@ -284,7 +284,7 @@ class ConfigDefinitionTest extends TestCase
                             'public_key' => null,
                             'reset_public_key' => false,
                         ],
-                        '#master_key_pair' => null,
+                        '#master_private_key' => null,
                     ],
                 ],
                 [
@@ -553,7 +553,7 @@ INVALID_MESSAGE,
                             'public_key' => null,
                             'reset_public_key' => true,
                         ],
-                        '#master_key_pair' => null,
+                        '#master_private_key' => null,
                     ],
                 ],
             ],

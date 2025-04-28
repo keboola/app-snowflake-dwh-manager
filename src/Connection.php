@@ -124,7 +124,7 @@ class Connection extends SnowflakeConnection
      */
     public function createUser(
         string $userName,
-        string $passwordOrKeyPair,
+        string $passwordOrPrivateKey,
         string $type,
         array $otherOptions,
     ): void {
@@ -139,7 +139,7 @@ class Connection extends SnowflakeConnection
             [
                 $this->quoteIdentifier($userName),
                 $type === 'SERVICE' ? 'RSA_PUBLIC_KEY' : 'PASSWORD',
-                $this->quote($passwordOrKeyPair),
+                $this->quote($passwordOrPrivateKey),
             ],
         ));
     }

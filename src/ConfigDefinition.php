@@ -30,7 +30,7 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->scalarNode('#master_password')
                     ->defaultValue('')
                 ->end()
-                ->scalarNode('#master_key_pair')
+                ->scalarNode('#master_private_key')
                     ->defaultNull()
                 ->end()
                 ->scalarNode('master_database')
