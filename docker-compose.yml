@@ -11,7 +11,7 @@ services:
       - SNOWFLAKE_PRIVATE_KEY
       - SNOWFLAKE_DATABASE
       - SNOWFLAKE_WAREHOUSE
-      - SNOWFLAKE_SCHEMA_PRIVATE_KEY
+      - SNOWFLAKE_SCHEMA_PUBLIC_KEY
     volumes:
       - ./:/code
       - ./data:/data

@@ -85,7 +85,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema3',
-                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PRIVATE_KEY'),
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'),
                 ],
             ],
         ];
@@ -105,7 +105,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema4',
-                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PRIVATE_KEY'),
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'),
                 ],
             ],
         ];
@@ -144,7 +144,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema_5',
-                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PRIVATE_KEY'),
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'),
                     'reset_public_key' => true,
                 ],
             ],
