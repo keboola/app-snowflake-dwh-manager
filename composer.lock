@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6a8bff9ef4b193035ae6d35ca0a2b0f8",
+    "content-hash": "dac85f6351411caad1a9be06174f80a0",
     "packages": [
         {
             "name": "ircmaxell/random-lib",
@@ -157,16 +157,16 @@
         },
         {
             "name": "keboola/db-adapter-snowflake",
-            "version": "1.5.0",
+            "version": "dev-marek-CT-2100-keypair-to-privatekey",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-adapter-snowflake.git",
-                "reference": "2cf9c90915e05603ff7228ade717dac7c61d1720"
+                "reference": "985e2d307da3ac8741bfdb8bde32e9137c0091b3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/2cf9c90915e05603ff7228ade717dac7c61d1720",
-                "reference": "2cf9c90915e05603ff7228ade717dac7c61d1720",
+                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/985e2d307da3ac8741bfdb8bde32e9137c0091b3",
+                "reference": "985e2d307da3ac8741bfdb8bde32e9137c0091b3",
                 "shasum": ""
             },
             "require": {
@@ -194,9 +194,9 @@
                 "MIT"
             ],
             "support": {
-                "source": "https://github.com/keboola/db-adapter-snowflake/tree/1.5.0"
+                "source": "https://github.com/keboola/db-adapter-snowflake/tree/marek-CT-2100-keypair-to-privatekey"
             },
-            "time": "2025-03-04T12:24:33+00:00"
+            "time": "2025-04-28T08:32:37+00:00"
         },
         {
             "name": "keboola/php-component",
@@ -3886,7 +3886,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "keboola/db-adapter-snowflake": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
