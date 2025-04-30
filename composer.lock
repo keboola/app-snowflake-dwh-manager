@@ -157,16 +157,16 @@
         },
         {
             "name": "keboola/db-adapter-snowflake",
-            "version": "1.5.0",
+            "version": "1.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-adapter-snowflake.git",
-                "reference": "2cf9c90915e05603ff7228ade717dac7c61d1720"
+                "reference": "f6a006bf507ed0493615530d4cf4f9bfb4b80e40"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/2cf9c90915e05603ff7228ade717dac7c61d1720",
-                "reference": "2cf9c90915e05603ff7228ade717dac7c61d1720",
+                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/f6a006bf507ed0493615530d4cf4f9bfb4b80e40",
+                "reference": "f6a006bf507ed0493615530d4cf4f9bfb4b80e40",
                 "shasum": ""
             },
             "require": {
@@ -194,9 +194,9 @@
                 "MIT"
             ],
             "support": {
-                "source": "https://github.com/keboola/db-adapter-snowflake/tree/1.5.0"
+                "source": "https://github.com/keboola/db-adapter-snowflake/tree/1.5.1"
             },
-            "time": "2025-03-04T12:24:33+00:00"
+            "time": "2025-04-28T10:43:58+00:00"
         },
         {
             "name": "keboola/php-component",

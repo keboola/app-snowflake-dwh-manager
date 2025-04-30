@@ -8,10 +8,10 @@ services:
       - SNOWFLAKE_HOST
       - SNOWFLAKE_USER
       - SNOWFLAKE_PASSWORD
-      - SNOWFLAKE_KEYPAIR
+      - SNOWFLAKE_PRIVATE_KEY
       - SNOWFLAKE_DATABASE
       - SNOWFLAKE_WAREHOUSE
-      - SNOWFLAKE_SCHEMA_KEYPAIR
+      - SNOWFLAKE_SCHEMA_PUBLIC_KEY
     volumes:
       - ./:/code
       - ./data:/data

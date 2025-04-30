@@ -22,14 +22,14 @@ class Config extends BaseConfig
     {
         /** @var array<string, array<string, mixed>> $config */
         $password = $config['parameters']['#master_password'] ?? '';
-        $keyPair = $config['parameters']['#master_key_pair'] ?? null;
+        $privateKey = $config['parameters']['#master_private_key'] ?? null;
 
-        if (empty($password) && $keyPair === null) {
-            throw new UserException('Either "password" or "keyPair" must be provided.');
+        if (empty($password) && $privateKey === null) {
+            throw new UserException('Either "password" or "privateKey" must be provided.');
         }
 
-        if (!empty($password) && !empty($keyPair)) {
-            throw new UserException('Both "password" and "keyPair" cannot be set at the same time.');
+        if (!empty($password) && !empty($privateKey)) {
+            throw new UserException('Both "password" and "privateKey" cannot be set at the same time.');
         }
 
         parent::__construct($config, $configDefinition);
@@ -44,7 +44,7 @@ class Config extends BaseConfig
             'host' => $this->getValue(['parameters', 'master_host']),
             'user' => $this->getValue(['parameters', 'master_user']),
             'password' => $this->getValue(['parameters', '#master_password']),
-            'keyPair' => $this->getValue(['parameters', '#master_key_pair']),
+            'privateKey' => $this->getValue(['parameters', '#master_private_key']),
             'database' => $this->getValue(['parameters', 'master_database']),
             'warehouse' => $this->getValue(['parameters', 'warehouse']),
         ];

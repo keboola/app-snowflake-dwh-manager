@@ -85,7 +85,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema3',
-                    'public_key' => getenv('SNOWFLAKE_SCHEMA_KEYPAIR'),
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'),
                 ],
             ],
         ];
@@ -100,12 +100,12 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_key_pair' => getenv('SNOWFLAKE_KEYPAIR'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema4',
-                    'public_key' => getenv('SNOWFLAKE_SCHEMA_KEYPAIR'),
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'),
                 ],
             ],
         ];
@@ -114,13 +114,13 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     /**
      * @return array<string, array<mixed>>
      */
-    private static function getSchemaWithoutKeyPairConfig(): array
+    private static function getSchemaWithoutPrivateKeyConfig(): array
     {
         return [
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_key_pair' => getenv('SNOWFLAKE_KEYPAIR'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
@@ -133,18 +133,18 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     /**
      * @return array<string, array<mixed>>
      */
-    private static function getSchemaWithKeyPairConfig(): array
+    private static function getSchemaWithPrivateKeyConfig(): array
     {
         return [
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_key_pair' => getenv('SNOWFLAKE_KEYPAIR'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema_5',
-                    'public_key' => getenv('SNOWFLAKE_SCHEMA_KEYPAIR'),
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'),
                     'reset_public_key' => true,
                 ],
             ],
@@ -180,7 +180,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         ];
     }
 
-    public function testCreateSchemaAsMasterUserWithKeyPair(): void
+    public function testCreateSchemaAsMasterUserWithPrivateKey(): void
     {
         $schema4config = $this->getConfigFromConfigArray(self::getSchema4Config());
         $connection = $this->getConnectionForConfig($schema4config);
@@ -197,7 +197,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         self::assertSame('SERVICE', $users[0]['type']);
     }
 
-    public function testCreateSchemaWithKeyPairUser(): void
+    public function testCreateSchemaWithPrivateKeyUser(): void
     {
         $schema3config = $this->getConfigFromConfigArray(self::getSchema3Config());
         $connection = $this->getConnectionForConfig($schema3config);
@@ -214,14 +214,14 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         self::assertSame('SERVICE', $users[0]['type']);
     }
 
-    public function testSetKeyPairForSchemaUser(): void
+    public function testSetPrivateKeyForSchemaUser(): void
     {
-        $schemaConfig = $this->getConfigFromConfigArray(self::getSchemaWithoutKeyPairConfig());
+        $schemaConfig = $this->getConfigFromConfigArray(self::getSchemaWithoutPrivateKeyConfig());
         $connection = $this->getConnectionForConfig($schemaConfig);
 
         self::dropCreatedSchema($connection, $schemaConfig->getDatabase(), $schemaConfig->getSchema());
 
-        $this->runAppWithConfig(self::getSchemaWithoutKeyPairConfig());
+        $this->runAppWithConfig(self::getSchemaWithoutPrivateKeyConfig());
 
         $userName = implode('_', [$schemaConfig->getDatabase(), $schemaConfig->getSchema()->getName()]);
 
@@ -230,7 +230,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         self::assertSame('false', $users[0]['has_rsa_public_key']);
 
-        $this->runAppWithConfig(self::getSchemaWithKeyPairConfig());
+        $this->runAppWithConfig(self::getSchemaWithPrivateKeyConfig());
 
         /** @var array<int, array<string, string|int>> $users */
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
