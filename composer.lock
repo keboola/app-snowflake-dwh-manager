@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dac85f6351411caad1a9be06174f80a0",
+    "content-hash": "6a8bff9ef4b193035ae6d35ca0a2b0f8",
     "packages": [
         {
             "name": "ircmaxell/random-lib",
@@ -157,16 +157,16 @@
         },
         {
             "name": "keboola/db-adapter-snowflake",
-            "version": "dev-marek-CT-2100-keypair-to-privatekey",
+            "version": "1.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-adapter-snowflake.git",
-                "reference": "985e2d307da3ac8741bfdb8bde32e9137c0091b3"
+                "reference": "f6a006bf507ed0493615530d4cf4f9bfb4b80e40"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/985e2d307da3ac8741bfdb8bde32e9137c0091b3",
-                "reference": "985e2d307da3ac8741bfdb8bde32e9137c0091b3",
+                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/f6a006bf507ed0493615530d4cf4f9bfb4b80e40",
+                "reference": "f6a006bf507ed0493615530d4cf4f9bfb4b80e40",
                 "shasum": ""
             },
             "require": {
@@ -194,9 +194,9 @@
                 "MIT"
             ],
             "support": {
-                "source": "https://github.com/keboola/db-adapter-snowflake/tree/marek-CT-2100-keypair-to-privatekey"
+                "source": "https://github.com/keboola/db-adapter-snowflake/tree/1.5.1"
             },
-            "time": "2025-04-28T08:32:37+00:00"
+            "time": "2025-04-28T10:43:58+00:00"
         },
         {
             "name": "keboola/php-component",
@@ -3886,9 +3886,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "keboola/db-adapter-snowflake": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

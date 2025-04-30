@@ -4,7 +4,7 @@
     "require": {
         "php": "^8.4",
         "ircmaxell/random-lib": "^1.2",
-        "keboola/db-adapter-snowflake": "dev-marek-CT-2100-keypair-to-privatekey",
+        "keboola/db-adapter-snowflake": "^1.5",
         "keboola/php-component": "^10.0"
     },
     "autoload": {
