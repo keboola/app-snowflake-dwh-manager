@@ -114,7 +114,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     /**
      * @return array<string, array<mixed>>
      */
-    private static function getSchemaWithoutPrivateKeyConfig(): array
+    private static function getSchemaWithoutPublicKeyConfig(): array
     {
         return [
             'parameters' => [
@@ -133,7 +133,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     /**
      * @return array<string, array<mixed>>
      */
-    private static function getSchemaWithPrivateKeyConfig(): array
+    private static function getSchemaWithPublicKeyConfig(): array
     {
         return [
             'parameters' => [
@@ -145,7 +145,26 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema_5',
                     'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'),
-                    'reset_public_key' => true,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getSchemaWithDifferentPublicKeyConfig(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'business_schema' => [
+                    'schema_name' => 'my_dwh_schema_5',
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'),
                 ],
             ],
         ];
@@ -216,12 +235,12 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
     public function testSetPrivateKeyForSchemaUser(): void
     {
-        $schemaConfig = $this->getConfigFromConfigArray(self::getSchemaWithoutPrivateKeyConfig());
+        $schemaConfig = $this->getConfigFromConfigArray(self::getSchemaWithoutPublicKeyConfig());
         $connection = $this->getConnectionForConfig($schemaConfig);
 
         self::dropCreatedSchema($connection, $schemaConfig->getDatabase(), $schemaConfig->getSchema());
 
-        $this->runAppWithConfig(self::getSchemaWithoutPrivateKeyConfig());
+        $this->runAppWithConfig(self::getSchemaWithoutPublicKeyConfig());
 
         $userName = implode('_', [$schemaConfig->getDatabase(), $schemaConfig->getSchema()->getName()]);
 
@@ -230,12 +249,43 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         self::assertSame('false', $users[0]['has_rsa_public_key']);
 
-        $this->runAppWithConfig(self::getSchemaWithPrivateKeyConfig());
+        $this->runAppWithConfig(self::getSchemaWithPublicKeyConfig());
 
         /** @var array<int, array<string, string|int>> $users */
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
 
         self::assertSame('true', $users[0]['has_rsa_public_key']);
+    }
+
+    public function testChangeOfAlreadySetPublicKey(): void
+    {
+        $schemaConfig = $this->getConfigFromConfigArray(self::getSchemaWithPublicKeyConfig());
+        $connection = $this->getConnectionForConfig($schemaConfig);
+
+        self::dropCreatedSchema($connection, $schemaConfig->getDatabase(), $schemaConfig->getSchema());
+
+        $this->runAppWithConfig(self::getSchemaWithPublicKeyConfig());
+
+        $userName = implode('_', [$schemaConfig->getDatabase(), $schemaConfig->getSchema()->getName()]);
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'' . $userName . '\' LIMIT 1');
+
+        self::assertSame('true', $users[0]['has_rsa_public_key']);
+
+        $this->runAppWithConfig(self::getSchemaWithDifferentPublicKeyConfig());
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('DESCRIBE USER ' . $userName);
+        $filteredResult = array_filter(
+            $users,
+            /** @var array<string, int|string> $item */
+            static fn (array $item): bool => $item['property'] === 'RSA_PUBLIC_KEY',
+        );
+        /** @var array<string, string> $rsaPublicKey */
+        $rsaPublicKey = array_pop($filteredResult);
+
+        self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'), $rsaPublicKey['value']);
     }
 
     public function testCreateUserAsPersonType(): void

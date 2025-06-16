@@ -112,12 +112,13 @@ class DwhManager
         ], $schema->getPublicKey());
 
         if ($schema->isResetPassword()) {
-            $this->ensureUserResetPassword($rwUser);
+//            $this->ensureUserResetPassword($rwUser);
         }
 
-        $privateKey = $schema->getPublicKey();
-        if ($schema->isResetPublicKey() && $privateKey !== null) {
-            $this->ensureUserResetPublicKey($rwUser, $privateKey);
+        $publicKey = $schema->getPublicKey();
+        if ($publicKey !== null) {
+            $this->ensureUserResetPublicKey($rwUser, $publicKey);
+            $this->ensureToUnsetUserPassword($rwUser);
         }
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
@@ -447,11 +448,26 @@ class DwhManager
 
     private function ensureUserResetPublicKey(string $userName, string $publicKey): void
     {
-        $this->connection->resetUserPublicKey($userName, $publicKey);
-        $this->logger->info(sprintf(
-            'Reset public key for user "%s"',
-            $userName,
-        ));
+        if ($this->connection->retrieveUserPublicKey($userName) !== $publicKey) {
+            $this->connection->resetUserPublicKey($userName, $publicKey);
+
+            $this->logger->info(sprintf(
+                'Reset public key for user "%s"',
+                $userName,
+            ));
+        }
+    }
+
+    private function ensureToUnsetUserPassword(string $userName): void
+    {
+        if ($this->connection->isPasswordSet($userName)) {
+            $this->connection->unsetPassword($userName);
+
+            $this->logger->info(sprintf(
+                'Unset password for user "%s".',
+                $userName,
+            ));
+        }
     }
 
     private function ensureUserResetMFA(string $userName): void
