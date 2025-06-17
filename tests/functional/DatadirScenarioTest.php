@@ -233,7 +233,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         self::assertSame('SERVICE', $users[0]['type']);
     }
 
-    public function testSetPrivateKeyForSchemaUser(): void
+    public function testSetPublicKeyForSchemaUser(): void
     {
         $schemaConfig = $this->getConfigFromConfigArray(self::getSchemaWithoutPublicKeyConfig());
         $connection = $this->getConnectionForConfig($schemaConfig);
