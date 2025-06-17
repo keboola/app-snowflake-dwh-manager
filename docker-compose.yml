@@ -12,6 +12,7 @@ services:
       - SNOWFLAKE_DATABASE
       - SNOWFLAKE_WAREHOUSE
       - SNOWFLAKE_SCHEMA_PUBLIC_KEY
+      - SNOWFLAKE_SCHEMA_PUBLIC_KEY_2
     volumes:
       - ./:/code
       - ./data:/data

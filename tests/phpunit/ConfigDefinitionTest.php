@@ -219,7 +219,6 @@ class ConfigDefinitionTest extends TestCase
                             'statement_timeout' => 10800,
                             'reset_password' => false,
                             'public_key' => null,
-                            'reset_public_key' => false,
                         ],
                         '#master_private_key' => null,
                     ],
@@ -250,7 +249,6 @@ class ConfigDefinitionTest extends TestCase
                             'statement_timeout' => 123,
                             'reset_password' => false,
                             'public_key' => null,
-                            'reset_public_key' => false,
                         ],
                         '#master_private_key' => null,
                     ],
@@ -282,7 +280,6 @@ class ConfigDefinitionTest extends TestCase
                             'reset_password' => true,
                             'statement_timeout' => 10800,
                             'public_key' => null,
-                            'reset_public_key' => false,
                         ],
                         '#master_private_key' => null,
                     ],
@@ -531,29 +528,6 @@ class ConfigDefinitionTest extends TestCase
                         'user' => [
                             'email' => '',
                         ],
-                    ],
-                ],
-            ],
-            'key pair reset with NULL value' => [
-                InvalidConfigurationException::class,
-                <<< INVALID_MESSAGE
-Invalid configuration for path "root.parameters.business_schema": Cannot reset public key when public_key is not set
-INVALID_MESSAGE,
-                [
-                    'parameters' => [
-                        'master_host' => 'host',
-                        'master_user' => 'user',
-                        '#master_password' => 'password',
-                        'master_database' => 'database',
-                        'warehouse' => 'warehouse',
-                        'business_schema' => [
-                            'schema_name' => 'dwh1',
-                            'statement_timeout' => 10800,
-                            'reset_password' => false,
-                            'public_key' => null,
-                            'reset_public_key' => true,
-                        ],
-                        '#master_private_key' => null,
                     ],
                 ],
             ],

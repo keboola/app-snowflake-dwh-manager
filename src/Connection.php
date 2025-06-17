@@ -66,6 +66,31 @@ class Connection extends SnowflakeConnection
         ));
     }
 
+    public function retrieveUserPublicKey(string $userName, string $type = 'rsa_public_key'): string
+    {
+        /** @var array<string, string|int> $user */
+        $user = $this->describeUser($userName);
+
+        return (string) $user[$type];
+    }
+
+    public function isPasswordSet(string $userName): bool
+    {
+        $user = $this->describeUser($userName);
+
+        return $user['password'] !== null && $user['password'] !== 'null';
+    }
+
+    public function unsetPassword(string $userName): void
+    {
+        $this->query(vsprintf(
+            'ALTER USER IF EXISTS %s UNSET PASSWORD;',
+            [
+                $this->quoteIdentifier($userName),
+            ],
+        ));
+    }
+
     public function resetUserMFA(string $userName): void
     {
         $this->query(vsprintf(
@@ -124,7 +149,7 @@ class Connection extends SnowflakeConnection
      */
     public function createUser(
         string $userName,
-        string $passwordOrPrivateKey,
+        string $passwordOrPublicKey,
         string $type,
         array $otherOptions,
     ): void {
@@ -139,7 +164,7 @@ class Connection extends SnowflakeConnection
             [
                 $this->quoteIdentifier($userName),
                 $type === 'SERVICE' ? 'RSA_PUBLIC_KEY' : 'PASSWORD',
-                $this->quote($passwordOrPrivateKey),
+                $this->quote($passwordOrPublicKey),
             ],
         ));
     }

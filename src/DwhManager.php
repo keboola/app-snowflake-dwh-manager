@@ -115,9 +115,10 @@ class DwhManager
             $this->ensureUserResetPassword($rwUser);
         }
 
-        $privateKey = $schema->getPublicKey();
-        if ($schema->isResetPublicKey() && $privateKey !== null) {
-            $this->ensureUserResetPublicKey($rwUser, $privateKey);
+        $publicKey = $schema->getPublicKey();
+        if ($publicKey !== null) {
+            $this->ensureUserResetPublicKey($rwUser, $publicKey);
+            $this->ensureToUnsetUserPassword($rwUser);
         }
 
         $this->ensureRoleGrantedToUser($rwRole, $rwUser);
@@ -372,10 +373,10 @@ class DwhManager
     /**
      * @param array<mixed> $options
      */
-    private function ensureUserExists(string $userName, string $type, array $options, ?string $privateKey = null): void
+    private function ensureUserExists(string $userName, string $type, array $options, ?string $publicKey = null): void
     {
         if (!$this->checker->existsUser($userName)) {
-            if ($privateKey === null) {
+            if ($publicKey === null) {
                 $options['must_change_password'] = new ExprString('TRUE');
 
                 $password = $this->generatePassword();
@@ -396,7 +397,7 @@ class DwhManager
 
             $this->connection->createUser(
                 $userName,
-                $privateKey,
+                $publicKey,
                 $type,
                 $options,
             );
@@ -447,11 +448,26 @@ class DwhManager
 
     private function ensureUserResetPublicKey(string $userName, string $publicKey): void
     {
-        $this->connection->resetUserPublicKey($userName, $publicKey);
-        $this->logger->info(sprintf(
-            'Reset public key for user "%s"',
-            $userName,
-        ));
+        if ($this->connection->retrieveUserPublicKey($userName) !== $publicKey) {
+            $this->connection->resetUserPublicKey($userName, $publicKey);
+
+            $this->logger->info(sprintf(
+                'Reset public key for user "%s"',
+                $userName,
+            ));
+        }
+    }
+
+    private function ensureToUnsetUserPassword(string $userName): void
+    {
+        if ($this->connection->isPasswordSet($userName)) {
+            $this->connection->unsetPassword($userName);
+
+            $this->logger->info(sprintf(
+                'Unset password for user "%s".',
+                $userName,
+            ));
+        }
     }
 
     private function ensureUserResetMFA(string $userName): void
