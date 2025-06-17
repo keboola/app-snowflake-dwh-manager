@@ -261,31 +261,19 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     {
         $schemaConfig = $this->getConfigFromConfigArray(self::getSchemaWithPublicKeyConfig());
         $connection = $this->getConnectionForConfig($schemaConfig);
+        $userName = implode('_', [$schemaConfig->getDatabase(), $schemaConfig->getSchema()->getName()]);
 
         self::dropCreatedSchema($connection, $schemaConfig->getDatabase(), $schemaConfig->getSchema());
 
         $this->runAppWithConfig(self::getSchemaWithPublicKeyConfig());
 
-        $userName = implode('_', [$schemaConfig->getDatabase(), $schemaConfig->getSchema()->getName()]);
-
-        /** @var array<int, array<string, string|int>> $users */
-        $users = $connection->fetchAll('SHOW USERS LIKE \'' . $userName . '\' LIMIT 1');
-
-        self::assertSame('true', $users[0]['has_rsa_public_key']);
+        $rsaPublicKey = $this->retrievePublicKey($connection, $userName);
+        self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'), $rsaPublicKey);
 
         $this->runAppWithConfig(self::getSchemaWithDifferentPublicKeyConfig());
 
-        /** @var array<int, array<string, string|int>> $users */
-        $users = $connection->fetchAll('DESCRIBE USER ' . $userName);
-        $filteredResult = array_filter(
-            $users,
-            /** @var array<string, int|string> $item */
-            static fn (array $item): bool => $item['property'] === 'RSA_PUBLIC_KEY',
-        );
-        /** @var array<string, string> $rsaPublicKey */
-        $rsaPublicKey = array_pop($filteredResult);
-
-        self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'), $rsaPublicKey['value']);
+        $rsaPublicKey = $this->retrievePublicKey($connection, $userName);
+        self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'), $rsaPublicKey);
     }
 
     public function testCreateUserAsPersonType(): void
@@ -764,5 +752,20 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $logger = new NullLogger();
         }
         self::$logger = $logger;
+    }
+
+    private function retrievePublicKey(Connection $connection, string $userName): string
+    {
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('DESCRIBE USER ' . $userName);
+        $filteredResult = array_filter(
+            $users,
+            /** @var array<string, int|string> $item */
+            static fn (array $item): bool => $item['property'] === 'RSA_PUBLIC_KEY',
+        );
+        /** @var array<string, string> $rsaPublicKey */
+        $rsaPublicKey = array_pop($filteredResult);
+
+        return $rsaPublicKey['value'];
     }
 }

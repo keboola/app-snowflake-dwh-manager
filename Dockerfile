@@ -63,9 +63,6 @@ RUN mkdir -p ~/.gnupg \
     && dpkg -i /tmp/snowflake-odbc.deb \
     && rm /tmp/snowflake-odbc.deb
 
-#RUN pecl install xdebug \
-#    && docker-php-ext-enable xdebug
-
 ## Composer - deps always cached unless changed
 # First copy only composer files
 COPY composer.* /code/
