@@ -78,7 +78,7 @@ class Connection extends SnowflakeConnection
     {
         $user = $this->describeUser($userName);
 
-        return $user['password'] !== null;
+        return $user['password'] !== null && $user['password'] !== 'null';
     }
 
     public function unsetPassword(string $userName): void
