@@ -93,11 +93,6 @@ class User extends BaseConfig
         return (bool) $this->getValue(['reset_password']);
     }
 
-    public function isResetMfa(): bool
-    {
-        return (bool) $this->getValue(['reset_mfa']);
-    }
-
     public function isPersonType(): bool
     {
         return (bool) $this->getValue(['person_type']);

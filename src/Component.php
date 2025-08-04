@@ -10,33 +10,72 @@ use Keboola\Db\Import\Exception;
 use Keboola\SnowflakeDwhManager\Manager\Checker;
 use Keboola\SnowflakeDwhManager\Manager\CheckerHelper;
 use Keboola\SnowflakeDwhManager\Manager\NamingConventions;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class Component extends BaseComponent
 {
-    protected function run(): void
+    private Connection $connection;
+    private DwhManager $manager;
+
+    public function __construct(LoggerInterface $logger)
     {
+        parent::__construct($logger);
+
         /** @var Config $config */
         $config = $this->getConfig();
         try {
-            $connection = new Connection($config->getSnowflakeConnectionOptions());
+            $this->connection = new Connection($config->getSnowflakeConnectionOptions());
         } catch (Exception $e) {
             throw new UserException('Cannot connect to Snowflake, check your credentials.', 0, $e);
         }
+
         $prefix = $config->getDatabase();
-        $manager = new DwhManager(
-            new Checker(new CheckerHelper(), $connection),
-            $connection,
+        $this->manager = new DwhManager(
+            new Checker(new CheckerHelper(), $this->connection),
+            $this->connection,
             $this->getLogger(),
             new NamingConventions($prefix),
             $config->getWarehouse(),
             $config->getDatabase(),
         );
+    }
+
+    protected function run(): void
+    {
+        /** @var Config $config */
+        $config = $this->getConfig();
+
         if ($config->isSchemaRow()) {
-            $manager->checkSchema($config->getSchema());
+            $this->manager->checkSchema($config->getSchema());
         } elseif ($config->isUserRow()) {
-            $manager->checkUser($config->getUser());
+            $this->manager->checkUser($config->getUser());
         }
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function getSyncActions(): array
+    {
+        return ['enrollMFA' => 'handleEnrollMFA'];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function handleEnrollMFA(): array
+    {
+        /** @var Config $config */
+        $config = $this->getConfig();
+
+        $this->manager->ensureUserResetMFA($config->getUser());
+
+        return [
+            'action' => 'enrollMFA',
+            'status' => 'success',
+            'message' => 'MFA enrollment handled successfully.',
+        ];
     }
 
     protected function getConfigClass(): string

@@ -162,10 +162,6 @@ class DwhManager
             $this->ensureUserResetPassword($userName);
         }
 
-        if ($user->isResetMFA()) {
-            $this->ensureUserResetMFA($userName);
-        }
-
         if ($user->isPersonType()) {
             $this->ensureUserTypePerson($userName);
         }
@@ -470,8 +466,10 @@ class DwhManager
         }
     }
 
-    private function ensureUserResetMFA(string $userName): void
+    public function ensureUserResetMFA(User $user): void
     {
+        $userName = $this->namingConventions->getUsernameFromEmail($user);
+
         $this->connection->resetUserMFA($userName);
         $this->logger->info(sprintf(
             'Reset MFA for user "%s"',
