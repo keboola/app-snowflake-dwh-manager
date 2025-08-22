@@ -477,6 +477,15 @@ class DwhManager
         ));
     }
 
+    public function resetPasswordAndRetrieveResetUrl(User|Schema $userOrSchema): string
+    {
+        $userName = $userOrSchema instanceof User
+            ? $this->namingConventions->getUsernameFromEmail($userOrSchema)
+            : $this->namingConventions->getRwUserFromSchema($userOrSchema);
+
+        return $this->connection->resetUserPassword($userName);
+    }
+
     private function ensureUserTypePerson(string $userName): void
     {
         $this->connection->migrateUserToTypePerson($userName);

@@ -58,7 +58,10 @@ class Component extends BaseComponent
      */
     protected function getSyncActions(): array
     {
-        return ['enrollMFA' => 'handleEnrollMFA'];
+        return [
+            'enrollMFA' => 'handleEnrollMFA',
+            'resetPassword' => 'handleResetPassword',
+        ];
     }
 
     /**
@@ -75,6 +78,24 @@ class Component extends BaseComponent
             'action' => 'enrollMFA',
             'status' => 'success',
             'message' => 'MFA enrollment handled successfully.',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function handleResetPassword(): array
+    {
+        /** @var Config $config */
+        $config = $this->getConfig();
+        $userOrSchema = $config->isUserRow() ? $config->getUser() : $config->getSchema();
+
+        $password = $this->manager->resetPasswordAndRetrieveResetUrl($userOrSchema);
+
+        return [
+            'action' => 'resetPassword',
+            'status' => 'success',
+            'message' => sprintf('Password reset URL: "%s" generated successfully.', $password),
         ];
     }
 
