@@ -145,7 +145,8 @@ class DwhManager
 
         // create user itself and grant them their role
         $userName = $this->namingConventions->getUsernameFromEmail($user);
-        $this->ensureUserExists($userName, 'PERSON', [
+        $type = $user->hasPublicKey() ? 'SERVICE' : 'PERSON';
+        $this->ensureUserExists($userName, $type, [
             'default_role' => $userRole,
             'default_warehouse' => $this->warehouse,
             'default_namespace' => new ExprString(
@@ -156,10 +157,16 @@ class DwhManager
             'disabled' => new ExprString($user->isDisabled() ? 'TRUE' : 'FALSE'),
             'email' => $user->getEmail(),
             'statement_timeout_in_seconds' => new ExprInt($user->getStatementTimeout()),
-        ]);
+        ], $user->getPublicKey());
 
         if ($user->isResetPassword()) {
             $this->ensureUserResetPassword($userName);
+        }
+
+        $publicKey = $user->getPublicKey();
+        if ($publicKey !== null) {
+            $this->ensureUserResetPublicKey($userName, $publicKey);
+            $this->ensureToUnsetUserPassword($userName);
         }
 
         if ($user->isPersonType()) {
