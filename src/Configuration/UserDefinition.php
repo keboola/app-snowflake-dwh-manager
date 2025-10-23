@@ -81,6 +81,9 @@ class UserDefinition implements ConfigurationInterface
                 ->booleanNode('person_type')
                     ->defaultFalse()
                 ->end()
+                ->scalarNode('public_key')
+                    ->defaultNull()
+                ->end()
             ->end()
         ->end()
         ;
