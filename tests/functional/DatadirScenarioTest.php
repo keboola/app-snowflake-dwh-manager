@@ -293,6 +293,25 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         self::assertSame('PERSON', $users[0]['type']);
     }
 
+    public function testCreateUserAsPersonTypeWithKeypair(): void
+    {
+        $user3config = $this->getConfigFromConfigArray(self::getUser3_1Config());
+        $connection = $this->getConnectionForConfig($user3config);
+
+        self::dropCreatedUser($connection, $user3config->getDatabase(), $user3config->getUser());
+
+        $this->runAppWithConfig(self::getUser3_1Config());
+
+        $userName = new NamingConventions($user3config->getDatabase())->getUsernameFromEmail($user3config->getUser());
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+
+        self::assertSame('PERSON', $users[0]['type']);
+        $rsaPublicKey = $this->retrievePublicKey($connection, $userName);
+        self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'), $rsaPublicKey);
+    }
+
     public function testChangeUserToPersonType(): void
     {
         $user4config = $this->getConfigFromConfigArray(self::getUser4Config());
@@ -376,6 +395,28 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                     'email' => 'user3@keboola.com',
                     'business_schemas' => ['my_dwh_schema3'],
                     'disabled' => false,
+                ],
+            ],
+        ];
+    }
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getUser3_1Config(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'user' => [
+                    'email' => 'user3@keboola.com',
+                    'business_schemas' => ['my_dwh_schema3'],
+                    'disabled' => false,
+                    'person_type' => true,
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'),
                 ],
             ],
         ];
