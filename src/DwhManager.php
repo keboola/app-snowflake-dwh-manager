@@ -398,7 +398,7 @@ class DwhManager
                     'Created user "%s" with public key only',
                     $userName,
                 ),
-                default => throw new \Exception('Invalid user creation parameters'),
+                default => throw new UserException('Invalid user creation parameters'),
             });
             $this->connection->createUser(
                 userName: $userName,
