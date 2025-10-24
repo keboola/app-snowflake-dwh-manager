@@ -810,6 +810,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         return $rsaPublicKey['value'];
     }
+
     private function assertHasPassword(Connection $connection, string $userName): bool
     {
         /** @var array<int, array<string, string|int>> $users */
@@ -819,9 +820,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             /** @var array<string, int|string> $item */
             static fn (array $item): bool => $item['property'] === 'has_password',
         );
-        /** @var array<string, string> $rsaPublicKey */
+        /** @var array<string, string> $value */
         $value = array_pop($filteredResult);
 
-        return $value === 'true';
+        return $value['value'] === 'true';
     }
 }
