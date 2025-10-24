@@ -295,12 +295,12 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
     public function testCreateUserAsPersonTypeWithKeypair(): void
     {
-        $user3config = $this->getConfigFromConfigArray(self::getUser3_1Config());
+        $user3config = $this->getConfigFromConfigArray(self::getUser3ConfigWithPublicKey());
         $connection = $this->getConnectionForConfig($user3config);
 
         self::dropCreatedUser($connection, $user3config->getDatabase(), $user3config->getUser());
 
-        $this->runAppWithConfig(self::getUser3_1Config());
+        $this->runAppWithConfig(self::getUser3ConfigWithPublicKey());
 
         $userName = new NamingConventions($user3config->getDatabase())->getUsernameFromEmail($user3config->getUser());
 
@@ -402,7 +402,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     /**
      * @return array<string, array<mixed>>
      */
-    private static function getUser3_1Config(): array
+    private static function getUser3ConfigWithPublicKey(): array
     {
         return [
             'parameters' => [
