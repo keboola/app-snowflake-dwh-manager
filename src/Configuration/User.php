@@ -97,4 +97,18 @@ class User extends BaseConfig
     {
         return (bool) $this->getValue(['person_type']);
     }
+
+    public function hasPublicKey(): bool
+    {
+        return !empty($this->getValue(['public_key']));
+    }
+
+    public function getPublicKey(): ?string
+    {
+        if (!$this->hasPublicKey()) {
+            return null;
+        }
+
+        return $this->getStringValue(['public_key']);
+    }
 }
