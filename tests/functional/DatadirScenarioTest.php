@@ -310,7 +310,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         self::assertSame('PERSON', $users[0]['type']);
         $rsaPublicKey = $this->retrievePublicKey($connection, $userName);
         self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'), $rsaPublicKey);
-        self:self::assertTrue($this->assertHasPassword($connection, $userName));
+        self::assertTrue($this->assertHasPassword($connection, $userName));
     }
 
     public function testChangeUserToPersonType(): void
@@ -818,7 +818,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $filteredResult = array_filter(
             $users,
             /** @var array<string, int|string> $item */
-            static fn (array $item): bool => $item['property'] === 'has_password',
+            static fn (array $item): bool => $item['property'] === 'PASSWORD',
         );
         /** @var array<string, string> $value */
         $value = array_pop($filteredResult);
