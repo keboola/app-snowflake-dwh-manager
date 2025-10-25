@@ -822,7 +822,8 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         );
         /** @var array<string, string> $value */
         $value = array_pop($filteredResult);
-        echo 'password:' . $value;
+        echo 'password:';
+        print_r($value);
         return $value['value'] !== 'null';
     }
 }
