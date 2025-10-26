@@ -278,7 +278,6 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $rsaPublicKey = $this->retrievePublicKey($connection, $userName);
         self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'), $rsaPublicKey);
         self::assertFalse($this->assertHasPassword($connection, $userName));
-
     }
 
     public function testCreateUserAsPersonType(): void
