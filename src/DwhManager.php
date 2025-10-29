@@ -156,10 +156,15 @@ class DwhManager
             'disabled' => new ExprString($user->isDisabled() ? 'TRUE' : 'FALSE'),
             'email' => $user->getEmail(),
             'statement_timeout_in_seconds' => new ExprInt($user->getStatementTimeout()),
-        ]);
+        ], $user->getPublicKey());
 
         if ($user->isResetPassword()) {
             $this->ensureUserResetPassword($userName);
+        }
+
+        $publicKey = $user->getPublicKey();
+        if ($publicKey !== null) {
+            $this->ensureUserResetPublicKey($userName, $publicKey);
         }
 
         if ($user->isPersonType()) {
@@ -372,30 +377,35 @@ class DwhManager
     private function ensureUserExists(string $userName, string $type, array $options, ?string $publicKey = null): void
     {
         if (!$this->checker->existsUser($userName)) {
-            if ($publicKey === null) {
+            $password = null;
+            if (in_array($type, ['LEGACY_SERVICE', 'PERSON'])) {
                 $options['must_change_password'] = new ExprString('TRUE');
-
                 $password = $this->generatePassword();
-                $this->connection->createUser(
-                    $userName,
-                    $password,
-                    $type,
-                    $options,
-                );
-                $this->logger->info(sprintf(
+            }
+
+            $this->logger->info(match (true) {
+                $publicKey === null && $password !== null => sprintf(
                     'Created user "%s" with password "%s"',
                     $userName,
                     $password,
-                ));
-
-                return;
-            }
-
+                ),
+                $publicKey !== null && $password !== null => sprintf(
+                    'Created user "%s" with password "%s" and public key',
+                    $userName,
+                    $password,
+                ),
+                $publicKey !== null && $password === null => sprintf(
+                    'Created user "%s" with public key only',
+                    $userName,
+                ),
+                default => throw new UserException('Invalid user creation parameters'),
+            });
             $this->connection->createUser(
-                $userName,
-                $publicKey,
-                $type,
-                $options,
+                userName: $userName,
+                password: $password,
+                publicKey: $publicKey,
+                type: $type,
+                otherOptions: $options,
             );
 
             return;

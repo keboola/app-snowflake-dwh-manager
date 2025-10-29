@@ -214,6 +214,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
 
         self::assertSame('SERVICE', $users[0]['type']);
+        self::assertFalse($this->assertHasPassword($connection, $userName));
     }
 
     public function testCreateSchemaWithPrivateKeyUser(): void
@@ -231,6 +232,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
 
         self::assertSame('SERVICE', $users[0]['type']);
+        self::assertFalse($this->assertHasPassword($connection, $userName));
     }
 
     public function testSetPublicKeyForSchemaUser(): void
@@ -255,6 +257,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
 
         self::assertSame('true', $users[0]['has_rsa_public_key']);
+        self::assertFalse($this->assertHasPassword($connection, $userName));
     }
 
     public function testChangeOfAlreadySetPublicKey(): void
@@ -274,6 +277,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
 
         $rsaPublicKey = $this->retrievePublicKey($connection, $userName);
         self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'), $rsaPublicKey);
+        self::assertFalse($this->assertHasPassword($connection, $userName));
     }
 
     public function testCreateUserAsPersonType(): void
@@ -291,6 +295,27 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
 
         self::assertSame('PERSON', $users[0]['type']);
+        self::assertTrue($this->assertHasPassword($connection, $userName));
+    }
+
+    public function testCreateUserAsPersonTypeWithKeypair(): void
+    {
+        $user3config = $this->getConfigFromConfigArray(self::getUser3ConfigWithPublicKey());
+        $connection = $this->getConnectionForConfig($user3config);
+
+        self::dropCreatedUser($connection, $user3config->getDatabase(), $user3config->getUser());
+
+        $this->runAppWithConfig(self::getUser3ConfigWithPublicKey());
+
+        $userName = new NamingConventions($user3config->getDatabase())->getUsernameFromEmail($user3config->getUser());
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+
+        self::assertSame('PERSON', $users[0]['type']);
+        $rsaPublicKey = $this->retrievePublicKey($connection, $userName);
+        self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'), $rsaPublicKey);
+        self::assertTrue($this->assertHasPassword($connection, $userName));
     }
 
     public function testChangeUserToPersonType(): void
@@ -313,6 +338,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         /** @var array<int, array<string, string|int>> $users */
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
         self::assertSame('PERSON', $users[0]['type']);
+        self::assertTrue($this->assertHasPassword($connection, $userName));
     }
 
     /**
@@ -376,6 +402,28 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                     'email' => 'user3@keboola.com',
                     'business_schemas' => ['my_dwh_schema3'],
                     'disabled' => false,
+                ],
+            ],
+        ];
+    }
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getUser3ConfigWithPublicKey(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'user' => [
+                    'email' => 'user3@keboola.com',
+                    'business_schemas' => ['my_dwh_schema3'],
+                    'disabled' => false,
+                    'person_type' => true,
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'),
                 ],
             ],
         ];
@@ -767,5 +815,21 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $rsaPublicKey = array_pop($filteredResult);
 
         return $rsaPublicKey['value'];
+    }
+
+    private function assertHasPassword(Connection $connection, string $userName): bool
+    {
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('DESCRIBE USER ' . $userName);
+        $filteredResult = array_filter(
+            $users,
+            /** @var array<string, int|string> $item */
+            static fn (array $item): bool => $item['property'] === 'PASSWORD',
+        );
+        /** @var array<string, string> $value */
+        $value = array_pop($filteredResult);
+        echo 'password:';
+        print_r($value);
+        return $value['value'] !== 'null';
     }
 }
