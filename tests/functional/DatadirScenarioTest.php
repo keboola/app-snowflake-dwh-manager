@@ -196,6 +196,9 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'create-user-user4' => [
                 self::getUser4Config(),
             ],
+            'create-user-user5-skip-password' => [
+                self::getUser5ConfigSkipPassword(),
+            ],
         ];
     }
 
@@ -316,6 +319,64 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $rsaPublicKey = $this->retrievePublicKey($connection, $userName);
         self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'), $rsaPublicKey);
         self::assertTrue($this->assertHasPassword($connection, $userName));
+    }
+
+    public function testCreateUserAsPersonTypeWithKeypairAndSkipPassword(): void
+    {
+        $userConfig = $this->getConfigFromConfigArray(self::getUser5ConfigSkipPassword());
+        $connection = $this->getConnectionForConfig($userConfig);
+
+        self::dropCreatedUser($connection, $userConfig->getDatabase(), $userConfig->getUser());
+
+        $this->runAppWithConfig(self::getUser5ConfigSkipPassword());
+
+        $userName = new NamingConventions($userConfig->getDatabase())->getUsernameFromEmail($userConfig->getUser());
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+
+        self::assertSame('PERSON', $users[0]['type']);
+        $rsaPublicKey = $this->retrievePublicKey($connection, $userName);
+        self::assertSame(getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'), $rsaPublicKey);
+        self::assertFalse($this->assertHasPassword($connection, $userName));
+
+        // re-run to verify idempotency
+        $this->runAppWithConfig(self::getUser5ConfigSkipPassword());
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+        self::assertSame('PERSON', $users[0]['type']);
+        self::assertSame(
+            getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'),
+            $this->retrievePublicKey($connection, $userName),
+        );
+        self::assertFalse($this->assertHasPassword($connection, $userName));
+    }
+
+    public function testUnsetPasswordWhenSkipPasswordEnabledForExistingUser(): void
+    {
+        $userConfig = $this->getConfigFromConfigArray(self::getUser3Config());
+        $connection = $this->getConnectionForConfig($userConfig);
+
+        self::dropCreatedUser($connection, $userConfig->getDatabase(), $userConfig->getUser());
+
+        // first run: create user with password (no skip_password)
+        $this->runAppWithConfig(self::getUser3Config());
+
+        $userName = new NamingConventions($userConfig->getDatabase())->getUsernameFromEmail($userConfig->getUser());
+        self::assertTrue($this->assertHasPassword($connection, $userName));
+
+        // second run: enable skip_password with public_key on the same user
+        $this->runAppWithConfig(self::getUser3ConfigWithPublicKeyAndSkipPassword());
+
+        /** @var array<int, array<string, string|int>> $users */
+        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
+        self::assertSame('PERSON', $users[0]['type']);
+        self::assertSame(
+            getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'),
+            $this->retrievePublicKey($connection, $userName),
+        );
+        self::assertFalse($this->assertHasPassword($connection, $userName));
     }
 
     public function testChangeUserToPersonType(): void
@@ -446,6 +507,54 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                     'business_schemas' => ['my_dwh_schema3'],
                     'disabled' => false,
                     'person_type' => true,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getUser3ConfigWithPublicKeyAndSkipPassword(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'user' => [
+                    'email' => 'user3@keboola.com',
+                    'business_schemas' => ['my_dwh_schema3'],
+                    'disabled' => false,
+                    'person_type' => true,
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'),
+                    'skip_password' => true,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array<mixed>>
+     */
+    private static function getUser5ConfigSkipPassword(): array
+    {
+        return [
+            'parameters' => [
+                'master_host' => getenv('SNOWFLAKE_HOST'),
+                'master_user' => getenv('SNOWFLAKE_USER'),
+                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                'master_database' => getenv('SNOWFLAKE_DATABASE'),
+                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
+                'user' => [
+                    'email' => 'user5@keboola.com',
+                    'business_schemas' => ['my_dwh_schema3'],
+                    'disabled' => false,
+                    'person_type' => true,
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY_2'),
+                    'skip_password' => true,
                 ],
             ],
         ];
