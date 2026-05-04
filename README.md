@@ -65,7 +65,7 @@ There are two types of configs - schema config and user config. App detects auto
 `statement_timeout`: Amount of time, in seconds, after which a running SQL statement is canceled.
     - For *schema config* it applies to schema's default RW user.
     - For *user config* it applies to the user himself.
-`person_type`: if `true`, an existing user will be migrated to Snowflake `TYPE = PERSON` (newly created users are always created as `PERSON` regardless of this flag).
+`person_type`: if `true`, an already-existing user will be migrated to a Snowflake `PERSON` type account. Newly created users are created as `PERSON` by default.
 `public_key`: RSA public key for key-pair authentication.
 `skip_password`: if `true`, no password is generated/set for the user and the account relies on key-pair authentication only. Requires `public_key` to be set.
 
