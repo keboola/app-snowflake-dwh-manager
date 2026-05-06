@@ -84,6 +84,18 @@ class UserDefinition implements ConfigurationInterface
                 ->scalarNode('public_key')
                     ->defaultNull()
                 ->end()
+                ->booleanNode('skip_password')
+                    ->defaultFalse()
+                ->end()
+            ->end()
+            ->validate()
+                ->ifTrue(function ($config) {
+                    if (!is_array($config)) {
+                        return false;
+                    }
+                    return ($config['skip_password'] ?? false) && empty($config['public_key']);
+                })
+                ->thenInvalid('"skip_password" can only be used when "public_key" is set')
             ->end()
         ->end()
         ;

@@ -111,4 +111,9 @@ class User extends BaseConfig
 
         return $this->getStringValue(['public_key']);
     }
+
+    public function isSkipPassword(): bool
+    {
+        return (bool) $this->getValue(['skip_password']);
+    }
 }

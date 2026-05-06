@@ -145,6 +145,11 @@ class DwhManager
 
         // create user itself and grant them their role
         $userName = $this->namingConventions->getUsernameFromEmail($user);
+        $skipPassword = $user->isSkipPassword();
+        if ($skipPassword && !$user->hasPublicKey()) {
+            throw new UserException('"skip_password" can only be used when "public_key" is set');
+        }
+
         $this->ensureUserExists($userName, 'PERSON', [
             'default_role' => $userRole,
             'default_warehouse' => $this->warehouse,
@@ -156,15 +161,19 @@ class DwhManager
             'disabled' => new ExprString($user->isDisabled() ? 'TRUE' : 'FALSE'),
             'email' => $user->getEmail(),
             'statement_timeout_in_seconds' => new ExprInt($user->getStatementTimeout()),
-        ], $user->getPublicKey());
+        ], $user->getPublicKey(), $skipPassword);
 
-        if ($user->isResetPassword()) {
+        if ($user->isResetPassword() && !$skipPassword) {
             $this->ensureUserResetPassword($userName);
         }
 
         $publicKey = $user->getPublicKey();
         if ($publicKey !== null) {
             $this->ensureUserResetPublicKey($userName, $publicKey);
+        }
+
+        if ($skipPassword) {
+            $this->ensureToUnsetUserPassword($userName);
         }
 
         if ($user->isPersonType()) {
@@ -374,11 +383,16 @@ class DwhManager
     /**
      * @param array<mixed> $options
      */
-    private function ensureUserExists(string $userName, string $type, array $options, ?string $publicKey = null): void
-    {
+    private function ensureUserExists(
+        string $userName,
+        string $type,
+        array $options,
+        ?string $publicKey = null,
+        bool $skipPassword = false,
+    ): void {
         if (!$this->checker->existsUser($userName)) {
             $password = null;
-            if (in_array($type, ['LEGACY_SERVICE', 'PERSON'])) {
+            if (!$skipPassword && in_array($type, ['LEGACY_SERVICE', 'PERSON'])) {
                 $options['must_change_password'] = new ExprString('TRUE');
                 $password = $this->generatePassword();
             }
