@@ -38,6 +38,9 @@ class Config extends BaseConfig
         $connectionOptions = [
             'host' => $this->getValue(['parameters', 'master_host']),
             'user' => $this->getValue(['parameters', 'master_user']),
+            // The Snowflake DB adapter Connection always reads the 'password' offset; key-pair
+            // auth is selected via 'privateKey'. Pass an empty password to satisfy the adapter.
+            'password' => '',
             'privateKey' => $this->getValue(['parameters', '#master_private_key']),
             'database' => $this->getValue(['parameters', 'master_database']),
             'warehouse' => $this->getValue(['parameters', 'warehouse']),
