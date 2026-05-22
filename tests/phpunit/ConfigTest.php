@@ -20,7 +20,7 @@ class ConfigTest extends TestCase
             'parameters' => [
                 'master_host' => 'host',
                 'master_user' => 'user',
-                '#master_password' => 'password',
+                '#master_private_key' => 'private_key',
                 'master_database' => 'database',
                 'warehouse' => 'warehouse',
                 'user' => [
@@ -47,7 +47,7 @@ class ConfigTest extends TestCase
             'parameters' => [
                 'master_host' => 'host',
                 'master_user' => 'user',
-                '#master_password' => 'password',
+                '#master_private_key' => 'private_key',
                 'master_database' => 'database',
                 'warehouse' => 'warehouse',
                 'business_schema' => [
@@ -83,14 +83,13 @@ class ConfigTest extends TestCase
     public static function invalidConfigsDataProvider(): array
     {
         return [
-            'empty master_password & master_private_key' => [
+            'missing master_private_key' => [
                 UserException::class,
-                'Either "password" or "privateKey" must be provided.',
+                '"#master_private_key" must be provided.',
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => '',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -99,15 +98,14 @@ class ConfigTest extends TestCase
                     ],
                 ],
             ],
-            'master_password & master_private_key' => [
+            'empty master_private_key' => [
                 UserException::class,
-                'Both "password" and "privateKey" cannot be set at the same time.',
+                '"#master_private_key" must be provided.',
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'gr3eatpassword',
-                        '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
+                        '#master_private_key' => '',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
