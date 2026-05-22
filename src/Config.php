@@ -21,15 +21,10 @@ class Config extends BaseConfig
     public function __construct(array $config, ?ConfigurationInterface $configDefinition = null)
     {
         /** @var array<string, array<string, mixed>> $config */
-        $password = $config['parameters']['#master_password'] ?? '';
         $privateKey = $config['parameters']['#master_private_key'] ?? null;
 
-        if (empty($password) && $privateKey === null) {
-            throw new UserException('Either "password" or "privateKey" must be provided.');
-        }
-
-        if (!empty($password) && !empty($privateKey)) {
-            throw new UserException('Both "password" and "privateKey" cannot be set at the same time.');
+        if (empty($privateKey)) {
+            throw new UserException('"#master_private_key" must be provided.');
         }
 
         parent::__construct($config, $configDefinition);
@@ -43,7 +38,9 @@ class Config extends BaseConfig
         $connectionOptions = [
             'host' => $this->getValue(['parameters', 'master_host']),
             'user' => $this->getValue(['parameters', 'master_user']),
-            'password' => $this->getValue(['parameters', '#master_password']),
+            // The Snowflake DB adapter Connection always reads the 'password' offset; key-pair
+            // auth is selected via 'privateKey'. Pass an empty password to satisfy the adapter.
+            'password' => '',
             'privateKey' => $this->getValue(['parameters', '#master_private_key']),
             'database' => $this->getValue(['parameters', 'master_database']),
             'warehouse' => $this->getValue(['parameters', 'warehouse']),

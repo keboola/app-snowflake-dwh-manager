@@ -40,7 +40,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -57,14 +57,13 @@ class ConfigDefinitionTest extends TestCase
                             'public_key' => null,
                             'skip_password' => false,
                         ],
-                        '#master_private_key' => null,
                     ],
                 ],
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -82,7 +81,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -99,14 +98,13 @@ class ConfigDefinitionTest extends TestCase
                             'public_key' => null,
                             'skip_password' => false,
                         ],
-                        '#master_private_key' => null,
                     ],
                 ],
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -125,7 +123,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -144,14 +142,13 @@ class ConfigDefinitionTest extends TestCase
                             'public_key' => null,
                             'skip_password' => false,
                         ],
-                        '#master_private_key' => null,
                     ],
                 ],
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -172,7 +169,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -189,14 +186,13 @@ class ConfigDefinitionTest extends TestCase
                             'public_key' => null,
                             'skip_password' => false,
                         ],
-                        '#master_private_key' => null,
                     ],
                 ],
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -215,7 +211,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'business_schema' => [
@@ -224,14 +220,13 @@ class ConfigDefinitionTest extends TestCase
                             'reset_password' => false,
                             'public_key' => null,
                         ],
-                        '#master_private_key' => null,
                     ],
                 ],
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'business_schema' => [
@@ -245,7 +240,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'business_schema' => [
@@ -254,14 +249,13 @@ class ConfigDefinitionTest extends TestCase
                             'reset_password' => false,
                             'public_key' => null,
                         ],
-                        '#master_private_key' => null,
                     ],
                 ],
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'business_schema' => [
@@ -276,7 +270,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -292,14 +286,13 @@ class ConfigDefinitionTest extends TestCase
                             'disabled' => false,
                             'reset_password' => false,
                         ],
-                        '#master_private_key' => null,
                     ],
                 ],
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -319,7 +312,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'business_schema' => [
@@ -328,14 +321,13 @@ class ConfigDefinitionTest extends TestCase
                             'statement_timeout' => 10800,
                             'public_key' => null,
                         ],
-                        '#master_private_key' => null,
                     ],
                 ],
                 [
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'business_schema' => [
@@ -380,7 +372,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -403,7 +395,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                     ],
@@ -417,7 +409,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'business_schema' => [
@@ -433,7 +425,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -453,7 +445,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -479,7 +471,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -505,7 +497,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -522,7 +514,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => '',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -538,7 +530,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => '',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -554,7 +546,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => '',
                         'warehouse' => 'warehouse',
                         'user' => [
@@ -570,7 +562,7 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => '',
                         'user' => [
@@ -586,11 +578,42 @@ class ConfigDefinitionTest extends TestCase
                     'parameters' => [
                         'master_host' => 'host',
                         'master_user' => 'user',
-                        '#master_password' => 'password',
+                        '#master_private_key' => 'private_key',
                         'master_database' => 'database',
                         'warehouse' => 'warehouse',
                         'user' => [
                             'email' => '',
+                        ],
+                    ],
+                ],
+            ],
+            'missing master_private_key' => [
+                InvalidConfigurationException::class,
+                'The child config "#master_private_key" under "root.parameters" must be configured',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                        ],
+                    ],
+                ],
+            ],
+            'empty master_private_key' => [
+                InvalidConfigurationException::class,
+                'The path "root.parameters.#master_private_key" cannot contain an empty value',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_private_key' => '',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
                         ],
                     ],
                 ],
