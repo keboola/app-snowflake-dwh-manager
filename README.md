@@ -20,7 +20,7 @@ There are two types of configs - schema config and user config. App detects auto
     "parameters" : {
         "master_host": "some.snowflakecomputing.com",
         "master_user": "username_that_can_create_roles_and_schemas",
-        "#master_password": "password",
+        "#master_private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
         "master_database": "database_that_will_hold_the_schemas",
         "warehouse": "snowflake_warehouse",
         "business_schema": {
@@ -33,13 +33,15 @@ There are two types of configs - schema config and user config. App detects auto
 
 `schema_name`: the name of the schema to be created, keep it short and simple
 
+The master user must authenticate with an RSA key pair. Password authentication for the master user is no longer supported (Snowflake is deprecating password authentication). See [Snowflake key-pair authentication docs](https://docs.snowflake.com/en/user-guide/key-pair-auth).
+
 ## User config
 ```json
 {
     "parameters" : {
         "master_host": "some.snowflakecomputing.com",
         "master_user": "username_that_can_create_roles_and_schemas",
-        "#master_password": "password",
+        "#master_private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
         "master_database": "database_that_will_hold_the_schemas",
         "warehouse": "snowflake_warehouse",
         "user": {
@@ -95,9 +97,9 @@ CREATE ROLE "DWHM_MYDATAWAREHOUSE";
 GRANT OWNERSHIP ON DATABASE "DWHM_MYDATAWAREHOUSE" TO ROLE "DWHM_MYDATAWAREHOUSE";
 
 CREATE USER "DWHM_MYDATAWAREHOUSE"
-PASSWORD = "STRONG PASSWORD"
+RSA_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A..."
 DEFAULT_ROLE = "DWHM_MYDATAWAREHOUSE"
-TYPE = LEGACY_SERVICE;
+TYPE = SERVICE;
 
 GRANT ROLE "DWHM_MYDATAWAREHOUSE" TO USER "DWHM_MYDATAWAREHOUSE";
 
@@ -140,9 +142,9 @@ docker-compose run --rm dev composer install --no-scripts
 
 ### Tests
 
-Functional tests need `.env` file with Snowflake server credentials. You can create this file from `.env.dist`. By default scenario tests present the component output in console. On Travis, this behavior is suppressed using environment variable `CI=true` to prevent leaking test user credentials into the build log. 
+Functional tests need `.env` file with Snowflake server credentials. You can create this file from `.env.dist`. By default scenario tests present the component output in console. On Travis, this behavior is suppressed using environment variable `CI=true` to prevent leaking test user credentials into the build log.
 
-Public key used in tests for user creation has to be generated and placed in `SNOWFLAKE_SCHEMA_PUBLIC_KEY` environment.
+The master user authenticates with an RSA key pair; the PEM-encoded private key has to be placed in `SNOWFLAKE_PRIVATE_KEY` environment variable. Public key used in tests for user creation has to be generated and placed in `SNOWFLAKE_SCHEMA_PUBLIC_KEY` environment.
 Take a look how to generate keys: https://docs.snowflake.com/en/user-guide/key-pair-auth#generate-the-private-key
 
 Run the test suite using this command:

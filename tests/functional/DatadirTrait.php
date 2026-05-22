@@ -115,16 +115,25 @@ trait DatadirTrait
             ->generateString(30);
         $connection->alterUser($user1Username, ['password' => $userNewPassword]);
 
-        // alter the original config to use new user and password
-        $loginAsUser1Config = $userConfig;
-        $loginAsUser1Config['parameters']['master_user'] = $user1Username;
-        $loginAsUser1Config['parameters']['#master_password'] = $userNewPassword;
+        // build connection options for the managed user.
+        // The master/app connection uses key-pair authentication only, but managed Snowflake
+        // users still support password authentication, so we connect as them using their password.
+        $masterOptions = $config->getSnowflakeConnectionOptions();
+        $userConnectionOptions = [
+            'host' => $masterOptions['host'],
+            'user' => $user1Username,
+            'password' => $userNewPassword,
+            'database' => $masterOptions['database'],
+            'warehouse' => $masterOptions['warehouse'],
+        ];
+        if (isset($masterOptions['runId'])) {
+            $userConnectionOptions['runId'] = $masterOptions['runId'];
+        }
 
         // force destructor to disconnect
         unset($connection);
 
         // get connection as the user
-        $config = new Config($loginAsUser1Config, new ConfigDefinition());
-        return $this->getConnectionForConfig($config);
+        return new Connection($userConnectionOptions);
     }
 }

@@ -41,7 +41,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
@@ -61,7 +61,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
@@ -80,7 +80,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
@@ -411,7 +411,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [
@@ -432,7 +432,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [
@@ -456,7 +456,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [
@@ -476,7 +476,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [
@@ -499,7 +499,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [
@@ -521,7 +521,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [
@@ -545,7 +545,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             'parameters' => [
                 'master_host' => getenv('SNOWFLAKE_HOST'),
                 'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_password' => getenv('SNOWFLAKE_PASSWORD'),
+                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
                 'master_database' => getenv('SNOWFLAKE_DATABASE'),
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'user' => [

@@ -235,12 +235,6 @@ parameters:
 			path: tests/functional/DatadirScenarioTest.php
 
 		-
-			message: '#^Cannot access offset ''\#master_password'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: tests/functional/DatadirScenarioTest.php
-
-		-
 			message: '#^Cannot access offset ''END_TIME'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -248,12 +242,6 @@ parameters:
 
 		-
 			message: '#^Cannot access offset ''QUERY_TAG'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: tests/functional/DatadirScenarioTest.php
-
-		-
-			message: '#^Cannot access offset ''master_user'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: tests/functional/DatadirScenarioTest.php
