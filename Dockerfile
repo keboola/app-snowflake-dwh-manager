@@ -1,7 +1,9 @@
 FROM php:8.4-cli-bullseye
 
-ARG SNOWFLAKE_ODBC_VERSION=3.10.0
-ARG SNOWFLAKE_GPG_KEY=2A3149C82551A34A
+ARG SNOWFLAKE_ODBC_VERSION=3.18.0
+# Snowflake signing key for 3.18.0; bullseye's debsig-verify resolves the policy
+# dir by the 16-char key id (fpr 6C983AB7AFE2E5951C6C47B13C98F63C9292CE02)
+ARG SNOWFLAKE_GPG_KEY=3C98F63C9292CE02
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
 ARG DEBIAN_FRONTEND=noninteractive
 ENV COMPOSER_ALLOW_SUPERUSER 1
@@ -18,6 +20,7 @@ RUN apt-get update && apt-get install -y \
         git \
         unixodbc \
         unixodbc-dev \
+        odbcinst \
         libpq-dev \
         debsig-verify \
         libicu-dev
