@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\SnowflakeDwhManager;
 
 use Exception;
+use Keboola\Component\UserException;
 use Keboola\SnowflakeDbAdapter\Connection as SnowflakeConnection;
 use Keboola\SnowflakeDwhManager\Connection\Expr;
 use RuntimeException;
@@ -32,15 +33,19 @@ class Connection extends SnowflakeConnection
             throw new Exception('Nothing to alter without options');
         }
 
-        $this->query(vsprintf(
-            'ALTER USER IF EXISTS 
+        try {
+            $this->query(vsprintf(
+                'ALTER USER IF EXISTS 
             %s
             SET 
             ' . $this->createQuotedOptionsStringFromArray($options),
-            [
+                [
                 $this->quoteIdentifier($userName),
-            ],
-        ));
+                ],
+            ));
+        } catch (RuntimeException $e) {
+            throw $this->reclassifyInvalidEmailError($e, $userName, $options);
+        }
     }
 
     public function resetUserPassword(string $userName): string
@@ -163,17 +168,21 @@ class Connection extends SnowflakeConnection
         if ($publicKey !== null) {
             $authorization .= sprintf(' RSA_PUBLIC_KEY = %s ', $this->quote($publicKey));
         }
-        $this->query(vsprintf(
-            'CREATE USER IF NOT EXISTS 
+        try {
+            $this->query(vsprintf(
+                'CREATE USER IF NOT EXISTS 
             %s 
             %s 
             TYPE = ' . $type . '
             ' . $otherOptionsString,
-            [
+                [
                 $this->quoteIdentifier($userName),
                 $authorization,
-            ],
-        ));
+                ],
+            ));
+        } catch (RuntimeException $e) {
+            throw $this->reclassifyInvalidEmailError($e, $userName, $otherOptions);
+        }
     }
 
     /**
@@ -424,5 +433,36 @@ class Connection extends SnowflakeConnection
     {
         $res = $this->fetchAll('SELECT CURRENT_ROLE() AS "name"');
         return $res[0]['name'];
+    }
+
+    /**
+     * Snowflake rejects a syntactically invalid EMAIL value at the ODBC layer with a generic
+     * "SQL error: Invalid email address(es)" message. That error is otherwise indistinguishable from
+     * any other query failure and surfaces as an opaque internal error, even though it is caused by a
+     * value the user supplied in their configuration. Reclassify only that specific, known error as a
+     * UserException so the job fails with an actionable message; every other query error is rethrown
+     * unchanged.
+     *
+     * @param array<mixed> $options
+     */
+    private function reclassifyInvalidEmailError(RuntimeException $e, string $userName, array $options): Throwable
+    {
+        if (array_key_exists('email', $options)
+            && is_string($options['email'])
+            && stripos($e->getMessage(), 'invalid email address') !== false
+        ) {
+            return new UserException(
+                sprintf(
+                    'Invalid email address "%s" configured for Snowflake user "%s". ' .
+                    'Please provide a valid email address.',
+                    $options['email'],
+                    $userName,
+                ),
+                0,
+                $e,
+            );
+        }
+
+        return $e;
     }
 }
