@@ -15,6 +15,8 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Config extends BaseConfig
 {
+    private bool $hasDeprecatedMasterPassword = false;
+
     /**
      * @inheritDoc
      */
@@ -34,7 +36,19 @@ class Config extends BaseConfig
             throw new UserException('"#master_private_key" must be provided.');
         }
 
+        $this->hasDeprecatedMasterPassword = !empty($password);
+
         parent::__construct($config, $configDefinition);
+    }
+
+    /**
+     * Whether the configuration still carries the deprecated "#master_password" key.
+     * The value is never used to connect; this only exists so the component can warn
+     * about configurations that are still due for migration.
+     */
+    public function hasDeprecatedMasterPassword(): bool
+    {
+        return $this->hasDeprecatedMasterPassword;
     }
 
     /**

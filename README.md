@@ -35,7 +35,7 @@ There are two types of configs - schema config and user config. App detects auto
 
 The master user must authenticate with an RSA key pair. Password authentication for the master user is no longer supported (Snowflake is deprecating password authentication). See [Snowflake key-pair authentication docs](https://docs.snowflake.com/en/user-guide/key-pair-auth).
 
-`#master_password` is deprecated. It is still accepted so that existing configurations keep validating, but its value is ignored and never used to connect. Configurations that provide only `#master_password` without `#master_private_key` will fail with an error describing the migration.
+`#master_password` is deprecated. It is still accepted so that existing configurations keep validating, but its value is ignored and never used to connect - the job logs a warning when it is present. Configurations that provide only `#master_password` without `#master_private_key` will fail with an error describing the migration.
 
 ## User config
 ```json

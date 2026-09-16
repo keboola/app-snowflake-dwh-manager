@@ -156,5 +156,26 @@ class ConfigTest extends TestCase
         // the legacy key must not break validation, but it must never reach the connection
         $this->assertSame('', $connectionOptions['password']);
         $this->assertSame('private_key', $connectionOptions['privateKey']);
+        $this->assertTrue($config->hasDeprecatedMasterPassword());
+    }
+
+    public function testConfigWithoutMasterPasswordIsNotFlaggedAsDeprecated(): void
+    {
+        $configData = [
+            'parameters' => [
+                'master_host' => 'host',
+                'master_user' => 'user',
+                '#master_private_key' => 'private_key',
+                'master_database' => 'database',
+                'warehouse' => 'warehouse',
+                'user' => [
+                    'email' => 'test@example.com',
+                ],
+            ],
+        ];
+
+        $config = new Config($configData, new ConfigDefinition());
+
+        $this->assertFalse($config->hasDeprecatedMasterPassword());
     }
 }
