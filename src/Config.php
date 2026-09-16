@@ -15,24 +15,40 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Config extends BaseConfig
 {
+    private bool $hasDeprecatedMasterPassword = false;
+
     /**
      * @inheritDoc
      */
     public function __construct(array $config, ?ConfigurationInterface $configDefinition = null)
     {
         /** @var array<string, array<string, mixed>> $config */
-        $password = $config['parameters']['#master_password'] ?? '';
         $privateKey = $config['parameters']['#master_private_key'] ?? null;
+        $password = $config['parameters']['#master_password'] ?? null;
 
-        if (empty($password) && $privateKey === null) {
-            throw new UserException('Either "password" or "privateKey" must be provided.');
+        if (empty($privateKey)) {
+            if (!empty($password)) {
+                throw new UserException(
+                    'Password authentication is no longer supported for the master user. '
+                    . 'Replace "#master_password" with "#master_private_key" containing an RSA private key.',
+                );
+            }
+            throw new UserException('"#master_private_key" must be provided.');
         }
 
-        if (!empty($password) && !empty($privateKey)) {
-            throw new UserException('Both "password" and "privateKey" cannot be set at the same time.');
-        }
+        $this->hasDeprecatedMasterPassword = !empty($password);
 
         parent::__construct($config, $configDefinition);
+    }
+
+    /**
+     * Whether the configuration still carries the deprecated "#master_password" key.
+     * The value is never used to connect; this only exists so the component can warn
+     * about configurations that are still due for migration.
+     */
+    public function hasDeprecatedMasterPassword(): bool
+    {
+        return $this->hasDeprecatedMasterPassword;
     }
 
     /**
@@ -43,7 +59,9 @@ class Config extends BaseConfig
         $connectionOptions = [
             'host' => $this->getValue(['parameters', 'master_host']),
             'user' => $this->getValue(['parameters', 'master_user']),
-            'password' => $this->getValue(['parameters', '#master_password']),
+            // The Snowflake DB adapter Connection always reads the 'password' offset; key-pair
+            // auth is selected via 'privateKey'. Pass an empty password to satisfy the adapter.
+            'password' => '',
             'privateKey' => $this->getValue(['parameters', '#master_private_key']),
             'database' => $this->getValue(['parameters', 'master_database']),
             'warehouse' => $this->getValue(['parameters', 'warehouse']),

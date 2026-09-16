@@ -24,6 +24,15 @@ class Component extends BaseComponent
 
         /** @var Config $config */
         $config = $this->getConfig();
+
+        if ($config->hasDeprecatedMasterPassword()) {
+            $this->getLogger()->warning(
+                'Configuration still contains the deprecated "#master_password" option. '
+                . 'It is ignored - the master user connects using "#master_private_key" only. '
+                . 'Remove "#master_password" from the configuration.',
+            );
+        }
+
         try {
             $this->connection = new Connection($config->getSnowflakeConnectionOptions());
         } catch (Exception $e) {

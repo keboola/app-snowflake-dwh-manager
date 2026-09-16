@@ -27,11 +27,14 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->cannotBeEmpty()
                     ->isRequired()
                 ->end()
+                // Deprecated and ignored. The master user connects using key-pair authentication
+                // only, so this value is never used. The node is kept so that existing
+                // configurations still carrying it do not fail validation.
                 ->scalarNode('#master_password')
-                    ->defaultValue('')
                 ->end()
                 ->scalarNode('#master_private_key')
-                    ->defaultNull()
+                    ->cannotBeEmpty()
+                    ->isRequired()
                 ->end()
                 ->scalarNode('master_database')
                     ->cannotBeEmpty()

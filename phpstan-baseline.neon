@@ -235,42 +235,6 @@ parameters:
 			path: tests/functional/DatadirScenarioTest.php
 
 		-
-			message: '#^Cannot access offset ''\#master_password'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: tests/functional/DatadirScenarioTest.php
-
-		-
-			message: '#^Cannot access offset ''END_TIME'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: tests/functional/DatadirScenarioTest.php
-
-		-
-			message: '#^Cannot access offset ''QUERY_TAG'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: tests/functional/DatadirScenarioTest.php
-
-		-
-			message: '#^Cannot access offset ''master_user'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: tests/functional/DatadirScenarioTest.php
-
-		-
-			message: '#^Cannot access offset ''reset_password'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: tests/functional/DatadirScenarioTest.php
-
-		-
-			message: '#^Cannot access offset ''statement_timeout'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: tests/functional/DatadirScenarioTest.php
-
-		-
 			message: '#^Cannot access offset 0 on array\<mixed\>\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -292,12 +256,6 @@ parameters:
 			message: '#^Parameter \#1 \$config of class Keboola\\SnowflakeDwhManager\\Config constructor expects array\<mixed\>, mixed given\.$#'
 			identifier: argument.type
 			count: 2
-			path: tests/functional/DatadirScenarioTest.php
-
-		-
-			message: '#^Parameter \#1 \$datetime of class DateTimeImmutable constructor expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
 			path: tests/functional/DatadirScenarioTest.php
 
 		-

@@ -93,38 +93,4 @@ trait DatadirTrait
         );
         self::$logger->log(Logger::DEBUG, sprintf('Dropped user "%s"' . PHP_EOL, $user->getEmail()));
     }
-
-    /**
-     * @param mixed[] $userConfig
-     */
-    private function getConnectionForUserFromUserConfig(array $userConfig): Connection
-    {
-        $config = $this->getConfigFromConfigArray($userConfig);
-        if (!$config->isUserRow()) {
-            throw new Exception('This is not a user config');
-        }
-
-        // get master connection to change the password
-        $connection = $this->getConnectionForConfig($config);
-
-        // change the password to known one
-        $user1Username = $this->namingConventions->getUsernameFromEmail($config->getUser());
-        $randomLibFactory = new Factory();
-        $userNewPassword = $randomLibFactory
-            ->getMediumStrengthGenerator()
-            ->generateString(30);
-        $connection->alterUser($user1Username, ['password' => $userNewPassword]);
-
-        // alter the original config to use new user and password
-        $loginAsUser1Config = $userConfig;
-        $loginAsUser1Config['parameters']['master_user'] = $user1Username;
-        $loginAsUser1Config['parameters']['#master_password'] = $userNewPassword;
-
-        // force destructor to disconnect
-        unset($connection);
-
-        // get connection as the user
-        $config = new Config($loginAsUser1Config, new ConfigDefinition());
-        return $this->getConnectionForConfig($config);
-    }
 }
