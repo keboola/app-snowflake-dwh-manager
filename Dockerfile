@@ -1,4 +1,4 @@
-FROM php:8.4-cli-bookworm
+FROM php:8.4-cli-trixie
 
 ARG SNOWFLAKE_ODBC_VERSION=3.18.0
 # Snowflake signing key for 3.18.0; debsig-verify resolves the policy
