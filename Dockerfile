@@ -1,7 +1,7 @@
-FROM php:8.4-cli-bullseye
+FROM php:8.4-cli-bookworm
 
 ARG SNOWFLAKE_ODBC_VERSION=3.18.0
-# Snowflake signing key for 3.18.0; bullseye's debsig-verify resolves the policy
+# Snowflake signing key for 3.18.0; debsig-verify resolves the policy
 # dir by the 16-char key id (fpr 6C983AB7AFE2E5951C6C47B13C98F63C9292CE02)
 ARG SNOWFLAKE_GPG_KEY=3C98F63C9292CE02
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
