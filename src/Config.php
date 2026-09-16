@@ -22,8 +22,15 @@ class Config extends BaseConfig
     {
         /** @var array<string, array<string, mixed>> $config */
         $privateKey = $config['parameters']['#master_private_key'] ?? null;
+        $password = $config['parameters']['#master_password'] ?? null;
 
         if (empty($privateKey)) {
+            if (!empty($password)) {
+                throw new UserException(
+                    'Password authentication is no longer supported for the master user. '
+                    . 'Replace "#master_password" with "#master_private_key" containing an RSA private key.',
+                );
+            }
             throw new UserException('"#master_private_key" must be provided.');
         }
 

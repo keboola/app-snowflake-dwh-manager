@@ -114,6 +114,47 @@ class ConfigTest extends TestCase
                     ],
                 ],
             ],
+            'legacy master_password without master_private_key' => [
+                UserException::class,
+                'Password authentication is no longer supported for the master user. '
+                . 'Replace "#master_password" with "#master_private_key" containing an RSA private key.',
+                [
+                    'parameters' => [
+                        'master_host' => 'host',
+                        'master_user' => 'user',
+                        '#master_password' => 'gr3eatpassword',
+                        'master_database' => 'database',
+                        'warehouse' => 'warehouse',
+                        'user' => [
+                            'email' => 'test@example.com',
+                        ],
+                    ],
+                ],
+            ],
         ];
+    }
+
+    public function testLegacyMasterPasswordIsAcceptedButNeverUsed(): void
+    {
+        $configData = [
+            'parameters' => [
+                'master_host' => 'host',
+                'master_user' => 'user',
+                '#master_password' => 'gr3eatpassword',
+                '#master_private_key' => 'private_key',
+                'master_database' => 'database',
+                'warehouse' => 'warehouse',
+                'user' => [
+                    'email' => 'test@example.com',
+                ],
+            ],
+        ];
+
+        $config = new Config($configData, new ConfigDefinition());
+        $connectionOptions = $config->getSnowflakeConnectionOptions();
+
+        // the legacy key must not break validation, but it must never reach the connection
+        $this->assertSame('', $connectionOptions['password']);
+        $this->assertSame('private_key', $connectionOptions['privateKey']);
     }
 }
