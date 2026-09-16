@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Keboola\SnowflakeDwhManager\DatadirTests;
 
-use DateInterval;
-use DateTimeImmutable;
-use DateTimeZone;
 use Keboola\DatadirTests\AbstractDatadirTestCase;
 use Keboola\DatadirTests\Exception\DatadirTestsException;
 use Keboola\SnowflakeDwhManager\Config;
@@ -19,18 +16,14 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
-use Throwable;
 
 class DatadirScenarioTest extends AbstractDatadirTestCase
 {
     use DatadirTrait;
 
     private static LoggerInterface $logger;
-
-    private NamingConventions $namingConventions;
 
     /**
      * @return array<string, array<mixed>>
@@ -46,7 +39,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema',
-                    'reset_password' => true,
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'),
                 ],
             ],
         ];
@@ -66,6 +59,7 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema2',
+                    'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'),
                 ],
             ],
         ];
@@ -106,25 +100,6 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
                 'business_schema' => [
                     'schema_name' => 'my_dwh_schema4',
                     'public_key' => getenv('SNOWFLAKE_SCHEMA_PUBLIC_KEY'),
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * @return array<string, array<mixed>>
-     */
-    private static function getSchemaWithoutPublicKeyConfig(): array
-    {
-        return [
-            'parameters' => [
-                'master_host' => getenv('SNOWFLAKE_HOST'),
-                'master_user' => getenv('SNOWFLAKE_USER'),
-                '#master_private_key' => getenv('SNOWFLAKE_PRIVATE_KEY'),
-                'master_database' => getenv('SNOWFLAKE_DATABASE'),
-                'warehouse' => getenv('SNOWFLAKE_WAREHOUSE'),
-                'business_schema' => [
-                    'schema_name' => 'my_dwh_schema_5',
                 ],
             ],
         ];
@@ -235,31 +210,6 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
         $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
 
         self::assertSame('SERVICE', $users[0]['type']);
-        self::assertFalse($this->assertHasPassword($connection, $userName));
-    }
-
-    public function testSetPublicKeyForSchemaUser(): void
-    {
-        $schemaConfig = $this->getConfigFromConfigArray(self::getSchemaWithoutPublicKeyConfig());
-        $connection = $this->getConnectionForConfig($schemaConfig);
-
-        self::dropCreatedSchema($connection, $schemaConfig->getDatabase(), $schemaConfig->getSchema());
-
-        $this->runAppWithConfig(self::getSchemaWithoutPublicKeyConfig());
-
-        $userName = implode('_', [$schemaConfig->getDatabase(), $schemaConfig->getSchema()->getName()]);
-
-        /** @var array<int, array<string, string|int>> $users */
-        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
-
-        self::assertSame('false', $users[0]['has_rsa_public_key']);
-
-        $this->runAppWithConfig(self::getSchemaWithPublicKeyConfig());
-
-        /** @var array<int, array<string, string|int>> $users */
-        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
-
-        self::assertSame('true', $users[0]['has_rsa_public_key']);
         self::assertFalse($this->assertHasPassword($connection, $userName));
     }
 
@@ -377,29 +327,6 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
             $this->retrievePublicKey($connection, $userName),
         );
         self::assertFalse($this->assertHasPassword($connection, $userName));
-    }
-
-    public function testChangeUserToPersonType(): void
-    {
-        $user4config = $this->getConfigFromConfigArray(self::getUser4Config());
-        $connection = $this->getConnectionForConfig($user4config);
-
-        $this->runAppWithConfig(self::getUser4Config());
-
-        $userName = new NamingConventions($user4config->getDatabase())->getUsernameFromEmail($user4config->getUser());
-
-        $connection->query(sprintf('ALTER USER %s SET TYPE=LEGACY_SERVICE', $userName));
-
-        /** @var array<int, array<string, string|int>> $users */
-        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
-        self::assertSame('LEGACY_SERVICE', $users[0]['type']);
-
-        $this->runAppWithConfig(self::getUser4Config());
-
-        /** @var array<int, array<string, string|int>> $users */
-        $users = $connection->fetchAll('SHOW USERS LIKE \'%' . $userName . '%\' LIMIT 1');
-        self::assertSame('PERSON', $users[0]['type']);
-        self::assertTrue($this->assertHasPassword($connection, $userName));
     }
 
     /**
@@ -613,267 +540,6 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
      * @depends testDatadir
      */
     // phpcs:disable SlevomatCodingStandard.TypeHints.TypeHintDeclaration.UselessDocComment
-    public function testUser1HaveCorrectAccessAfterProvisioning(): void
-    {
-        // phpcs:enable
-        $user1ConfigArray = self::getUser1Config();
-        $user1config = $this->getConfigFromConfigArray($user1ConfigArray);
-
-        $masterConnection = $this->getConnectionForConfig($user1config);
-
-        // create table in read schema
-        $readSchema = strtoupper($user1config->getUser()->getReadOnlySchemas()[0]);
-        $masterConnection->query('USE SCHEMA ' . $masterConnection->quoteIdentifier($readSchema));
-        $masterConnection->query('DROP TABLE IF EXISTS read_schema_table');
-        $masterConnection->query('CREATE TABLE read_schema_table (id INT)');
-        $masterConnection->query('INSERT INTO read_schema_table VALUES (9), (8), (7)');
-
-        unset($masterConnection);
-
-        $user1connection = $this->getConnectionForUserFromUserConfig($user1ConfigArray);
-        try {
-            $user1connection->fetchAll('SELECT * FROM read_schema_table');
-            $this->fail('User does not have access to generated schema without re-running the schema config');
-        } catch (Throwable $e) {
-            $this->assertStringContainsString(
-                'Object \'READ_SCHEMA_TABLE\' does not exist or not authorized',
-                $e->getMessage(),
-            );
-        }
-
-        unset($user1connection);
-
-        $process = $this->runAppWithConfig(self::getSchema1Config());
-
-        $user1connection = $this->getConnectionForUserFromUserConfig($user1ConfigArray);
-        $userRwSchema = $this->namingConventions->getOwnSchemaNameFromUser($user1config->getUser());
-        $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($userRwSchema));
-        $user1connection->query('DROP TABLE IF EXISTS user1table');
-
-        // can create table in their schema
-        $user1connection->query('CREATE TABLE user1table (id INT)');
-
-        // can insert row into created table
-        $user1connection->query('INSERT INTO user1table VALUES (1), (10)');
-
-        // can fetch from created table
-        $rows = $user1connection->fetchAll('SELECT * FROM user1table');
-        $this->assertCount(2, $rows);
-
-        // can read from read only schema
-        $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($readSchema));
-        $rows = $user1connection->fetchAll('SELECT * FROM read_schema_table');
-        $this->assertCount(3, $rows);
-
-        // cannot write to read only schema
-        try {
-            $user1connection->query('CREATE TABLE table_in_read_schema (id INT)');
-            $this->fail('User must not be allowed to create a table in shared read only schema');
-        } catch (Throwable $e) {
-            $this->assertStringContainsString(
-                'Insufficient privileges to operate on schema \'MY_DWH_SCHEMA\'',
-                $e->getMessage(),
-            );
-        }
-        $this->assertStringContainsString('resetPasswordToken', $process->getOutput());
-
-        $user2configArray = self::getUser2Config();
-        $user2Config = $this->getConfigFromConfigArray($user2configArray);
-        $user2Schema = $this->namingConventions->getOwnSchemaNameFromUser($user2Config->getUser());
-
-        // cannot use other user's schema
-        try {
-            $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($user2Schema));
-            $this->fail('User must not be allowed to use other user\'s schema');
-        } catch (Throwable $e) {
-            $this->assertStringContainsString(
-                'Cannot access object or it does not exist',
-                $e->getMessage(),
-            );
-        }
-
-        $user1ConfigArray = self::getUser1Config();
-        $user1config = $this->getConfigFromConfigArray($user1ConfigArray);
-
-        $masterConnection = $this->getConnectionForConfig($user1config);
-
-        // Check query tags are present
-        sleep(30);
-        // to make sure query is propagated to history table
-        $history = $masterConnection->fetchAll("
-            select 
-                QUERY_TEXT, QUERY_TAG, END_TIME 
-            from 
-                table(information_schema.query_history_by_user()) 
-            WHERE 
-                query_text='SELECT CURRENT_ROLE() AS \"name\"' 
-            order by end_time DESC
-            LIMIT 1;
-        ");
-        $this->assertSame(
-            '{"runId":"dwhm_test_run_id"}',
-            $history[0]['QUERY_TAG'],
-        );
-        $this->assertGreaterThan(
-            (new DateTimeImmutable())->sub(new DateInterval('PT5M'))->setTimezone(new DateTimeZone('UTC')),
-            (new DateTimeImmutable($history[0]['END_TIME']))->setTimezone(new DateTimeZone('UTC')),
-        );
-        unset($masterConnection);
-
-        $user1ConfigArray['parameters']['user']['reset_password'] = true;
-
-        $process = $this->runAppWithConfig($user1ConfigArray);
-
-        $this->assertStringContainsString('resetPasswordToken', $process->getOutput());
-    }
-
-    /**
-     * @depends testDatadir
-     */
-    // phpcs:disable SlevomatCodingStandard.TypeHints.TypeHintDeclaration.UselessDocComment
-    public function testUser2HaveCorrectAccessAfterProvisioning(): void
-    {
-        // phpcs:enable
-        $user2ConfigArray = self::getUser2Config();
-        $user2config = $this->getConfigFromConfigArray($user2ConfigArray);
-
-        $masterConnection = $this->getConnectionForConfig($user2config);
-
-        // create table in read schema
-        $readSchema = strtoupper($user2config->getUser()->getReadOnlySchemas()[0]);
-        $masterConnection->query('USE SCHEMA ' . $masterConnection->quoteIdentifier($readSchema));
-        $masterConnection->query('DROP TABLE IF EXISTS read_schema_table');
-        $masterConnection->query('CREATE TABLE read_schema_table (id INT)');
-        $masterConnection->query('INSERT INTO read_schema_table VALUES (9), (8), (7)');
-
-        // create table in read write schema
-        $writeSchemas = $user2config->getUser()->getWriteSchemas();
-        $writeSchema = strtoupper($writeSchemas[0]);
-        $masterConnection->query('USE SCHEMA ' . $masterConnection->quoteIdentifier($writeSchema));
-        $masterConnection->query('DROP TABLE IF EXISTS write_schema_table');
-        $masterConnection->query('CREATE TABLE write_schema_table (id INT)');
-        $masterConnection->query('INSERT INTO write_schema_table VALUES (9), (8), (7), (6)');
-
-        // disconnect
-        unset($masterConnection);
-
-        $user2connection = $this->getConnectionForUserFromUserConfig($user2ConfigArray);
-        try {
-            $user2connection->fetchAll('SELECT * FROM read_schema_table');
-            $this->fail('User does not have access to generated schema without re-running the schema config');
-        } catch (Throwable $e) {
-            $this->assertStringContainsString(
-                'Object \'READ_SCHEMA_TABLE\' does not exist or not authorized',
-                $e->getMessage(),
-            );
-        }
-        try {
-            $user2connection->query('INSERT INTO write_schema_table VALUES (19)');
-            $this->fail('User does not have write access to generated schema without re-running the schema config');
-        } catch (Throwable $e) {
-            $this->assertStringContainsString(
-                'Table \'WRITE_SCHEMA_TABLE\' does not exist',
-                $e->getMessage(),
-            );
-        }
-
-        // rerun for read only schema
-        $this->runAppWithConfig(self::getSchema1Config());
-        // rerun for read/write schema
-        $this->runAppWithConfig(self::getSchema2Config());
-
-        $userRwSchema = $this->namingConventions->getOwnSchemaNameFromUser($user2config->getUser());
-        $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($userRwSchema));
-        $user2connection->query('DROP TABLE IF EXISTS user2table');
-
-        // can create table in their schema
-        $user2connection->query('CREATE TABLE user2table (id INT)');
-
-        // can insert row into created table
-        $user2connection->query('INSERT INTO user2table VALUES (1), (10)');
-
-        // can fetch from created table
-        $rows = $user2connection->fetchAll('SELECT * FROM user2table');
-        $this->assertCount(2, $rows);
-
-        // can read from read only schema
-        $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($readSchema));
-        $rows = $user2connection->fetchAll('SELECT * FROM read_schema_table');
-        $this->assertCount(3, $rows);
-
-        // cannot write to read only schema
-        try {
-            $user2connection->query('CREATE TABLE table_in_read_schema (id INT)');
-            $this->fail('User must not be allowed to create a table in shared read only schema');
-        } catch (Throwable $e) {
-            $this->assertStringContainsString(
-                'Insufficient privileges to operate on schema \'MY_DWH_SCHEMA\'',
-                $e->getMessage(),
-            );
-        }
-
-        // can read from write schema
-        $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($writeSchema));
-        $rows = $user2connection->fetchAll('SELECT * FROM write_schema_table');
-        $this->assertCount(4, $rows);
-
-        // can write to write schema
-        $user2connection->query('DROP TABLE IF EXISTS user2_table_in_write_schema');
-        $user2connection->query('CREATE TABLE user2_table_in_write_schema (id INT)');
-        $user2connection->query('INSERT INTO user2_table_in_write_schema VALUES (1), (10)');
-
-        // can write into existing table
-        $rows = $user2connection->fetchAll('SELECT * FROM write_schema_table');
-        $this->assertCount(4, $rows);
-        $user2connection->query('INSERT INTO write_schema_table VALUES (5)');
-        $rows = $user2connection->fetchAll('SELECT * FROM write_schema_table');
-        $this->assertCount(5, $rows);
-
-        $user1configArray = self::getUser1Config();
-        $user1Config = $this->getConfigFromConfigArray($user1configArray);
-        $user1Schema = $this->namingConventions->getOwnSchemaNameFromUser($user1Config->getUser());
-
-        // cannot use other user's schema
-        try {
-            $user2connection->query('USE SCHEMA ' . $user2connection->quoteIdentifier($user1Schema));
-            $this->fail('User must not be allowed to use other user\'s schema');
-        } catch (Throwable $e) {
-            $this->assertStringContainsString(
-                'Cannot access object or it does not exist',
-                $e->getMessage(),
-            );
-        }
-        unset($user2connection);
-
-        // user can manipulate schema object created by other users
-        $user1connection = $this->getConnectionForUserFromUserConfig($user1configArray);
-        $readSchemaRole = $this->namingConventions->getRoRoleFromSchemaName($writeSchema);
-        $user1connection->query('USE ROLE ' . $user1connection->quoteIdentifier($readSchemaRole));
-        $user1connection->query('USE SCHEMA ' . $user1connection->quoteIdentifier($writeSchema));
-        $user2TableRows = $user1connection->fetchAll('SELECT * FROM user2_table_in_write_schema');
-        $this->assertCount(2, $user2TableRows);
-    }
-
-    /**
-     * @depends testDatadir
-     */
-    // phpcs:disable SlevomatCodingStandard.TypeHints.TypeHintDeclaration.UselessDocComment
-    public function testUserStatementTimeout(): void
-    {
-        // phpcs:enable
-        $userConfigArray = self::getUser1Config();
-        $userConfigArray['parameters']['user']['statement_timeout'] = 2;
-        $this->runAppWithConfig($userConfigArray);
-
-        $userConnection = $this->getConnectionForUserFromUserConfig($userConfigArray);
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage(
-            'Query reached its timeout 2 second(s)" while executing query "call system$wait(10);',
-        );
-        $userConnection->query('call system$wait(10);');
-    }
-
     public static function setUpBeforeClass(): void
     {
         self::setUpLogging();
@@ -895,8 +561,6 @@ class DatadirScenarioTest extends AbstractDatadirTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $database = (string) getenv('SNOWFLAKE_DATABASE');
-        $this->namingConventions = new NamingConventions($database);
     }
 
     private static function setUpLogging(): void

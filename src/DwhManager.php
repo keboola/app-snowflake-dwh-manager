@@ -77,6 +77,14 @@ class DwhManager
 
     public function checkSchema(Schema $schema): void
     {
+        if (!$schema->hasPublicKey()) {
+            throw new UserException(sprintf(
+                'Schema "%s" requires "public_key". The schema user is created as a Snowflake SERVICE '
+                . 'account that authenticates with a key pair; password authentication is no longer supported.',
+                $schema->getName(),
+            ));
+        }
+
         $schemaName = $this->namingConventions->getSchemaNameFromSchema($schema);
         $rwUser = $this->namingConventions->getRwUserFromSchema($schema);
         $rwRole = $this->namingConventions->getRwRoleFromSchema($schema);
@@ -99,8 +107,7 @@ class DwhManager
         $this->ensureRoleHasSchemaPrivileges($roRole, self::PRIVILEGES_SCHEMA_READ_ONLY, $schemaName);
         $this->ensureRoleHasFutureObjectPrivilegesOnSchema($roRole, self::PRIVILEGES_OBJECT_READ, $schemaName);
 
-        $type = $schema->hasPublicKey() ? 'SERVICE' : 'LEGACY_SERVICE';
-        $this->ensureUserExists($rwUser, $type, [
+        $this->ensureUserExists($rwUser, 'SERVICE', [
             'default_role' => $rwRole,
             'default_warehouse' => $this->warehouse,
             'default_namespace' => new ExprString(
@@ -392,7 +399,7 @@ class DwhManager
     ): void {
         if (!$this->checker->existsUser($userName)) {
             $password = null;
-            if (!$skipPassword && in_array($type, ['LEGACY_SERVICE', 'PERSON'])) {
+            if (!$skipPassword && $type === 'PERSON') {
                 $options['must_change_password'] = new ExprString('TRUE');
                 $password = $this->generatePassword();
             }

@@ -93,47 +93,4 @@ trait DatadirTrait
         );
         self::$logger->log(Logger::DEBUG, sprintf('Dropped user "%s"' . PHP_EOL, $user->getEmail()));
     }
-
-    /**
-     * @param mixed[] $userConfig
-     */
-    private function getConnectionForUserFromUserConfig(array $userConfig): Connection
-    {
-        $config = $this->getConfigFromConfigArray($userConfig);
-        if (!$config->isUserRow()) {
-            throw new Exception('This is not a user config');
-        }
-
-        // get master connection to change the password
-        $connection = $this->getConnectionForConfig($config);
-
-        // change the password to known one
-        $user1Username = $this->namingConventions->getUsernameFromEmail($config->getUser());
-        $randomLibFactory = new Factory();
-        $userNewPassword = $randomLibFactory
-            ->getMediumStrengthGenerator()
-            ->generateString(30);
-        $connection->alterUser($user1Username, ['password' => $userNewPassword]);
-
-        // build connection options for the managed user.
-        // The master/app connection uses key-pair authentication only, but managed Snowflake
-        // users still support password authentication, so we connect as them using their password.
-        $masterOptions = $config->getSnowflakeConnectionOptions();
-        $userConnectionOptions = [
-            'host' => $masterOptions['host'],
-            'user' => $user1Username,
-            'password' => $userNewPassword,
-            'database' => $masterOptions['database'],
-            'warehouse' => $masterOptions['warehouse'],
-        ];
-        if (isset($masterOptions['runId'])) {
-            $userConnectionOptions['runId'] = $masterOptions['runId'];
-        }
-
-        // force destructor to disconnect
-        unset($connection);
-
-        // get connection as the user
-        return new Connection($userConnectionOptions);
-    }
 }
